@@ -6,6 +6,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
 import type { AiAnalysis } from "@/lib/types";
 import { Button, Card, ErrorBox, Input, Label, PageTitle, Select } from "@/components/ui";
+import {
+  fileToBase64,
+  uploadToCloudinary,
+  type UploadSignature,
+} from "@/lib/cloudinary-upload";
 
 type EditItem = {
   name: string;
@@ -23,6 +28,7 @@ export default function FoodScanPage() {
   const router = useRouter();
   const qc = useQueryClient();
   const [err, setErr] = useState<string | null>(null);
+  const [status, setStatus] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<AiAnalysis | null>(null);
   const [items, setItems] = useState<EditItem[]>([]);
   const [mealType, setMealType] = useState("lunch");
@@ -30,31 +36,34 @@ export default function FoodScanPage() {
 
   const analyze = useMutation({
     mutationFn: async () => {
-      const sig = await api<{
-        folder: string;
-        mock?: boolean;
-      }>("/v1/media/upload-signature", { method: "POST", body: "{}" });
+      if (!file) throw new Error("Pilih foto makanan terlebih dahulu.");
 
-      // Dev: skip real Cloudinary; use mock public_id + optional base64
-      const publicId = `${sig.folder}/mock_${Date.now()}`;
-      let imageBase64: string | undefined;
-      if (file) {
-        const buf = await file.arrayBuffer();
-        const bytes = new Uint8Array(buf);
-        let binary = "";
-        for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
-        imageBase64 = btoa(binary);
+      setStatus("Meminta tanda tangan upload...");
+      const sig = await api<UploadSignature>("/v1/media/upload-signature", {
+        method: "POST",
+        body: "{}",
+      });
+
+      setStatus(sig.mock ? "Mode mock upload..." : "Mengunggah ke Cloudinary...");
+      const uploaded = await uploadToCloudinary(file, sig);
+
+      setStatus("Menganalisis dengan Gemini...");
+      // Mock: send base64. Production: backend fetches from Cloudinary (avoids Vercel body limit).
+      const payload: Record<string, unknown> = {
+        cloudinaryPublicId: uploaded.public_id,
+        mediaDeliveryType: uploaded.type || sig.delivery_type,
+        mediaVersion: uploaded.version != null ? String(uploaded.version) : undefined,
+        mediaFormat: uploaded.format || file.type.split("/")[1],
+        mediaBytes: uploaded.bytes ?? file.size,
+        mimeType: file.type || "image/jpeg",
+      };
+      if (sig.mock) {
+        payload.imageBase64 = await fileToBase64(file);
       }
 
       return api<AiAnalysis>("/v1/food-analyses", {
         method: "POST",
-        body: JSON.stringify({
-          cloudinaryPublicId: publicId,
-          mediaFormat: file?.type?.split("/")[1] ?? "jpeg",
-          mediaBytes: file?.size,
-          imageBase64,
-          mimeType: file?.type || "image/jpeg",
-        }),
+        body: JSON.stringify(payload),
       });
     },
     onSuccess: (data) => {
@@ -73,8 +82,12 @@ export default function FoodScanPage() {
         })),
       );
       setErr(null);
+      setStatus(null);
     },
-    onError: (e: Error) => setErr(e.message),
+    onError: (e: Error) => {
+      setErr(e.message);
+      setStatus(null);
+    },
   });
 
   const confirm = useMutation({
@@ -113,20 +126,27 @@ export default function FoodScanPage() {
     <div>
       <PageTitle
         title="AI Food Snap"
-        subtitle="Foto dihapus setelah analisis. Kuota 10/hari. Hasil wajib ditinjau sebelum simpan."
+        subtitle="Upload Cloudinary + analisis Gemini. Foto dihapus setelah analisis. Kuota 10/hari."
       />
       <Card className="space-y-3">
         <div>
           <Label>Foto makanan (JPEG/PNG/WebP, max 10MB)</Label>
           <Input
             type="file"
-            accept="image/jpeg,image/png,image/webp,image/heic"
-            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+            capture="environment"
+            onChange={(e) => {
+              setFile(e.target.files?.[0] ?? null);
+              setAnalysis(null);
+              setItems([]);
+              setErr(null);
+            }}
           />
         </div>
-        <Button onClick={() => analyze.mutate()} disabled={analyze.isPending}>
-          {analyze.isPending ? "Menganalisis..." : "Analisis (mock OK tanpa Cloudinary/Gemini)"}
+        <Button onClick={() => analyze.mutate()} disabled={analyze.isPending || !file}>
+          {analyze.isPending ? "Memproses..." : "Unggah & analisis AI"}
         </Button>
+        {status ? <p className="text-xs text-slate-500">{status}</p> : null}
         {analysis?.quota ? (
           <p className="text-xs text-slate-500">
             Kuota AI: {analysis.quota.used}/{analysis.quota.quota} (sisa {analysis.quota.remaining})
@@ -158,7 +178,7 @@ export default function FoodScanPage() {
             </Select>
           </div>
           {items.map((item, idx) => (
-            <div key={idx} className="rounded-xl border border-slate-100 p-3 space-y-2">
+            <div key={idx} className="space-y-2 rounded-xl border border-slate-100 p-3">
               <Input value={item.name} onChange={(e) => updateItem(idx, "name", e.target.value)} />
               <div className="grid grid-cols-3 gap-2">
                 <Input
@@ -166,7 +186,10 @@ export default function FoodScanPage() {
                   value={item.portion_amount}
                   onChange={(e) => updateItem(idx, "portion_amount", Number(e.target.value))}
                 />
-                <Input value={item.portion_unit} onChange={(e) => updateItem(idx, "portion_unit", e.target.value)} />
+                <Input
+                  value={item.portion_unit}
+                  onChange={(e) => updateItem(idx, "portion_unit", e.target.value)}
+                />
                 <Input
                   type="number"
                   value={item.calories}
@@ -176,7 +199,7 @@ export default function FoodScanPage() {
             </div>
           ))}
           <Button onClick={() => confirm.mutate()} disabled={confirm.isPending || items.length === 0}>
-            Simpan hasil yang sudah ditinjau
+            {confirm.isPending ? "Menyimpan..." : "Simpan hasil yang sudah ditinjau"}
           </Button>
           <Button
             variant="ghost"

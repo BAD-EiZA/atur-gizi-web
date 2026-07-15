@@ -2,19 +2,22 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, ApiError } from "@/lib/api-client";
 import { Button, Card, ErrorBox, Input, Label, PageTitle, Select } from "@/components/ui";
+import type { Me } from "@/lib/types";
 
 type Preview = {
   bmr_kcal: number | null;
   tdee_kcal: number | null;
   calorie_target: number;
   disclaimer: string;
+  onboarding_completed?: boolean;
 };
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const qc = useQueryClient();
   const [form, setForm] = useState({
     displayName: "",
     dateOfBirth: "2000-01-01",
@@ -59,7 +62,7 @@ export default function OnboardingPage() {
 
   const completeMut = useMutation({
     mutationFn: () =>
-      api("/v1/onboarding/complete", {
+      api<Preview>("/v1/onboarding/complete", {
         method: "POST",
         body: JSON.stringify({
           displayName: form.displayName || undefined,
@@ -76,7 +79,18 @@ export default function OnboardingPage() {
           estimatesAccepted: form.estimatesAccepted,
         }),
       }),
-    onSuccess: () => router.replace("/dashboard"),
+    onSuccess: async () => {
+      // Refresh me so layout stops redirecting back to onboarding
+      await qc.invalidateQueries({ queryKey: ["me"] });
+      await qc.fetchQuery({
+        queryKey: ["me"],
+        queryFn: async () => {
+          await api("/v1/users/sync", { method: "POST", body: "{}" });
+          return api<Me>("/v1/me");
+        },
+      });
+      router.replace("/dashboard");
+    },
     onError: (e: Error) => {
       if (e instanceof ApiError) setErr(e.message);
       else setErr(e.message);
@@ -168,7 +182,7 @@ export default function OnboardingPage() {
             onClick={() => completeMut.mutate()}
             disabled={completeMut.isPending || !form.estimatesAccepted}
           >
-            Simpan & lanjut
+            {completeMut.isPending ? "Menyimpan..." : "Simpan & lanjut"}
           </Button>
         </div>
       </Card>

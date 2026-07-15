@@ -9,16 +9,20 @@ import { ApiError } from "@/lib/api-client";
 import Link from "next/link";
 
 export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
-  const { data, isLoading, error } = useMe();
+  const { data, isLoading, isFetching, error } = useMe();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!data) return;
+    if (!data || isFetching) return;
     if (!data.onboarding_completed && pathname !== "/onboarding") {
       router.replace("/onboarding");
+      return;
     }
-  }, [data, pathname, router]);
+    if (data.onboarding_completed && pathname === "/onboarding") {
+      router.replace("/dashboard");
+    }
+  }, [data, isFetching, pathname, router]);
 
   if (isLoading) {
     return (
@@ -48,6 +52,15 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
 
   if (pathname === "/onboarding") {
     return <>{children}</>;
+  }
+
+  // Block dashboard shell until onboarding done (avoids flash then bounce)
+  if (data && !data.onboarding_completed) {
+    return (
+      <div className="flex min-h-screen items-center justify-center text-sm text-slate-500">
+        Mengalihkan ke onboarding...
+      </div>
+    );
   }
 
   return <AppShell>{children}</AppShell>;
