@@ -4,7 +4,9 @@ import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
 import { useMe } from "@/hooks/use-me";
-import { ErrorBox } from "@/components/ui";
+import { ErrorBox, Button } from "@/components/ui";
+import { ApiError } from "@/lib/api-client";
+import Link from "next/link";
 
 export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
   const { data, isLoading, error } = useMe();
@@ -27,9 +29,19 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
   }
 
   if (error) {
+    const status = error instanceof ApiError ? error.status : 0;
     return (
-      <div className="mx-auto max-w-md px-4 py-16">
-        <ErrorBox message={(error as Error).message || "Gagal memuat sesi. Pastikan API berjalan."} />
+      <div className="mx-auto max-w-md space-y-4 px-4 py-16">
+        <ErrorBox
+          message={
+            status === 401
+              ? "Sesi berakhir. Silakan masuk kembali."
+              : (error as Error).message || "Gagal memuat sesi."
+          }
+        />
+        <Link href="/api/auth/login">
+          <Button className="w-full">Masuk ulang</Button>
+        </Link>
       </div>
     );
   }

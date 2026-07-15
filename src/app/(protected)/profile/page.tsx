@@ -2,12 +2,13 @@
 
 import { useMe } from "@/hooks/use-me";
 import { Button, Card, PageTitle } from "@/components/ui";
-import { api } from "@/lib/api-client";
+import { api, clearTokenCache } from "@/lib/api-client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components";
 
 export default function ProfilePage() {
-  const { data, refetch } = useMe();
+  const { data } = useMe();
   const router = useRouter();
   const [msg, setMsg] = useState<string | null>(null);
 
@@ -42,14 +43,21 @@ export default function ProfilePage() {
           <Button variant="secondary" onClick={() => router.push("/onboarding")}>
             Ulangi onboarding
           </Button>
+          <LogoutLink
+            postLogoutRedirectURL="/"
+            className="inline-flex items-center justify-center rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-medium text-slate-900 hover:bg-slate-200"
+            onClick={() => clearTokenCache()}
+          >
+            Keluar
+          </LogoutLink>
           <Button
             variant="danger"
             onClick={async () => {
               if (!confirm("Hapus akun dan semua data? Tindakan ini tidak dapat dibatalkan.")) return;
               await api("/v1/account/deletion-request", { method: "POST", body: "{}" });
               setMsg("Akun dihapus.");
-              await refetch();
-              router.push("/");
+              clearTokenCache();
+              window.location.href = "/api/auth/logout";
             }}
           >
             Hapus akun

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Button } from "@/components/ui";
+import { LoginLink, RegisterLink } from "@kinde-oss/kinde-auth-nextjs/components";
 
 export default function LandingPage() {
   return (
@@ -16,11 +16,23 @@ export default function LandingPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <Link href="/login">
-            <Button>Mulai / Masuk</Button>
-          </Link>
-          <Link href="/dashboard">
-            <Button variant="secondary">Ke dashboard (dev)</Button>
+          <LoginLink
+            postLoginRedirectURL="/dashboard"
+            className="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700"
+          >
+            Masuk
+          </LoginLink>
+          <RegisterLink
+            postLoginRedirectURL="/onboarding"
+            className="inline-flex items-center justify-center rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-medium text-slate-900 hover:bg-slate-200"
+          >
+            Daftar
+          </RegisterLink>
+          <Link
+            href="/login"
+            className="inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
+          >
+            Opsi lain
           </Link>
         </div>
         <ul className="grid gap-3 text-sm text-slate-600 sm:grid-cols-3">
