@@ -72,9 +72,11 @@ export default function ProfilePage() {
         <HelperText>
           Data dipakai untuk estimasi target dan aktivitas. Bukan diagnosis medis. Usia minimum 15.
         </HelperText>
-        <Button variant="outline" onClick={() => router.push("/onboarding")}>
-          Perbarui target / onboarding
-        </Button>
+        <Link href="/onboarding">
+          <Button variant="outline" type="button">
+            Perbarui target / onboarding
+          </Button>
+        </Link>
       </Card>
 
       <Card className="space-y-3">

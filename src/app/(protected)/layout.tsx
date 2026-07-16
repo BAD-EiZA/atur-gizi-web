@@ -15,12 +15,9 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
 
   useEffect(() => {
     if (!data || isFetching) return;
+    // Force incomplete users into onboarding; allow revisit to update targets
     if (!data.onboarding_completed && pathname !== "/onboarding") {
       router.replace("/onboarding");
-      return;
-    }
-    if (data.onboarding_completed && pathname === "/onboarding") {
-      router.replace("/dashboard");
     }
   }, [data, isFetching, pathname, router]);
 

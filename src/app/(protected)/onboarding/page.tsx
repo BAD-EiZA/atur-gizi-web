@@ -122,8 +122,8 @@ export default function OnboardingPage() {
   return (
     <div className="mx-auto max-w-lg px-4 py-8">
       <PageTitle
-        title="Onboarding"
-        subtitle={`Langkah ${step + 1}/3 · ${steps[step]}. Usia min. 15. Draft tersimpan lokal.`}
+        title="Profil & target"
+        subtitle={`Langkah ${step + 1}/3 · ${steps[step]}. Usia min. 15. Dapat diperbarui kapan saja.`}
       />
       <div className="mb-4 flex gap-1">
         {steps.map((s, i) => (
