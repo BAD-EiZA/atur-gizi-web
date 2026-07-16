@@ -1,9 +1,18 @@
 "use client";
 
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api, track } from "@/lib/api-client";
-import { Card, EmptyState, PageTitle } from "@/components/ui";
-import { useEffect } from "react";
+import {
+  Badge,
+  Card,
+  EmptyState,
+  HelperText,
+  PageTitle,
+  SectionTitle,
+  Skeleton,
+  Stat,
+} from "@/components/ui";
 
 type Weekly = {
   week_start: string;
@@ -43,56 +52,123 @@ export default function InsightsPage() {
     void track("dashboard_viewed", { surface: "insights" });
   }, []);
 
+  const maxBar = Math.max(
+    1,
+    ...(weekly.data?.daily.map((d) => Math.max(d.consumed_calories, d.target)) ?? [1]),
+  );
+
   return (
     <div className="space-y-4">
-      <PageTitle title="Insight mingguan" subtitle="Ringkasan netral, tanpa menghakimi." />
-      {weekly.isLoading ? <p className="text-sm text-slate-500">Memuat...</p> : null}
+      <PageTitle
+        title="Insight mingguan"
+        subtitle="Ringkasan netral, tanpa menghakimi. Insight awal jika data masih terbatas."
+      />
+
+      {weekly.isLoading ? <Skeleton className="h-40" /> : null}
+
       {weekly.data ? (
-        <Card className="space-y-2 text-sm">
-          <p className="font-medium">
-            {weekly.data.week_start} – {weekly.data.week_end}
-          </p>
-          <p>{weekly.data.message}</p>
-          <div className="grid grid-cols-3 gap-2 text-center">
-            <div>
-              <p className="text-slate-500">Hari aktif</p>
-              <p className="font-semibold">{weekly.data.active_days}</p>
-            </div>
-            <div>
-              <p className="text-slate-500">Rata konsumsi</p>
-              <p className="font-semibold">{weekly.data.avg_consumed_calories}</p>
-            </div>
-            <div>
-              <p className="text-slate-500">Aktivitas</p>
-              <p className="font-semibold">{weekly.data.total_activity_calories}</p>
-            </div>
+        <>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <Card>
+              <Stat label="Hari tercatat" value={weekly.data.active_days} unit="/ 7" />
+            </Card>
+            <Card>
+              <Stat
+                label="Rata-rata konsumsi"
+                value={weekly.data.avg_consumed_calories}
+                unit="kkal"
+              />
+            </Card>
+            <Card>
+              <Stat
+                label="Total aktivitas"
+                value={weekly.data.total_activity_calories}
+                unit="kkal"
+              />
+            </Card>
+            <Card>
+              <Stat
+                label="Protein minggu"
+                value={weekly.data.macros.protein_g}
+                unit="g"
+              />
+            </Card>
           </div>
-          <p className="text-xs text-slate-500">
-            Makro minggu: P {weekly.data.macros.protein_g}g · C {weekly.data.macros.carbs_g}g · L{" "}
-            {weekly.data.macros.fat_g}g
-          </p>
-          <ul className="divide-y text-xs">
-            {weekly.data.daily.map((d) => (
-              <li key={d.date} className="flex justify-between py-1">
-                <span>{d.date}</span>
-                <span>
-                  {d.consumed_calories}/{d.target} · act {d.burned_calories}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </Card>
+
+          <Card>
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              <SectionTitle>
+                {weekly.data.week_start} – {weekly.data.week_end}
+              </SectionTitle>
+              {weekly.data.active_days < 3 ? (
+                <Badge variant="warning">Data masih terbatas</Badge>
+              ) : (
+                <Badge variant="success">Cukup data</Badge>
+              )}
+            </div>
+            <p className="text-sm text-[hsl(var(--muted-foreground))]">{weekly.data.message}</p>
+
+            <div className="mt-6 space-y-3">
+              <p className="text-sm font-medium">Konsumsi harian vs target</p>
+              {weekly.data.daily.map((d) => (
+                <div key={d.date} className="grid grid-cols-[5.5rem_1fr_auto] items-center gap-2 text-xs">
+                  <span className="text-[hsl(var(--muted-foreground))]">
+                    {d.date.slice(5)}
+                  </span>
+                  <div className="relative h-3 rounded-full bg-[hsl(var(--muted))]">
+                    <div
+                      className="absolute inset-y-0 left-0 rounded-full bg-[hsl(var(--primary)/0.25)]"
+                      style={{ width: `${(d.target / maxBar) * 100}%` }}
+                      title="Target"
+                    />
+                    <div
+                      className="absolute inset-y-0 left-0 rounded-full bg-[hsl(var(--primary))]"
+                      style={{ width: `${(d.consumed_calories / maxBar) * 100}%` }}
+                      title="Konsumsi"
+                    />
+                  </div>
+                  <span className="tabular-nums text-[hsl(var(--muted-foreground))]">
+                    {d.consumed_calories}/{d.target}
+                  </span>
+                </div>
+              ))}
+              <HelperText>Batang gelap = konsumsi · area pudar = target hari itu.</HelperText>
+            </div>
+          </Card>
+        </>
       ) : (
-        !weekly.isLoading && <EmptyState title="Belum ada data insight." />
+        !weekly.isLoading && (
+          <EmptyState
+            title="Belum ada data insight"
+            description="Catat minimal beberapa hari agar pola mulai terlihat."
+          />
+        )
       )}
+
       {macros.data ? (
-        <Card className="text-sm">
-          <h2 className="mb-2 font-medium">Target makronutrien (estimasi)</h2>
-          <p>Kalori: {macros.data.calorie_target} kkal</p>
-          <p>
-            Protein {macros.data.protein_g}g · Karbo {macros.data.carbs_g}g · Lemak {macros.data.fat_g}g
+        <Card>
+          <SectionTitle>Target makronutrien (estimasi)</SectionTitle>
+          <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))]">
+            Berdasarkan target kalori {macros.data.calorie_target} kkal · split 30/40/30
           </p>
-          <p className="mt-1 text-xs text-slate-400">Split 30/40/30 — dapat disesuaikan nanti.</p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            {[
+              { label: "Protein", g: macros.data.protein_g, color: "bg-purple-400" },
+              { label: "Karbohidrat", g: macros.data.carbs_g, color: "bg-orange-400" },
+              { label: "Lemak", g: macros.data.fat_g, color: "bg-amber-400" },
+            ].map((m) => (
+              <div key={m.label} className="rounded-xl border border-[hsl(var(--border))] p-3">
+                <p className="text-xs text-[hsl(var(--muted-foreground))]">{m.label}</p>
+                <p className="text-xl font-semibold tabular-nums">{m.g} g</p>
+                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[hsl(var(--muted))]">
+                  <div className={`h-full w-full ${m.color} opacity-80`} />
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-2">
+            <HelperText>Label teks menyertai warna — bukan satu-satunya indikator.</HelperText>
+          </div>
         </Card>
       ) : null}
     </div>

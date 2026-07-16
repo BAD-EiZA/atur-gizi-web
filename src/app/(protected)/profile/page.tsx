@@ -1,68 +1,107 @@
 "use client";
 
-import { useMe } from "@/hooks/use-me";
-import { Button, Card, PageTitle } from "@/components/ui";
-import { api, clearTokenCache } from "@/lib/api-client";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components";
+import { useMe } from "@/hooks/use-me";
+import { clearTokenCache } from "@/lib/api-client";
+import { Badge, Button, Card, HelperText, PageTitle, SectionTitle } from "@/components/ui";
 
 export default function ProfilePage() {
   const { data } = useMe();
   const router = useRouter();
-  const [msg, setMsg] = useState<string | null>(null);
+  const initials = (data?.display_name || data?.email || "U")
+    .split(" ")
+    .map((p) => p[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
   return (
-    <div>
-      <PageTitle title="Profil" subtitle="Data profil & pengaturan akun" />
-      <Card className="space-y-2 text-sm">
-        <p>
-          <span className="text-slate-500">Nama:</span> {data?.display_name ?? "—"}
-        </p>
-        <p>
-          <span className="text-slate-500">Email:</span> {data?.email ?? "—"}
-        </p>
-        <p>
-          <span className="text-slate-500">Berat:</span> {data?.profile?.current_weight_kg ?? "—"} kg
-        </p>
-        <p>
-          <span className="text-slate-500">Tinggi:</span> {data?.profile?.height_cm ?? "—"} cm
-        </p>
-        <p>
-          <span className="text-slate-500">Zona waktu:</span> {data?.settings?.timezone}
-        </p>
-        <p>
-          <span className="text-slate-500">Simpan foto:</span>{" "}
-          {data?.settings?.retain_food_photos ? "Ya" : "Tidak (default: hapus setelah analisis)"}
-        </p>
-        <p className="text-xs text-slate-400">
-          Foto makanan dihapus otomatis setelah analisis AI. Kuota AI 10/hari. Usia min. 15.
-        </p>
-        {msg ? <p className="text-sm text-emerald-700">{msg}</p> : null}
-        <div className="flex flex-wrap gap-2 pt-2">
-          <Button variant="secondary" onClick={() => router.push("/onboarding")}>
-            Ulangi onboarding
-          </Button>
+    <div className="mx-auto max-w-3xl space-y-4">
+      <PageTitle title="Profil" subtitle="Data dasar dan preferensi akun." />
+
+      <Card className="flex flex-wrap items-center gap-4">
+        <div
+          className="flex size-16 items-center justify-center rounded-full bg-[hsl(var(--secondary))] text-lg font-bold text-[hsl(var(--secondary-foreground))]"
+          aria-hidden
+        >
+          {initials}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-lg font-semibold">{data?.display_name || "Pengguna"}</p>
+          <p className="text-sm text-[hsl(var(--muted-foreground))]">
+            {data?.email || "Email dikelola Kinde"}
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <Badge variant="secondary">
+              {data?.onboarding_completed ? "Onboarding selesai" : "Onboarding belum selesai"}
+            </Badge>
+            <Badge variant="outline">Kuota AI 10/hari</Badge>
+          </div>
+        </div>
+        <Button variant="secondary" onClick={() => router.push("/settings")}>
+          Buka setelan
+        </Button>
+      </Card>
+
+      <Card className="space-y-3 text-sm">
+        <SectionTitle>Informasi dasar</SectionTitle>
+        <dl className="grid gap-2 sm:grid-cols-2">
+          <div>
+            <dt className="text-[hsl(var(--muted-foreground))]">Berat</dt>
+            <dd className="font-medium tabular-nums">
+              {data?.profile?.current_weight_kg ?? "—"} kg
+            </dd>
+          </div>
+          <div>
+            <dt className="text-[hsl(var(--muted-foreground))]">Tinggi</dt>
+            <dd className="font-medium tabular-nums">{data?.profile?.height_cm ?? "—"} cm</dd>
+          </div>
+          <div>
+            <dt className="text-[hsl(var(--muted-foreground))]">Zona waktu</dt>
+            <dd className="font-medium">{data?.settings?.timezone ?? "—"}</dd>
+          </div>
+          <div>
+            <dt className="text-[hsl(var(--muted-foreground))]">Simpan foto AI</dt>
+            <dd className="font-medium">
+              {data?.settings?.retain_food_photos ? "Ya" : "Tidak (default hapus)"}
+            </dd>
+          </div>
+        </dl>
+        <HelperText>
+          Data dipakai untuk estimasi target dan aktivitas. Bukan diagnosis medis. Usia minimum 15.
+        </HelperText>
+        <Button variant="outline" onClick={() => router.push("/onboarding")}>
+          Perbarui target / onboarding
+        </Button>
+      </Card>
+
+      <Card className="space-y-3">
+        <SectionTitle>Akun</SectionTitle>
+        <div className="flex flex-wrap gap-2">
           <LogoutLink
             postLogoutRedirectURL="/"
-            className="inline-flex items-center justify-center rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-medium text-slate-900 hover:bg-slate-200"
+            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[hsl(var(--secondary))] px-4 py-2.5 text-sm font-medium text-[hsl(var(--secondary-foreground))]"
             onClick={() => clearTokenCache()}
           >
             Keluar
           </LogoutLink>
-          <Button
-            variant="danger"
-            onClick={async () => {
-              if (!confirm("Hapus akun dan semua data? Tindakan ini tidak dapat dibatalkan.")) return;
-              await api("/v1/account/deletion-request", { method: "POST", body: "{}" });
-              setMsg("Akun dihapus.");
-              clearTokenCache();
-              window.location.href = "/api/auth/logout";
-            }}
-          >
-            Hapus akun
-          </Button>
+          <Link href="/export">
+            <Button variant="outline">Ekspor data</Button>
+          </Link>
         </div>
+      </Card>
+
+      <Card className="border-red-200 bg-red-50/50 space-y-2">
+        <SectionTitle>Zona berbahaya</SectionTitle>
+        <p className="text-sm text-red-900/80">
+          Menghapus akun akan menghapus catatan, target, dan media terkait. Tindakan tidak dapat
+          dibatalkan setelah proses selesai.
+        </p>
+        <Link href="/account/delete">
+          <Button variant="danger">Hapus akun…</Button>
+        </Link>
       </Card>
     </div>
   );

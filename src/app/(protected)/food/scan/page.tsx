@@ -3,9 +3,22 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Camera, ImagePlus } from "lucide-react";
+import { toast } from "sonner";
 import { api } from "@/lib/api-client";
 import type { AiAnalysis } from "@/lib/types";
-import { Button, Card, ErrorBox, Input, Label, PageTitle, Select } from "@/components/ui";
+import {
+  Badge,
+  Button,
+  Card,
+  ErrorBox,
+  HelperText,
+  Input,
+  Label,
+  PageTitle,
+  Progress,
+  Select,
+} from "@/components/ui";
 import {
   fileToBase64,
   uploadToCloudinary,
@@ -22,33 +35,46 @@ type EditItem = {
   fat_g: number;
   fiber_g: number;
   confidence?: number;
+  confidence_label?: string;
 };
+
+function confVariant(label?: string): "success" | "warning" | "danger" | "outline" {
+  if (!label) return "outline";
+  const l = label.toLowerCase();
+  if (l.includes("tinggi") || l.includes("high")) return "success";
+  if (l.includes("sedang") || l.includes("medium")) return "warning";
+  return "danger";
+}
 
 export default function FoodScanPage() {
   const router = useRouter();
   const qc = useQueryClient();
   const [err, setErr] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
+  const [progress, setProgress] = useState(0);
   const [analysis, setAnalysis] = useState<AiAnalysis | null>(null);
   const [items, setItems] = useState<EditItem[]>([]);
   const [mealType, setMealType] = useState("lunch");
   const [file, setFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const analyze = useMutation({
     mutationFn: async () => {
       if (!file) throw new Error("Pilih foto makanan terlebih dahulu.");
 
-      setStatus("Meminta tanda tangan upload...");
+      setProgress(15);
+      setStatus("Meminta tanda tangan unggah...");
       const sig = await api<UploadSignature>("/v1/media/upload-signature", {
         method: "POST",
         body: "{}",
       });
 
-      setStatus(sig.mock ? "Mode mock upload..." : "Mengunggah ke Cloudinary...");
+      setProgress(40);
+      setStatus(sig.mock ? "Mode mock unggah..." : "Mengunggah ke Cloudinary...");
       const uploaded = await uploadToCloudinary(file, sig);
 
-      setStatus("Menganalisis dengan Gemini...");
-      // Mock: send base64. Production: backend fetches from Cloudinary (avoids Vercel body limit).
+      setProgress(65);
+      setStatus("Mengenali makanan dan memperkirakan porsi...");
       const payload: Record<string, unknown> = {
         cloudinaryPublicId: uploaded.public_id,
         mediaDeliveryType: uploaded.type || sig.delivery_type,
@@ -61,6 +87,8 @@ export default function FoodScanPage() {
         payload.imageBase64 = await fileToBase64(file);
       }
 
+      setProgress(85);
+      setStatus("Menghitung nutrisi (hasil belum disimpan)...");
       return api<AiAnalysis>("/v1/food-analyses", {
         method: "POST",
         body: JSON.stringify(payload),
@@ -79,14 +107,20 @@ export default function FoodScanPage() {
           fat_g: i.fat_g,
           fiber_g: i.fiber_g,
           confidence: i.confidence,
+          confidence_label: i.confidence_label,
         })),
       );
       setErr(null);
       setStatus(null);
+      setProgress(100);
+      toast.message("Draft AI siap ditinjau", {
+        description: "Hasil belum disimpan sebelum kamu konfirmasi.",
+      });
     },
     onError: (e: Error) => {
       setErr(e.message);
       setStatus(null);
+      setProgress(0);
     },
   });
 
@@ -94,6 +128,7 @@ export default function FoodScanPage() {
     mutationFn: () =>
       api(`/v1/food-analyses/${analysis!.id}/confirm`, {
         method: "POST",
+        idempotent: true,
         body: JSON.stringify({
           mealType,
           consumedAt: new Date().toISOString(),
@@ -113,6 +148,7 @@ export default function FoodScanPage() {
       }),
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ["dashboard"] });
+      toast.success("Hasil AI yang sudah ditinjau tersimpan.");
       router.push("/dashboard");
     },
     onError: (e: Error) => setErr(e.message),
@@ -122,33 +158,90 @@ export default function FoodScanPage() {
     setItems((prev) => prev.map((it, i) => (i === idx ? { ...it, [key]: value } : it)));
   };
 
+  const onFile = (f: File | null) => {
+    setFile(f);
+    setAnalysis(null);
+    setItems([]);
+    setErr(null);
+    setProgress(0);
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(f ? URL.createObjectURL(f) : null);
+  };
+
   return (
-    <div>
+    <div className="mx-auto max-w-3xl">
       <PageTitle
-        title="AI Food Snap"
-        subtitle="Upload Cloudinary + analisis Gemini. Foto dihapus setelah analisis. Kuota 10/hari."
+        title="Pindai makanan dengan AI"
+        subtitle="AI membuat draft. Kamu memegang keputusan. Foto dihapus setelah analisis (kecuali diaktifkan di setelan)."
       />
-      <Card className="space-y-3">
-        <div>
-          <Label>Foto makanan (JPEG/PNG/WebP, max 10MB)</Label>
+
+      <Card className="space-y-4">
+        <div
+          className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[hsl(var(--border))] bg-[hsl(var(--muted)/0.5)] px-4 py-8 text-center"
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => {
+            e.preventDefault();
+            const f = e.dataTransfer.files?.[0];
+            if (f) onFile(f);
+          }}
+        >
+          {previewUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={previewUrl}
+              alt="Pratinjau foto makanan"
+              className="mb-4 max-h-56 rounded-lg object-contain"
+            />
+          ) : (
+            <div className="mb-3 rounded-full bg-white p-3 text-[hsl(var(--muted-foreground))]">
+              <ImagePlus className="size-6" aria-hidden />
+            </div>
+          )}
+          <p className="text-sm font-medium">Seret foto ke sini atau pilih file</p>
+          <p className="mt-1 max-w-sm text-xs text-[hsl(var(--muted-foreground))]">
+            Tips: pencahayaan cukup, semua makanan terlihat, JPEG/PNG/WebP max 10 MB.
+          </p>
+          <Label htmlFor="photo" className="mt-4 !mb-0">
+            <span className="sr-only">Pilih foto</span>
+          </Label>
           <Input
+            id="photo"
             type="file"
             accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
             capture="environment"
-            onChange={(e) => {
-              setFile(e.target.files?.[0] ?? null);
-              setAnalysis(null);
-              setItems([]);
-              setErr(null);
-            }}
+            className="mt-3 max-w-xs"
+            onChange={(e) => onFile(e.target.files?.[0] ?? null)}
           />
         </div>
-        <Button onClick={() => analyze.mutate()} disabled={analyze.isPending || !file}>
-          {analyze.isPending ? "Memproses..." : "Unggah & analisis AI"}
+
+        <ul className="list-inside list-disc text-xs text-[hsl(var(--muted-foreground))]">
+          <li>Hasil AI adalah perkiraan awal, bukan data final.</li>
+          <li>Edit porsi dan kalori sebelum menyimpan.</li>
+          <li>Kuota AI 10 kali per hari per pengguna.</li>
+        </ul>
+
+        <Button
+          onClick={() => analyze.mutate()}
+          loading={analyze.isPending}
+          disabled={!file}
+        >
+          <Camera className="size-4" aria-hidden />
+          {analyze.isPending ? "Memproses..." : "Unggah & analisis"}
         </Button>
-        {status ? <p className="text-xs text-slate-500">{status}</p> : null}
+        {!file ? <HelperText>Pilih foto untuk mengaktifkan tombol analisis.</HelperText> : null}
+
+        {analyze.isPending || progress > 0 ? (
+          <div>
+            <div className="mb-1 flex justify-between text-xs text-[hsl(var(--muted-foreground))]">
+              <span>{status ?? "Siap"}</span>
+              <span className="tabular-nums">{progress}%</span>
+            </div>
+            <Progress value={progress} label="Progres analisis AI" />
+          </div>
+        ) : null}
+
         {analysis?.quota ? (
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-[hsl(var(--muted-foreground))]">
             Kuota AI: {analysis.quota.used}/{analysis.quota.quota} (sisa {analysis.quota.remaining})
           </p>
         ) : null}
@@ -156,20 +249,26 @@ export default function FoodScanPage() {
       </Card>
 
       {analysis?.result ? (
-        <Card className="mt-4 space-y-3">
-          <p className="text-sm text-slate-600">{analysis.disclaimer}</p>
-          <p className="text-sm">
-            Keyakinan: <strong>{analysis.result.overall_confidence_label}</strong> · Total estimasi{" "}
-            {analysis.result.total_estimated_calories} kkal
-          </p>
+        <Card className="mt-4 space-y-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="secondary">Estimasi AI</Badge>
+            <Badge variant={confVariant(analysis.result.overall_confidence_label)}>
+              {analysis.result.overall_confidence_label}
+            </Badge>
+            <span className="text-sm text-[hsl(var(--muted-foreground))]">
+              Total ~{analysis.result.total_estimated_calories} kkal
+            </span>
+          </div>
+          <p className="text-sm text-[hsl(var(--muted-foreground))]">{analysis.disclaimer}</p>
           {analysis.result.warnings?.map((w) => (
-            <p key={w} className="text-xs text-amber-700">
+            <p key={w} className="text-xs text-amber-800">
               {w}
             </p>
           ))}
+
           <div>
-            <Label>Waktu makan</Label>
-            <Select value={mealType} onChange={(e) => setMealType(e.target.value)}>
+            <Label htmlFor="meal">Jenis makan</Label>
+            <Select id="meal" value={mealType} onChange={(e) => setMealType(e.target.value)}>
               <option value="breakfast">Sarapan</option>
               <option value="lunch">Makan siang</option>
               <option value="dinner">Makan malam</option>
@@ -177,41 +276,69 @@ export default function FoodScanPage() {
               <option value="other">Lainnya</option>
             </Select>
           </div>
+
           {items.map((item, idx) => (
-            <div key={idx} className="space-y-2 rounded-xl border border-slate-100 p-3">
-              <Input value={item.name} onChange={(e) => updateItem(idx, "name", e.target.value)} />
+            <div
+              key={idx}
+              className="space-y-2 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--muted)/0.3)] p-3"
+            >
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant={confVariant(item.confidence_label)}>
+                  {item.confidence_label ?? "Perlu ditinjau"}
+                </Badge>
+              </div>
+              <Input
+                value={item.name}
+                onChange={(e) => updateItem(idx, "name", e.target.value)}
+                aria-label={`Nama item ${idx + 1}`}
+              />
               <div className="grid grid-cols-3 gap-2">
                 <Input
                   type="number"
                   value={item.portion_amount}
                   onChange={(e) => updateItem(idx, "portion_amount", Number(e.target.value))}
+                  aria-label="Jumlah porsi"
                 />
                 <Input
                   value={item.portion_unit}
                   onChange={(e) => updateItem(idx, "portion_unit", e.target.value)}
+                  aria-label="Satuan"
                 />
                 <Input
                   type="number"
                   value={item.calories}
                   onChange={(e) => updateItem(idx, "calories", Number(e.target.value))}
+                  aria-label="Kalori"
                 />
               </div>
+              <p className="text-xs text-[hsl(var(--muted-foreground))]">
+                P {item.protein_g}g · K {item.carbs_g}g · L {item.fat_g}g
+              </p>
             </div>
           ))}
-          <Button onClick={() => confirm.mutate()} disabled={confirm.isPending || items.length === 0}>
-            {confirm.isPending ? "Menyimpan..." : "Simpan hasil yang sudah ditinjau"}
-          </Button>
-          <Button
-            variant="ghost"
-            onClick={async () => {
-              if (!analysis) return;
-              await api(`/v1/food-analyses/${analysis.id}`, { method: "DELETE" });
-              setAnalysis(null);
-              setItems([]);
-            }}
-          >
-            Batalkan
-          </Button>
+
+          <div className="flex flex-wrap gap-2">
+            <Button
+              onClick={() => confirm.mutate()}
+              loading={confirm.isPending}
+              disabled={items.length === 0}
+            >
+              Simpan hasil yang sudah ditinjau
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={async () => {
+                if (!analysis) return;
+                await api(`/v1/food-analyses/${analysis.id}`, { method: "DELETE" });
+                setAnalysis(null);
+                setItems([]);
+                setProgress(0);
+                toast.message("Analisis dibatalkan");
+              }}
+            >
+              Batalkan
+            </Button>
+          </div>
         </Card>
       ) : null}
     </div>

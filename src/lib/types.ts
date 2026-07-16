@@ -31,6 +31,12 @@ export type Dashboard = {
   food_log_count: number;
   activity_duration_minutes: number;
   motivational_message: string;
+  target?: {
+    calorie_target: number;
+    bmr_kcal?: number | null;
+    tdee_kcal?: number | null;
+    goal?: string;
+  } | null;
   recent_food: Array<{
     id: string;
     title: string;

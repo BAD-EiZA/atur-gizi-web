@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useMe } from "@/hooks/use-me";
 import { api } from "@/lib/api-client";
-import { Button, Card, ErrorBox, Label, PageTitle, Select } from "@/components/ui";
+import { toast } from "sonner";
+import { Button, Card, ErrorBox, HelperText, Label, PageTitle, SectionTitle, Select } from "@/components/ui";
 import Link from "next/link";
 
 export default function SettingsPage() {
@@ -34,6 +35,7 @@ export default function SettingsPage() {
       }),
     onSuccess: async () => {
       setMsg("Pengaturan disimpan.");
+      toast.success("Pengaturan disimpan.");
       await refetch();
     },
     onError: (e: Error) => setErr(e.message),
@@ -41,8 +43,9 @@ export default function SettingsPage() {
 
   return (
     <div>
-      <PageTitle title="Pengaturan" subtitle="Preferensi akun, privasi media, unit." />
+      <PageTitle title="Setelan" subtitle="Umum, privasi media, dan tautan akun." />
       <Card className="space-y-3">
+        <SectionTitle>Umum</SectionTitle>
         <div>
           <Label>Zona waktu (IANA)</Label>
           <Select value={timezone} onChange={(e) => setTimezone(e.target.value)}>
@@ -60,14 +63,18 @@ export default function SettingsPage() {
             <option value="imperial">Imperial</option>
           </Select>
         </div>
-        <label className="flex items-start gap-2 text-sm text-slate-600">
+        <SectionTitle>Privasi & AI</SectionTitle>
+        <label className="flex items-start gap-2 text-sm text-[hsl(var(--foreground))]">
           <input
             type="checkbox"
             checked={retainPhotos}
             onChange={(e) => setRetainPhotos(e.target.checked)}
-            className="mt-1"
+            className="mt-1 size-4"
           />
-          Simpan foto makanan setelah analisis AI (default: hapus)
+          <span>
+            Simpan foto makanan setelah analisis AI
+            <HelperText>Default nonaktif — foto dihapus setelah analisis atau konfirmasi.</HelperText>
+          </span>
         </label>
         {msg ? <p className="text-sm text-emerald-700">{msg}</p> : null}
         {err ? <ErrorBox message={err} /> : null}
