@@ -148,6 +148,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           >
             Keluar
           </LogoutLink>
+          <p className="mt-3 px-3 text-[10px] text-[hsl(var(--muted-foreground))]">© 2026 BAD-EiZA</p>
         </div>
       </aside>
 

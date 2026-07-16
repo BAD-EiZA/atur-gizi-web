@@ -568,7 +568,7 @@ export default function LandingPage() {
             Estimasi kalori dan nutrisi dapat tidak akurat. Aplikasi ini bukan pengganti nasihat
             medis atau ahli gizi.
           </p>
-          <p className="mt-2">© {new Date().getFullYear()} Atur Gizi</p>
+          <p className="mt-2">© 2026 BAD-EiZA</p>
         </div>
       </footer>
     </div>
