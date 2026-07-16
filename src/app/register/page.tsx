@@ -1,11 +1,15 @@
 import Link from "next/link";
 import { RegisterLink, LoginLink } from "@kinde-oss/kinde-auth-nextjs/components";
 import { Card, PageTitle } from "@/components/ui";
+import { Logo } from "@/components/logo";
 
 export default function RegisterPage() {
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4">
-      <PageTitle title="Daftar Atur Gizi" subtitle="Buat akun melalui Kinde (email diverifikasi)." />
+      <div className="mb-6 flex justify-center">
+        <Logo size={40} priority />
+      </div>
+      <PageTitle title="Daftar" subtitle="Buat akun melalui Kinde (email diverifikasi)." />
       <Card className="space-y-4">
         <RegisterLink
           postLoginRedirectURL="/onboarding"

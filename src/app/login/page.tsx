@@ -1,14 +1,18 @@
 import Link from "next/link";
 import { LoginLink, RegisterLink } from "@kinde-oss/kinde-auth-nextjs/components";
 import { Card, PageTitle } from "@/components/ui";
+import { Logo } from "@/components/logo";
 
 const DEV = process.env.NEXT_PUBLIC_DEV_AUTH === "true";
 
 export default function LoginPage() {
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4">
+      <div className="mb-6 flex justify-center">
+        <Logo size={40} priority />
+      </div>
       <PageTitle
-        title="Masuk Atur Gizi"
+        title="Masuk"
         subtitle="Autentikasi aman melalui Kinde. Session tidak disimpan di localStorage."
       />
       <Card className="space-y-4">

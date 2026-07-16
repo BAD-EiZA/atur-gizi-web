@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { LoginLink, RegisterLink } from "@kinde-oss/kinde-auth-nextjs/components";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Logo } from "@/components/logo";
 
 const links = [
   { href: "#fitur", label: "Fitur" },
@@ -34,8 +35,8 @@ export function SiteHeader() {
       )}
     >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 md:px-6">
-        <a href="#" className="text-lg font-bold text-[hsl(var(--primary))]">
-          Atur Gizi
+        <a href="#" className="inline-flex items-center" aria-label="Atur Gizi beranda">
+          <Logo size={28} priority />
         </a>
 
         <nav className="hidden items-center gap-1 lg:flex" aria-label="Navigasi utama">

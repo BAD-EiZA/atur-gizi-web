@@ -15,6 +15,7 @@ import {
 import { LoginLink, RegisterLink } from "@kinde-oss/kinde-auth-nextjs/components";
 import { SiteHeader } from "@/components/landing/site-header";
 import { FaqSection } from "@/components/landing/faq-section";
+import { Logo } from "@/components/logo";
 
 export const metadata = {
   title: "Atur Gizi — Catat Makan, Aktivitas, dan Insight Mingguan",
@@ -253,12 +254,12 @@ export default function LandingPage() {
               <div className="overflow-hidden rounded-2xl border border-[hsl(var(--border))] bg-white shadow-sm">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="/illustrations/food-plate.svg"
-                  alt="Ilustrasi piring makanan untuk demo pindai AI"
+                  src="/illustrations/vegetable.jpg"
+                  alt="Foto sayuran untuk demo pindai AI"
                   className="h-56 w-full object-cover sm:h-64"
                 />
                 <p className="border-t border-[hsl(var(--border))] px-4 py-3 text-sm text-[hsl(var(--muted-foreground))]">
-                  Contoh foto · ilustrasi, bukan foto pengguna
+                  Contoh foto sayuran · demo pindai AI
                 </p>
               </div>
 
@@ -530,7 +531,7 @@ export default function LandingPage() {
       <footer className="border-t border-[hsl(var(--border))] bg-white">
         <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 md:grid-cols-4 md:px-6">
           <div className="md:col-span-1">
-            <p className="text-lg font-bold text-[hsl(var(--primary))]">Atur Gizi</p>
+            <Logo size={28} />
             <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))]">
               Catat dengan ringan. Tinjau dengan sadar.
             </p>

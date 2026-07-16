@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-labelledby="logoTitle">
+  <title id="logoTitle">Logo Atur Gizi</title>
+  <!-- leaf mark -->
+  <circle cx="32" cy="32" r="30" fill="#0D9488"/>
+  <path d="M32 14c-1.2 8.5-4.5 14.5-12 18.5 7.5 1.5 12.5 6.5 14.5 15 2-8.5 7-13.5 15.5-15-7.5-4-11-10-12.5-18.5-1.2 5.5-3.2 9.5-5 12.5-1.8-3-3.8-7-5-12.5z" fill="#ECFDF5"/>
+  <path d="M32 22v22" stroke="#0F766E" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M32 30c-4 2.5-7 6-8.5 10.5" stroke="#0F766E" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M32 34c4 2 7 5.5 8.5 9.5" stroke="#0F766E" stroke-width="1.6" stroke-linecap="round"/>
+</svg>
