@@ -9,8 +9,9 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "Atur Gizi",
-  description: "Pencatatan nutrisi dan aktivitas — estimasi, transparan, di bawah kendali Anda.",
+  title: "Atur Gizi — Catat Makan, Aktivitas, dan Insight Mingguan",
+  description:
+    "Catat makanan manual, dari barcode, atau melalui foto. Tinjau estimasi AI sebelum menyimpan dan pahami pola mingguan dengan bahasa yang netral.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
