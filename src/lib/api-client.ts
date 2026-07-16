@@ -27,7 +27,6 @@ async function getAccessToken(): Promise<string | null> {
   const body = (await res.json()) as { access_token?: string };
   if (!body.access_token) return null;
 
-  // Cache ~4 min (typical access token 5–60m; refresh via session endpoint)
   cachedToken = { value: body.access_token, exp: now + 4 * 60_000 };
   return body.access_token;
 }
@@ -36,16 +35,28 @@ export function clearTokenCache() {
   cachedToken = null;
 }
 
-export async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
+export function newIdempotencyKey() {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+export async function api<T>(
+  path: string,
+  options: RequestInit & { idempotent?: boolean } = {},
+): Promise<T> {
+  const { idempotent, ...fetchOpts } = options;
   const token = await getAccessToken();
-  const headers = new Headers(options.headers);
-  if (!headers.has("Content-Type") && options.body) {
+  const headers = new Headers(fetchOpts.headers);
+  if (!headers.has("Content-Type") && fetchOpts.body) {
     headers.set("Content-Type", "application/json");
   }
   if (token) headers.set("Authorization", `Bearer ${token}`);
+  if (idempotent && !headers.has("Idempotency-Key")) {
+    headers.set("Idempotency-Key", newIdempotencyKey());
+  }
 
   const res = await fetch(`${API_BASE}${path}`, {
-    ...options,
+    ...fetchOpts,
     headers,
   });
 
@@ -73,6 +84,17 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
 
   if (res.status === 204) return undefined as T;
   return res.json() as Promise<T>;
+}
+
+export async function track(name: string, props?: Record<string, unknown>) {
+  try {
+    await api("/v1/analytics/events", {
+      method: "POST",
+      body: JSON.stringify({ name, props }),
+    });
+  } catch {
+    /* non-blocking */
+  }
 }
 
 export { API_BASE };

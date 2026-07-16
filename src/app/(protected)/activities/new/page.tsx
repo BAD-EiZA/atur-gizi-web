@@ -34,6 +34,7 @@ export default function NewActivityPage() {
     mutationFn: () =>
       api("/v1/activity-logs", {
         method: "POST",
+        idempotent: true,
         body: JSON.stringify({
           activityTypeId: selected,
           durationMinutes: Number(duration),

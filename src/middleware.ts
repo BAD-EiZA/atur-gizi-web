@@ -5,7 +5,7 @@ export default withAuth(
     // Auth handled by withAuth
   },
   {
-    publicPaths: ["/", "/login", "/api/auth"],
+    publicPaths: ["/", "/login", "/register", "/api/auth"],
     isReturnToCurrentPage: true,
   },
 );

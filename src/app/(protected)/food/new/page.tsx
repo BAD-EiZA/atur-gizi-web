@@ -27,6 +27,7 @@ export default function NewFoodPage() {
     mutationFn: () =>
       api("/v1/food-logs", {
         method: "POST",
+        idempotent: true,
         body: JSON.stringify({
           consumedAt: new Date().toISOString(),
           mealType: form.mealType,

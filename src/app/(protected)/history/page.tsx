@@ -33,14 +33,19 @@ export default function HistoryPage() {
         ) : (
           <ul className="divide-y divide-slate-100">
             {(q.data?.data ?? []).map((item) => (
-              <li key={`${item.kind}-${item.id}`} className="flex items-center justify-between py-3 text-sm">
-                <div>
-                  <p className="font-medium">{item.title}</p>
-                  <p className="text-xs text-slate-500">
-                    {item.log_date} · {item.kind === "food" ? item.meal_type : `${item.duration_minutes} mnt`}
-                  </p>
-                </div>
-                <span className="text-slate-600">{item.calories} kkal</span>
+              <li key={`${item.kind}-${item.id}`} className="py-3 text-sm">
+                <a
+                  href={item.kind === "food" ? `/food/${item.id}` : `/activities/${item.id}`}
+                  className="flex items-center justify-between hover:text-emerald-700"
+                >
+                  <div>
+                    <p className="font-medium">{item.title}</p>
+                    <p className="text-xs text-slate-500">
+                      {item.log_date} · {item.kind === "food" ? item.meal_type : `${item.duration_minutes} mnt`}
+                    </p>
+                  </div>
+                  <span className="text-slate-600">{item.calories} kkal</span>
+                </a>
               </li>
             ))}
           </ul>

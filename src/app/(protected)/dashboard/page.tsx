@@ -79,7 +79,9 @@ export default function DashboardPage() {
               <ul className="space-y-2">
                 {d.recent_food.map((f) => (
                   <li key={f.id} className="flex justify-between text-sm">
-                    <span>{f.title}</span>
+                    <a href={`/food/${f.id}`} className="hover:text-emerald-700">
+                      {f.title}
+                    </a>
                     <span className="text-slate-500">{f.total_calories} kkal</span>
                   </li>
                 ))}
@@ -95,9 +97,9 @@ export default function DashboardPage() {
               <ul className="space-y-2">
                 {d.recent_activity.map((a) => (
                   <li key={a.id} className="flex justify-between text-sm">
-                    <span>
+                    <a href={`/activities/${a.id}`} className="hover:text-emerald-700">
                       {a.name} · {a.duration_minutes} mnt
-                    </span>
+                    </a>
                     <span className="text-slate-500">{a.calories_burned} kkal</span>
                   </li>
                 ))}
