@@ -250,17 +250,14 @@ export default function LandingPage() {
               </p>
             </div>
 
-            <div className="mt-10 grid gap-6 lg:grid-cols-2">
+            <div className="mt-10 grid gap-6 lg:grid-cols-2 lg:items-start">
               <div className="overflow-hidden rounded-2xl border border-[hsl(var(--border))] bg-white shadow-sm">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="/illustrations/vegetable.jpg"
-                  alt="Foto sayuran untuk demo pindai AI"
-                  className="h-56 w-full object-cover sm:h-64"
+                  src="/illustrations/food.jpg"
+                  alt="Foto makanan untuk demo pindai AI"
+                  className="h-auto w-full object-contain"
                 />
-                <p className="border-t border-[hsl(var(--border))] px-4 py-3 text-sm text-[hsl(var(--muted-foreground))]">
-                  Contoh foto sayuran · demo pindai AI
-                </p>
               </div>
 
               <div className="space-y-3 rounded-2xl border border-[hsl(var(--border))] bg-white p-5 shadow-sm">
