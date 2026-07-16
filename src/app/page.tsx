@@ -1,7 +1,5 @@
 import {
   Activity,
-  ArrowDown,
-  ArrowRight,
   Camera,
   Check,
   Download,
@@ -15,6 +13,7 @@ import {
 import { LoginLink, RegisterLink } from "@kinde-oss/kinde-auth-nextjs/components";
 import { SiteHeader } from "@/components/landing/site-header";
 import { FaqSection } from "@/components/landing/faq-section";
+import { FinalCta, HeroCta } from "@/components/landing/auth-cta";
 import { Logo } from "@/components/logo";
 
 export const metadata = {
@@ -22,18 +21,6 @@ export const metadata = {
   description:
     "Catat makanan manual, dari barcode, atau melalui foto. Tinjau estimasi AI sebelum menyimpan dan pahami pola mingguan dengan bahasa yang netral.",
 };
-
-function PrimaryCta({ className = "" }: { className?: string }) {
-  return (
-    <RegisterLink
-      postLoginRedirectURL="/onboarding"
-      className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[hsl(var(--primary))] px-5 py-3 text-sm font-medium text-white transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2 ${className}`}
-    >
-      Mulai gratis
-      <ArrowRight className="size-4" aria-hidden />
-    </RegisterLink>
-  );
-}
 
 export default function LandingPage() {
   return (
@@ -65,16 +52,7 @@ export default function LandingPage() {
                 </p>
               </div>
 
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <PrimaryCta />
-                <a
-                  href="#cara-kerja"
-                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-[hsl(var(--border))] bg-white px-5 py-3 text-sm font-medium transition hover:bg-[hsl(var(--muted))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))]"
-                >
-                  Lihat cara kerja
-                  <ArrowDown className="size-4" aria-hidden />
-                </a>
-              </div>
+              <HeroCta />
 
               <ul className="grid gap-2 text-sm text-[hsl(var(--muted-foreground))] sm:grid-cols-1 md:text-base">
                 {[
@@ -452,7 +430,12 @@ export default function LandingPage() {
                 setelah analisis selesai, dan data dapat diekspor atau dihapus melalui aplikasi.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
-                <PrimaryCta className="!bg-white !text-slate-900 hover:!brightness-100" />
+                <RegisterLink
+                  postLoginRedirectURL="/onboarding"
+                  className="inline-flex min-h-11 items-center rounded-lg bg-white px-5 py-3 text-sm font-medium text-slate-900"
+                >
+                  Mulai gratis
+                </RegisterLink>
                 <a
                   href="#faq"
                   className="inline-flex min-h-11 items-center rounded-lg border border-white/30 px-5 py-3 text-sm font-medium text-white transition hover:bg-white/10"
@@ -503,23 +486,8 @@ export default function LandingPage() {
 
         {/* FINAL CTA */}
         <section className="border-t border-[hsl(var(--border))] bg-gradient-to-b from-emerald-50/80 to-white">
-          <div className="mx-auto max-w-3xl px-4 py-16 text-center md:py-20">
-            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-              Mulai mencatat tanpa menjadikan setiap makan sebagai ujian
-            </h2>
-            <p className="mx-auto mt-3 max-w-xl text-sm text-[hsl(var(--muted-foreground))] md:text-base">
-              Buat akun, atur target, lalu catat makanan pertama. Gratis untuk mulai — tidak perlu
-              kartu pembayaran.
-            </p>
-            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <PrimaryCta className="w-full sm:w-auto" />
-              <a
-                href="#demo-ai"
-                className="inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-[hsl(var(--border))] bg-white px-5 py-3 text-sm font-medium sm:w-auto"
-              >
-                Lihat demo AI
-              </a>
-            </div>
+          <div className="mx-auto max-w-3xl px-4 py-16 md:py-20">
+            <FinalCta />
           </div>
         </section>
       </main>

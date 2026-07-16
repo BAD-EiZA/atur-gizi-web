@@ -43,9 +43,45 @@ export default function NewFoodPage() {
     notes: "",
   });
 
+  const [searchQ, setSearchQ] = useState("");
+  const [searchHits, setSearchHits] = useState<
+    Array<{ name: string; calories?: number; unit?: string; source?: string }>
+  >([]);
+
   const favs = useQuery({
     queryKey: ["favorites-foods"],
     queryFn: () => api<{ data: Fav[] }>("/v1/favorites/foods"),
+  });
+
+  const searchMut = useMutation({
+    mutationFn: () =>
+      api<{
+        from_catalog: Array<{ name: string; calories: number; unit: string; source?: string }>;
+        from_memory: Array<{ name: string; calories?: number | null; source?: string }>;
+        from_ai: Array<{ name: string; calories?: number; unit?: string }>;
+      }>(`/v1/ai/food-search?q=${encodeURIComponent(searchQ)}`),
+    onSuccess: (data) => {
+      const hits = [
+        ...data.from_memory.map((m) => ({
+          name: m.name,
+          calories: m.calories ?? undefined,
+          source: "memory",
+        })),
+        ...data.from_catalog.map((c) => ({
+          name: c.name,
+          calories: c.calories,
+          unit: c.unit,
+          source: "catalog",
+        })),
+        ...(data.from_ai ?? []).map((a) => ({
+          name: a.name,
+          calories: a.calories,
+          unit: a.unit,
+          source: "ai",
+        })),
+      ];
+      setSearchHits(hits);
+    },
   });
 
   const macroKcal = useMemo(
@@ -111,6 +147,49 @@ export default function NewFoodPage() {
         title="Catat makanan"
         subtitle="Input manual. Semua angka divalidasi di server. Estimasi dapat dikoreksi kapan saja."
       />
+
+      <Card className="mb-4 space-y-2">
+        <p className="text-sm font-medium">AI Smart Search</p>
+        <div className="flex flex-wrap gap-2">
+          <Input
+            value={searchQ}
+            onChange={(e) => setSearchQ(e.target.value)}
+            placeholder="Cari: naspad, ayam geprek, kopi pagi..."
+            className="min-w-[12rem] flex-1"
+          />
+          <Button
+            variant="secondary"
+            loading={searchMut.isPending}
+            disabled={!searchQ.trim()}
+            onClick={() => searchMut.mutate()}
+          >
+            Cari AI
+          </Button>
+        </div>
+        {searchHits.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {searchHits.slice(0, 10).map((h, i) => (
+              <button
+                key={`${h.name}-${i}`}
+                type="button"
+                className="rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--muted))] px-3 py-1.5 text-xs font-medium"
+                onClick={() =>
+                  setForm((prev) => ({
+                    ...prev,
+                    name: h.name,
+                    calories: h.calories ?? prev.calories,
+                    portionUnit: h.unit ?? prev.portionUnit,
+                  }))
+                }
+              >
+                {h.name}
+                {h.calories != null ? ` · ${h.calories} kkal` : ""}
+                {h.source ? ` · ${h.source}` : ""}
+              </button>
+            ))}
+          </div>
+        ) : null}
+      </Card>
 
       {(favs.data?.data.length ?? 0) > 0 ? (
         <Card className="mb-4">

@@ -18,6 +18,7 @@ import {
   Utensils,
   Users,
   Watch,
+  Wand2,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -34,6 +35,7 @@ const groups: { title: string; items: NavItem[] }[] = [
       { href: "/dashboard", label: "Beranda", icon: Home },
       { href: "/food/new", label: "Catat makanan", icon: Utensils },
       { href: "/food/scan", label: "Pindai AI", icon: Camera },
+      { href: "/ai-tools", label: "Alat AI", icon: Wand2 },
       { href: "/activities/new", label: "Aktivitas", icon: Activity },
     ],
   },
@@ -107,9 +109,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-[hsl(var(--background))] pb-20 md:pb-0 md:pl-64">
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 overflow-y-auto border-r border-[hsl(var(--border))] bg-white p-4 md:block">
-        <div className="mb-6 px-2">
+        <Link href="/dashboard" className="mb-6 block px-2" aria-label="Dashboard Atur Gizi">
           <Logo size={28} />
-        </div>
+        </Link>
         <nav className="space-y-5">
           {groups.map((g) => (
             <div key={g.title}>
