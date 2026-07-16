@@ -18,9 +18,10 @@ export function Providers({ children }: { children: ReactNode }) {
     <QueryClientProvider client={client}>
       {children}
       <Toaster
-        position="top-center"
+        position="bottom-right"
         richColors
         closeButton
+        offset={16}
         toastOptions={{
           className: "text-sm",
         }}

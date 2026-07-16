@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { api } from "@/lib/api-client";
@@ -29,6 +29,7 @@ type Fav = {
 
 export default function NewFoodPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const qc = useQueryClient();
   const [err, setErr] = useState<string | null>(null);
   const [form, setForm] = useState({
@@ -47,6 +48,18 @@ export default function NewFoodPage() {
   const [searchHits, setSearchHits] = useState<
     Array<{ name: string; calories?: number; unit?: string; source?: string }>
   >([]);
+
+  useEffect(() => {
+    const name = searchParams.get("name");
+    const calories = searchParams.get("calories");
+    if (name) {
+      setForm((f) => ({
+        ...f,
+        name,
+        calories: calories ? Number(calories) : f.calories,
+      }));
+    }
+  }, [searchParams]);
 
   const favs = useQuery({
     queryKey: ["favorites-foods"],

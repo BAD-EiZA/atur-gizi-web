@@ -1,9 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import {
+  Check,
+  ChevronDown,
+  ChevronRight,
+  HelpCircle,
+  Search,
+  Sparkles,
+} from "lucide-react";
 import { api } from "@/lib/api-client";
 import {
   Badge,
@@ -14,10 +22,12 @@ import {
   Input,
   Label,
   PageTitle,
+  Progress,
   SectionTitle,
   Select,
   Skeleton,
 } from "@/components/ui";
+import { cn } from "@/lib/utils";
 
 type Tab =
   | "search"
@@ -32,19 +42,124 @@ type Tab =
   | "brief"
   | "plate";
 
-const tabs: { id: Tab; label: string }[] = [
-  { id: "search", label: "Cari makanan" },
-  { id: "memory", label: "Memori" },
-  { id: "compare", label: "Bandingkan" },
-  { id: "plate", label: "Lengkapi piring" },
-  { id: "context", label: "Kontekstual" },
-  { id: "recover", label: "Pulihkan log" },
-  { id: "habits", label: "Pola" },
-  { id: "quality", label: "Kualitas data" },
-  { id: "target", label: "Jelaskan target" },
-  { id: "simulate", label: "Simulasi" },
-  { id: "brief", label: "Brief minggu" },
+const categories: { title: string; items: { id: Tab; label: string }[] }[] = [
+  {
+    title: "Catat lebih cepat",
+    items: [
+      { id: "search", label: "Cari makanan cerdas" },
+      { id: "recover", label: "Pulihkan log" },
+      { id: "plate", label: "Cek item terlewat" },
+      { id: "memory", label: "Memori & alias" },
+    ],
+  },
+  {
+    title: "Pahami pilihan",
+    items: [
+      { id: "compare", label: "Bandingkan makanan" },
+      { id: "target", label: "Penjelasan target" },
+      { id: "simulate", label: "Simulasi target" },
+    ],
+  },
+  {
+    title: "Lihat pola",
+    items: [
+      { id: "context", label: "Saran pencatatan" },
+      { id: "habits", label: "Pola kebiasaan" },
+      { id: "quality", label: "Periksa data" },
+      { id: "brief", label: "Rencana minggu" },
+    ],
+  },
 ];
+
+const tabMeta: Record<Tab, { title: string; desc: string }> = {
+  search: {
+    title: "Cari makanan cerdas",
+    desc: "Cari dari katalog dan memori. Hasil draft — belum disimpan.",
+  },
+  memory: {
+    title: "Memori makanan & alias",
+    desc: "Simpan sebutan lokal (naspad, kopi pagi) agar pencatatan lebih cepat.",
+  },
+  compare: {
+    title: "Bandingkan makanan",
+    desc: "Bandingkan estimasi kalori dan makro. Bukan label baik/buruk.",
+  },
+  plate: {
+    title: "Cek item yang terlewat",
+    desc: "Bukan saran menambah makanan — hanya verifikasi komponen yang mungkin lupa dicatat.",
+  },
+  context: {
+    title: "Saran pencatatan",
+    desc: "Saran berdasarkan jam dan kebiasaan. Bukan perintah.",
+  },
+  recover: {
+    title: "Buat ulang draft dari ingatan",
+    desc: "Direkonstruksi dari apa yang masih diingat — confidence rendah.",
+  },
+  habits: {
+    title: "Pola kebiasaan",
+    desc: "Insight deskriptif. Korelasi ≠ sebab-akibat.",
+  },
+  quality: {
+    title: "Pemeriksa kualitas data",
+    desc: "Fokus pada kelengkapan data, bukan penilaian pribadi.",
+  },
+  target: {
+    title: "Penjelasan target",
+    desc: "Transparansi formula BMR/TDEE. Estimasi, bukan nasihat medis.",
+  },
+  simulate: {
+    title: "Simulasi target",
+    desc: "Simulasi tidak mengubah target tersimpan.",
+  },
+  brief: {
+    title: "Rencana minggu",
+    desc: "Brief ringkas untuk fokus minggu — draft yang bisa ditinjau.",
+  },
+};
+
+function ResultShell({
+  children,
+  technical,
+  badges,
+  actions,
+}: {
+  children: ReactNode;
+  technical?: unknown;
+  badges?: ReactNode;
+  actions?: ReactNode;
+}) {
+  const [openTech, setOpenTech] = useState(false);
+  return (
+    <Card className="space-y-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <Badge variant="secondary">Draft</Badge>
+        <Badge variant="outline">Belum disimpan</Badge>
+        <Badge variant="outline">Estimasi</Badge>
+        {badges}
+      </div>
+      {children}
+      {actions ? <div className="flex flex-wrap gap-2 border-t border-[hsl(var(--border))] pt-3">{actions}</div> : null}
+      {technical != null ? (
+        <div className="border-t border-[hsl(var(--border))] pt-2">
+          <button
+            type="button"
+            className="inline-flex items-center gap-1 text-sm text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+            onClick={() => setOpenTech((v) => !v)}
+          >
+            {openTech ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
+            Lihat detail teknis
+          </button>
+          {openTech ? (
+            <pre className="mt-2 max-h-64 overflow-auto rounded-xl bg-[hsl(var(--muted))] p-3 text-xs leading-relaxed whitespace-pre-wrap break-words">
+              {JSON.stringify(technical, null, 2)}
+            </pre>
+          ) : null}
+        </div>
+      ) : null}
+    </Card>
+  );
+}
 
 export default function AiToolsPage() {
   const [tab, setTab] = useState<Tab>("search");
@@ -61,16 +176,23 @@ export default function AiToolsPage() {
     snacks: "",
     drinks: "",
   });
-  const [sim, setSim] = useState({
-    activityLevel: "moderate",
-    goal: "maintain",
-  });
-  const [result, setResult] = useState<unknown>(null);
+  const [sim, setSim] = useState({ activityLevel: "moderate", goal: "maintain" });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [result, setResult] = useState<any>(null);
   const qc = useQueryClient();
 
   const memory = useQuery({
     queryKey: ["meal-memory"],
-    queryFn: () => api<{ data: Array<{ id: string; alias: string; resolved_name: string; use_count: number }> }>("/v1/ai/meal-memory"),
+    queryFn: () =>
+      api<{
+        data: Array<{
+          id: string;
+          alias: string;
+          resolved_name: string;
+          use_count: number;
+          calories: number | null;
+        }>;
+      }>("/v1/ai/meal-memory"),
     enabled: tab === "memory",
   });
 
@@ -94,7 +216,10 @@ export default function AiToolsPage() {
           return api("/v1/ai/plate-completion", {
             method: "POST",
             body: JSON.stringify({
-              detectedItems: plateItems.split(",").map((s) => s.trim()).filter(Boolean),
+              detectedItems: plateItems
+                .split(",")
+                .map((s) => s.trim())
+                .filter(Boolean),
             }),
           });
         case "context":
@@ -123,266 +248,875 @@ export default function AiToolsPage() {
     },
     onSuccess: (data) => {
       setResult(data);
-      toast.message("Draft AI siap ditinjau");
+      toast.success(`${tabMeta[tab].title} selesai`, {
+        description: "Hasil siap ditinjau.",
+      });
     },
     onError: (e: Error) => setErr(e.message),
   });
 
+  const goToFoodLog = (name: string, calories?: number) => {
+    const params = new URLSearchParams({ name });
+    if (calories != null) params.set("calories", String(calories));
+    window.location.href = `/food/new?${params.toString()}`;
+  };
+
+  const meta = tabMeta[tab];
+
   return (
-    <div className="mx-auto max-w-5xl space-y-4">
+    <div className="space-y-4">
       <PageTitle
-        title="Alat AI"
-        subtitle="AI membuat draft. Anda meninjau dan mengedit. Bukan diagnosis medis."
+        title="Asisten AI"
+        subtitle="Pilih alat untuk membuat draft yang dapat ditinjau sebelum disimpan."
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <Badge variant="secondary">Draft, bukan keputusan</Badge>
+            <Badge variant="outline">Bukan alat medis</Badge>
+          </div>
+        }
       />
 
-      <div className="flex flex-wrap gap-2">
-        {tabs.map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            onClick={() => {
-              setTab(t.id);
-              setResult(null);
-              setErr(null);
-            }}
-            className={`rounded-full px-3 py-1.5 text-xs font-medium sm:text-sm ${
-              tab === t.id
-                ? "bg-[hsl(var(--primary))] text-white"
-                : "bg-[hsl(var(--muted))] text-[hsl(var(--foreground))]"
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
+      <div className="grid gap-4 lg:grid-cols-12">
+        {/* Secondary tool nav */}
+        <aside className="lg:col-span-3">
+          <Card className="sticky top-20 space-y-4 p-3">
+            {categories.map((cat) => (
+              <div key={cat.title}>
+                <p className="mb-1.5 px-2 text-[11px] font-semibold uppercase tracking-wide text-[hsl(var(--muted-foreground))]">
+                  {cat.title}
+                </p>
+                <div className="space-y-0.5">
+                  {cat.items.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      aria-current={tab === item.id ? "page" : undefined}
+                      onClick={() => {
+                        setTab(item.id);
+                        setResult(null);
+                        setErr(null);
+                      }}
+                      className={cn(
+                        "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm transition",
+                        tab === item.id
+                          ? "bg-[hsl(var(--secondary))] font-medium text-[hsl(var(--secondary-foreground))]"
+                          : "text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--muted))]",
+                      )}
+                    >
+                      {tab === item.id ? <Check className="size-3.5 shrink-0" aria-hidden /> : null}
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </Card>
 
-      <Card className="space-y-3">
-        {tab === "search" ? (
-          <>
-            <SectionTitle>AI Smart Search</SectionTitle>
-            <HelperText>Semantic search katalog + memori + draft AI.</HelperText>
-            <Label>Query makanan</Label>
-            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="ayam geprek sambal sedikit" />
-            <Button onClick={() => run.mutate()} loading={run.isPending} disabled={!q.trim()}>
-              Cari
-            </Button>
-            <p className="text-xs text-[hsl(var(--muted-foreground))]">
-              Atau buka{" "}
-              <Link href="/food/new" className="text-[hsl(var(--primary))]">
-                Catat makanan
-              </Link>{" "}
-              untuk memakai hasil.
-            </p>
-          </>
-        ) : null}
+          {/* Mobile select fallback */}
+          <div className="mt-3 lg:hidden">
+            <Label>Pilih alat</Label>
+            <Select
+              value={tab}
+              onChange={(e) => {
+                setTab(e.target.value as Tab);
+                setResult(null);
+              }}
+            >
+              {categories.flatMap((c) =>
+                c.items.map((i) => (
+                  <option key={i.id} value={i.id}>
+                    {c.title}: {i.label}
+                  </option>
+                )),
+              )}
+            </Select>
+          </div>
+        </aside>
 
-        {tab === "memory" ? (
-          <>
-            <SectionTitle>AI Meal Memory & Alias</SectionTitle>
-            <Label>Alias / sebutan</Label>
-            <Input value={alias} onChange={(e) => setAlias(e.target.value)} placeholder="naspad, kopi pagi, sarapan biasa" />
-            <div className="flex flex-wrap gap-2">
-              <Button onClick={() => run.mutate()} loading={run.isPending} disabled={!alias.trim()}>
-                Resolve alias
-              </Button>
-              <Button
-                variant="secondary"
-                onClick={async () => {
-                  if (!alias.trim()) return;
-                  await api("/v1/ai/meal-memory", {
-                    method: "POST",
-                    body: JSON.stringify({
-                      alias,
-                      resolvedName: alias,
-                      calories: 200,
-                      portionAmount: 1,
-                      portionUnit: "porsi",
-                    }),
-                  });
-                  toast.success("Memori disimpan (draft). Edit via resolve.");
-                  await qc.invalidateQueries({ queryKey: ["meal-memory"] });
-                }}
-              >
-                Simpan alias cepat
-              </Button>
-              <Button
-                variant="outline"
-                onClick={async () => {
-                  if (!confirm("Reset semua memori AI?")) return;
-                  await api("/v1/ai/meal-memory/reset", { method: "POST", body: "{}" });
-                  toast.message("Memori direset");
-                  await qc.invalidateQueries({ queryKey: ["meal-memory"] });
-                }}
-              >
-                Reset memori
-              </Button>
+        <div className="space-y-4 lg:col-span-9">
+          <Card className="space-y-3">
+            <div className="flex items-start gap-2">
+              <Sparkles className="mt-0.5 size-5 text-[hsl(var(--primary))]" aria-hidden />
+              <div>
+                <SectionTitle>{meta.title}</SectionTitle>
+                <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">{meta.desc}</p>
+              </div>
             </div>
-            {memory.isLoading ? <Skeleton className="h-20" /> : null}
-            <ul className="divide-y text-sm">
-              {(memory.data?.data ?? []).map((m) => (
-                <li key={m.id} className="flex items-center justify-between py-2">
-                  <span>
-                    <strong>{m.alias}</strong> → {m.resolved_name}{" "}
-                    <Badge variant="outline">×{m.use_count}</Badge>
-                  </span>
+
+            {/* FORMS */}
+            {tab === "search" ? (
+              <>
+                <Label>Cari makanan</Label>
+                <div className="flex flex-wrap gap-2">
+                  <Input
+                    value={q}
+                    onChange={(e) => setQ(e.target.value)}
+                    placeholder="ayam geprek sambal hijau"
+                    className="min-w-[12rem] flex-1"
+                  />
+                  <Button onClick={() => run.mutate()} loading={run.isPending} disabled={!q.trim()}>
+                    <Search className="size-4" aria-hidden />
+                    Cari
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {["ayam geprek", "nasi padang", "kopi susu", "bubur ayam"].map((ex) => (
+                    <button
+                      key={ex}
+                      type="button"
+                      className="rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--muted))] px-3 py-1 text-xs"
+                      onClick={() => setQ(ex)}
+                    >
+                      {ex}
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : null}
+
+            {tab === "memory" ? (
+              <>
+                <Label>Alias / sebutan</Label>
+                <Input
+                  value={alias}
+                  onChange={(e) => setAlias(e.target.value)}
+                  placeholder="naspad, kopi pagi, sarapan biasa"
+                />
+                <div className="flex flex-wrap gap-2">
+                  <Button onClick={() => run.mutate()} loading={run.isPending} disabled={!alias.trim()}>
+                    Cari arti alias
+                  </Button>
                   <Button
-                    variant="ghost"
+                    variant="secondary"
                     onClick={async () => {
-                      await api(`/v1/ai/meal-memory/${m.id}`, { method: "DELETE" });
+                      if (!alias.trim()) return;
+                      await api("/v1/ai/meal-memory", {
+                        method: "POST",
+                        body: JSON.stringify({
+                          alias,
+                          resolvedName: alias,
+                          calories: 200,
+                          portionAmount: 1,
+                          portionUnit: "porsi",
+                        }),
+                      });
+                      toast.success("Alias disimpan");
                       await qc.invalidateQueries({ queryKey: ["meal-memory"] });
                     }}
                   >
-                    Hapus
+                    Simpan sebagai alias
                   </Button>
-                </li>
+                </div>
+                <HelperText>Memori hanya mempercepat pencatatan akun Anda. Dapat dihapus kapan saja.</HelperText>
+                {memory.isLoading ? <Skeleton className="h-16" /> : null}
+                {(memory.data?.data.length ?? 0) > 0 ? (
+                  <div className="rounded-xl border border-[hsl(var(--border))]">
+                    <p className="border-b border-[hsl(var(--border))] px-3 py-2 text-sm font-medium">
+                      Alias tersimpan
+                    </p>
+                    <ul className="divide-y text-sm">
+                      {memory.data!.data.map((m) => (
+                        <li key={m.id} className="flex items-center justify-between px-3 py-2">
+                          <span>
+                            <strong>{m.alias}</strong> → {m.resolved_name}{" "}
+                            <Badge variant="outline">×{m.use_count}</Badge>
+                          </span>
+                          <Button
+                            variant="ghost"
+                            onClick={async () => {
+                              await api(`/v1/ai/meal-memory/${m.id}`, { method: "DELETE" });
+                              await qc.invalidateQueries({ queryKey: ["meal-memory"] });
+                            }}
+                          >
+                            Hapus
+                          </Button>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="border-t border-[hsl(var(--border))] p-2">
+                      <Button
+                        variant="outline"
+                        onClick={async () => {
+                          if (!confirm("Hapus semua memori AI? Tindakan ini tidak dapat dibatalkan.")) return;
+                          await api("/v1/ai/meal-memory/reset", { method: "POST", body: "{}" });
+                          toast.message("Memori direset");
+                          await qc.invalidateQueries({ queryKey: ["meal-memory"] });
+                        }}
+                      >
+                        Reset semua memori…
+                      </Button>
+                    </div>
+                  </div>
+                ) : null}
+              </>
+            ) : null}
+
+            {tab === "compare" ? (
+              <>
+                <div className="grid gap-3 sm:grid-cols-[1fr_auto_1fr] sm:items-end">
+                  <div>
+                    <Label>Makanan A</Label>
+                    <Input value={foodA} onChange={(e) => setFoodA(e.target.value)} />
+                  </div>
+                  <Button
+                    variant="outline"
+                    className="mb-0.5"
+                    type="button"
+                    onClick={() => {
+                      setFoodA(foodB);
+                      setFoodB(foodA);
+                    }}
+                  >
+                    ⇄
+                  </Button>
+                  <div>
+                    <Label>Makanan B</Label>
+                    <Input value={foodB} onChange={(e) => setFoodB(e.target.value)} />
+                  </div>
+                </div>
+                <Button onClick={() => run.mutate()} loading={run.isPending}>
+                  Bandingkan
+                </Button>
+              </>
+            ) : null}
+
+            {tab === "plate" ? (
+              <>
+                <Label>Item di piring (pisahkan koma)</Label>
+                <Input value={plateItems} onChange={(e) => setPlateItems(e.target.value)} />
+                <HelperText>
+                  AI memeriksa komponen yang mungkin belum tercatat. Ini bukan saran untuk menambah makanan.
+                </HelperText>
+                <Button onClick={() => run.mutate()} loading={run.isPending}>
+                  Cek komponen
+                </Button>
+              </>
+            ) : null}
+
+            {tab === "context" ? (
+              <>
+                <p className="text-sm text-[hsl(var(--muted-foreground))]">
+                  Berdasarkan jam lokal dan kebiasaan pencatatan Anda.
+                </p>
+                <Button onClick={() => run.mutate()} loading={run.isPending}>
+                  Perbarui saran
+                </Button>
+              </>
+            ) : null}
+
+            {tab === "recover" ? (
+              <>
+                <HelperText>Buat ulang draft dari hal yang masih diingat — bukan fakta pasti.</HelperText>
+                {(["breakfast", "lunch", "dinner", "snacks", "drinks"] as const).map((k) => (
+                  <div key={k}>
+                    <Label>
+                      {k === "breakfast"
+                        ? "Sarapan"
+                        : k === "lunch"
+                          ? "Makan siang"
+                          : k === "dinner"
+                            ? "Makan malam"
+                            : k === "snacks"
+                              ? "Camilan"
+                              : "Minuman"}
+                    </Label>
+                    <Input
+                      value={recover[k]}
+                      onChange={(e) => setRecover({ ...recover, [k]: e.target.value })}
+                      placeholder="Opsional"
+                    />
+                  </div>
+                ))}
+                <Button onClick={() => run.mutate()} loading={run.isPending}>
+                  Buat draft
+                </Button>
+              </>
+            ) : null}
+
+            {tab === "habits" ? (
+              <>
+                <HelperText>Minimal disarankan 5 hari catatan agar pola lebih bermakna.</HelperText>
+                <Button onClick={() => run.mutate()} loading={run.isPending}>
+                  Analisis pola
+                </Button>
+              </>
+            ) : null}
+
+            {tab === "quality" ? (
+              <Button onClick={() => run.mutate()} loading={run.isPending}>
+                Periksa kualitas data
+              </Button>
+            ) : null}
+
+            {tab === "target" ? (
+              <Button onClick={() => run.mutate()} loading={run.isPending}>
+                Jelaskan target saya
+              </Button>
+            ) : null}
+
+            {tab === "simulate" ? (
+              <>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div>
+                    <Label>Aktivitas</Label>
+                    <Select
+                      value={sim.activityLevel}
+                      onChange={(e) => setSim({ ...sim, activityLevel: e.target.value })}
+                    >
+                      <option value="sedentary">Sangat rendah</option>
+                      <option value="light">Ringan (1–3 hari/minggu)</option>
+                      <option value="moderate">Sedang</option>
+                      <option value="high">Tinggi</option>
+                      <option value="very_high">Sangat tinggi</option>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Tujuan</Label>
+                    <Select value={sim.goal} onChange={(e) => setSim({ ...sim, goal: e.target.value })}>
+                      <option value="lose_weight">Menurunkan berat</option>
+                      <option value="maintain">Mempertahankan</option>
+                      <option value="gain_weight">Meningkatkan</option>
+                    </Select>
+                  </div>
+                </div>
+                <Button onClick={() => run.mutate()} loading={run.isPending}>
+                  Simulasikan
+                </Button>
+              </>
+            ) : null}
+
+            {tab === "brief" ? (
+              <Button onClick={() => run.mutate()} loading={run.isPending}>
+                Buat brief minggu
+              </Button>
+            ) : null}
+
+            {err ? <ErrorBox message={err} /> : null}
+            {run.isPending ? <Skeleton className="h-24" /> : null}
+          </Card>
+
+          {/* STRUCTURED RESULTS */}
+          {result && tab === "search" ? (
+            <ResultShell
+              technical={result}
+              badges={<Badge variant="outline">Katalog + memori + AI</Badge>}
+            >
+              <SectionTitle>Hasil pencarian</SectionTitle>
+              {result.query ? (
+                <p className="text-sm text-[hsl(var(--muted-foreground))]">
+                  Query: <strong>{result.query}</strong>
+                </p>
+              ) : null}
+              <div className="space-y-2">
+                {[
+                  ...(result.from_memory ?? []).map((m: { name: string; calories?: number; source?: string }) => ({
+                    ...m,
+                    sourceLabel: "Memori",
+                  })),
+                  ...(result.from_catalog ?? []).map(
+                    (c: { name: string; calories?: number; unit?: string; source?: string }) => ({
+                      ...c,
+                      sourceLabel: "Katalog",
+                    }),
+                  ),
+                  ...(result.from_ai ?? []).map((a: { name: string; calories?: number; unit?: string }) => ({
+                    ...a,
+                    sourceLabel: "AI",
+                  })),
+                ].map(
+                  (
+                    item: { name: string; calories?: number; unit?: string; sourceLabel?: string },
+                    i: number,
+                  ) => (
+                    <div
+                      key={`${item.name}-${i}`}
+                      className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[hsl(var(--border))] p-3"
+                    >
+                      <div>
+                        <p className="font-medium">{item.name}</p>
+                        <p className="text-sm text-[hsl(var(--muted-foreground))]">
+                          {item.calories != null ? `${item.calories} kkal` : "—"}
+                          {item.unit ? ` · ${item.unit}` : ""}
+                        </p>
+                        <Badge variant="outline" className="mt-1">
+                          {item.sourceLabel}
+                        </Badge>
+                      </div>
+                      <Button
+                        variant="secondary"
+                        onClick={() => goToFoodLog(item.name, item.calories)}
+                      >
+                        Gunakan di catatan
+                      </Button>
+                    </div>
+                  ),
+                )}
+              </div>
+              {(result.from_catalog?.length ?? 0) +
+                (result.from_memory?.length ?? 0) +
+                (result.from_ai?.length ?? 0) ===
+              0 ? (
+                <p className="text-sm text-[hsl(var(--muted-foreground))]">Tidak ada hasil. Coba kata lain.</p>
+              ) : null}
+            </ResultShell>
+          ) : null}
+
+          {result && tab === "memory" && result.interpretation ? (
+            <ResultShell technical={result}>
+              <SectionTitle>Interpretasi alias</SectionTitle>
+              <p className="text-sm">
+                Kami menafsirkan <strong>“{result.input}”</strong> sebagai:
+              </p>
+              <p className="text-xl font-semibold">{result.interpretation}</p>
+              {result.follow_up ? (
+                <p className="flex gap-2 text-sm text-amber-900">
+                  <HelpCircle className="size-4 shrink-0" aria-hidden />
+                  {result.follow_up}
+                </p>
+              ) : null}
+              <div className="space-y-2">
+                {(result.candidates ?? []).map(
+                  (c: { name: string; calories?: number; unit?: string }, i: number) => (
+                    <div
+                      key={i}
+                      className="flex flex-wrap items-center justify-between gap-2 rounded-xl border p-3 text-sm"
+                    >
+                      <span>
+                        {c.name}
+                        {c.calories != null ? ` · ${c.calories} kkal` : ""}
+                        {c.unit ? ` · ${c.unit}` : ""}
+                      </span>
+                      <div className="flex gap-2">
+                        <Button variant="secondary" onClick={() => goToFoodLog(c.name, c.calories)}>
+                          Gunakan
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={async () => {
+                            await api("/v1/ai/meal-memory", {
+                              method: "POST",
+                              body: JSON.stringify({
+                                alias: result.input,
+                                resolvedName: c.name,
+                                calories: c.calories,
+                                portionUnit: c.unit,
+                              }),
+                            });
+                            toast.success("Alias disimpan");
+                            await qc.invalidateQueries({ queryKey: ["meal-memory"] });
+                          }}
+                        >
+                          Simpan alias
+                        </Button>
+                      </div>
+                    </div>
+                  ),
+                )}
+              </div>
+            </ResultShell>
+          ) : null}
+
+          {result && tab === "compare" && result.food_a ? (
+            <ResultShell technical={result}>
+              <SectionTitle>Perbandingan</SectionTitle>
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[20rem] text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-[hsl(var(--border))] text-[hsl(var(--muted-foreground))]">
+                      <th className="py-2 pr-3 font-medium">Aspek</th>
+                      <th className="py-2 pr-3 font-medium">{result.food_a.name}</th>
+                      <th className="py-2 font-medium">{result.food_b?.name}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b border-[hsl(var(--border))]">
+                      <td className="py-2 pr-3">Kalori</td>
+                      <td className="py-2 pr-3 tabular-nums">{result.food_a.calories_range}</td>
+                      <td className="py-2 tabular-nums">{result.food_b?.calories_range}</td>
+                    </tr>
+                    <tr className="border-b border-[hsl(var(--border))]">
+                      <td className="py-2 pr-3">Protein</td>
+                      <td className="py-2 pr-3 tabular-nums">{result.food_a.protein_g ?? "—"} g</td>
+                      <td className="py-2 tabular-nums">{result.food_b?.protein_g ?? "—"} g</td>
+                    </tr>
+                    <tr className="border-b border-[hsl(var(--border))]">
+                      <td className="py-2 pr-3">Karbo</td>
+                      <td className="py-2 pr-3 tabular-nums">{result.food_a.carbs_g ?? "—"} g</td>
+                      <td className="py-2 tabular-nums">{result.food_b?.carbs_g ?? "—"} g</td>
+                    </tr>
+                    <tr className="border-b border-[hsl(var(--border))]">
+                      <td className="py-2 pr-3">Lemak</td>
+                      <td className="py-2 pr-3 tabular-nums">{result.food_a.fat_g ?? "—"} g</td>
+                      <td className="py-2 tabular-nums">{result.food_b?.fat_g ?? "—"} g</td>
+                    </tr>
+                    <tr>
+                      <td className="py-2 pr-3">Ketidakpastian</td>
+                      <td className="py-2 pr-3">{result.food_a.uncertainty}</td>
+                      <td className="py-2">{result.food_b?.uncertainty}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p className="text-sm text-[hsl(var(--muted-foreground))]">
+                {result.note ||
+                  "Perbedaan terbesar biasanya dari minyak, porsi, dan topping. Bukan label baik/buruk."}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Button variant="secondary" onClick={() => goToFoodLog(result.food_a.name)}>
+                  Catat {result.food_a.name}
+                </Button>
+                <Button variant="outline" onClick={() => goToFoodLog(result.food_b?.name)}>
+                  Catat {result.food_b?.name}
+                </Button>
+              </div>
+            </ResultShell>
+          ) : null}
+
+          {result && tab === "plate" && result.missing_components ? (
+            <ResultShell technical={result} badges={<Badge variant="warning">Verifikasi</Badge>}>
+              <SectionTitle>Mungkin belum tercatat</SectionTitle>
+              <HelperText>
+                AI memeriksa komponen yang mungkin belum tercatat. Ini bukan saran untuk menambah makanan.
+              </HelperText>
+              <div className="space-y-3">
+                {(result.missing_components as Array<{ name: string; why: string; options: string[] }>).map(
+                  (c) => (
+                    <div key={c.name} className="rounded-xl border border-[hsl(var(--border))] p-3">
+                      <p className="font-medium">{c.name}</p>
+                      <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">{c.why}</p>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {(c.options ?? []).map((o) => (
+                          <button
+                            key={o}
+                            type="button"
+                            className="rounded-full border border-[hsl(var(--border))] px-3 py-1 text-xs hover:bg-[hsl(var(--muted))]"
+                            onClick={() => toast.message(`Anda memilih: ${o} untuk ${c.name}`)}
+                          >
+                            {o}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ),
+                )}
+              </div>
+              <Button variant="secondary" onClick={() => toast.message("Tidak ada yang ditambahkan")}>
+                Tidak ada yang terlewat
+              </Button>
+            </ResultShell>
+          ) : null}
+
+          {result && tab === "context" && result.suggestions ? (
+            <ResultShell technical={result}>
+              <SectionTitle>Saran untuk sekarang</SectionTitle>
+              <p className="text-sm text-[hsl(var(--muted-foreground))]">
+                Pukul ~{result.context?.local_hour ?? "—"} · saran meal:{" "}
+                {result.context?.suggested_meal_type ?? "—"}
+              </p>
+              {(result.suggestions as Array<{ title: string; items: string[] }>).map((s) => (
+                <div key={s.title} className="rounded-xl border p-3">
+                  <p className="font-medium">{s.title}</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {(s.items ?? []).length === 0 ? (
+                      <span className="text-sm text-[hsl(var(--muted-foreground))]">Belum ada item</span>
+                    ) : (
+                      s.items.map((item) => (
+                        <Link
+                          key={item}
+                          href={
+                            item.toLowerCase().includes("pindai")
+                              ? "/food/scan"
+                              : item.toLowerCase().includes("manual")
+                                ? "/food/new"
+                                : item.toLowerCase().includes("barcode")
+                                  ? "/barcode"
+                                  : `/food/new?name=${encodeURIComponent(item)}`
+                          }
+                          className="rounded-full bg-[hsl(var(--muted))] px-3 py-1.5 text-xs font-medium hover:bg-[hsl(var(--secondary))]"
+                        >
+                          {item}
+                        </Link>
+                      ))
+                    )}
+                  </div>
+                </div>
               ))}
-            </ul>
-          </>
-        ) : null}
-
-        {tab === "compare" ? (
-          <>
-            <SectionTitle>AI Food Comparison</SectionTitle>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div>
-                <Label>Makanan A</Label>
-                <Input value={foodA} onChange={(e) => setFoodA(e.target.value)} />
+              <div className="flex flex-wrap gap-2">
+                <Link href="/food/new">
+                  <Button>Catat manual</Button>
+                </Link>
+                <Link href="/food/scan">
+                  <Button variant="secondary">Pindai foto</Button>
+                </Link>
               </div>
-              <div>
-                <Label>Makanan B</Label>
-                <Input value={foodB} onChange={(e) => setFoodB(e.target.value)} />
-              </div>
-            </div>
-            <Button onClick={() => run.mutate()} loading={run.isPending}>
-              Bandingkan
-            </Button>
-          </>
-        ) : null}
+            </ResultShell>
+          ) : null}
 
-        {tab === "plate" ? (
-          <>
-            <SectionTitle>AI Plate Completion</SectionTitle>
-            <HelperText>Item terdeteksi (pisahkan koma). AI menyarankan yang mungkin terlewat.</HelperText>
-            <Input value={plateItems} onChange={(e) => setPlateItems(e.target.value)} />
-            <Button onClick={() => run.mutate()} loading={run.isPending}>
-              Cek komponen
-            </Button>
-          </>
-        ) : null}
-
-        {tab === "context" ? (
-          <>
-            <SectionTitle>AI Contextual Logging</SectionTitle>
-            <HelperText>Saran berdasarkan jam dan kebiasaan. Bukan perintah.</HelperText>
-            <Button onClick={() => run.mutate()} loading={run.isPending}>
-              Muat saran
-            </Button>
-          </>
-        ) : null}
-
-        {tab === "recover" ? (
-          <>
-            <SectionTitle>AI Missed Log Recovery</SectionTitle>
-            <HelperText>Draft dari ingatan — label “direkonstruksi”, bukan fakta pasti.</HelperText>
-            {(["breakfast", "lunch", "dinner", "snacks", "drinks"] as const).map((k) => (
-              <div key={k}>
-                <Label>{k}</Label>
-                <Input
-                  value={recover[k]}
-                  onChange={(e) => setRecover({ ...recover, [k]: e.target.value })}
-                  placeholder="Opsional"
-                />
-              </div>
-            ))}
-            <Button onClick={() => run.mutate()} loading={run.isPending}>
-              Buat draft
-            </Button>
-          </>
-        ) : null}
-
-        {tab === "habits" ? (
-          <>
-            <SectionTitle>AI Habit Pattern Finder</SectionTitle>
-            <Button onClick={() => run.mutate()} loading={run.isPending}>
-              Analisis pola
-            </Button>
-          </>
-        ) : null}
-
-        {tab === "quality" ? (
-          <>
-            <SectionTitle>AI Data Quality Assistant</SectionTitle>
-            <Button onClick={() => run.mutate()} loading={run.isPending}>
-              Periksa kualitas data
-            </Button>
-          </>
-        ) : null}
-
-        {tab === "target" ? (
-          <>
-            <SectionTitle>AI Explain My Target</SectionTitle>
-            <Button onClick={() => run.mutate()} loading={run.isPending}>
-              Jelaskan target saya
-            </Button>
-          </>
-        ) : null}
-
-        {tab === "simulate" ? (
-          <>
-            <SectionTitle>AI Goal Scenario Simulator</SectionTitle>
-            <HelperText>Simulasi tidak mengubah target tersimpan.</HelperText>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div>
-                <Label>Aktivitas</Label>
-                <Select
-                  value={sim.activityLevel}
-                  onChange={(e) => setSim({ ...sim, activityLevel: e.target.value })}
+          {result && tab === "recover" ? (
+            <ResultShell
+              technical={result}
+              badges={<Badge variant="warning">Direkonstruksi</Badge>}
+            >
+              <SectionTitle>Draft rekonstruksi</SectionTitle>
+              <p className="text-sm text-[hsl(var(--muted-foreground))]">
+                {result.label || "Berdasarkan ingatan Anda"} · Confidence: Rendah
+              </p>
+              <ul className="space-y-2">
+                {(result.draft_items ?? []).map(
+                  (d: { name: string; meal_type: string; calories: number }, i: number) => (
+                    <li
+                      key={i}
+                      className="flex items-center justify-between rounded-xl border p-3 text-sm"
+                    >
+                      <span>
+                        {d.name} · {d.meal_type}
+                      </span>
+                      <span className="tabular-nums">{d.calories} kkal</span>
+                    </li>
+                  ),
+                )}
+              </ul>
+              {(result.draft_items ?? []).length === 0 ? (
+                <p className="text-sm text-[hsl(var(--muted-foreground))]">
+                  Isi setidaknya satu field ingatan untuk membuat draft.
+                </p>
+              ) : (
+                <Button
+                  onClick={() => {
+                    const first = result.draft_items[0];
+                    goToFoodLog(first.name, first.calories);
+                  }}
                 >
-                  <option value="sedentary">Sangat rendah</option>
-                  <option value="light">Ringan</option>
-                  <option value="moderate">Sedang</option>
-                  <option value="high">Tinggi</option>
-                  <option value="very_high">Sangat tinggi</option>
-                </Select>
+                  Edit & simpan sebagai rekonstruksi
+                </Button>
+              )}
+            </ResultShell>
+          ) : null}
+
+          {result && tab === "habits" ? (
+            <ResultShell technical={result}>
+              <SectionTitle>Pola kebiasaan</SectionTitle>
+              {(result.data_points?.food_logs ?? 0) < 5 ? (
+                <div className="space-y-3">
+                  <p className="text-sm">
+                    Data tersedia: makanan {result.data_points?.food_logs ?? 0} · aktivitas{" "}
+                    {result.data_points?.activity_logs ?? 0}
+                  </p>
+                  <div>
+                    <div className="mb-1 flex justify-between text-xs text-[hsl(var(--muted-foreground))]">
+                      <span>Minimal disarankan 5 catatan makanan</span>
+                      <span>
+                        {Math.min(5, result.data_points?.food_logs ?? 0)} / 5
+                      </span>
+                    </div>
+                    <Progress
+                      value={((result.data_points?.food_logs ?? 0) / 5) * 100}
+                      label="Progres data pola"
+                    />
+                  </div>
+                  <p className="text-sm text-[hsl(var(--muted-foreground))]">
+                    Belum cukup data untuk menemukan pola yang stabil.
+                  </p>
+                  <div className="flex gap-2">
+                    <Link href="/food/new">
+                      <Button>Catat makanan</Button>
+                    </Link>
+                    <Link href="/activities/new">
+                      <Button variant="secondary">Tambah aktivitas</Button>
+                    </Link>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {(result.patterns ?? []).map(
+                    (p: { title: string; statement: string; kind: string }) => (
+                      <div key={p.title} className="rounded-xl border p-3">
+                        <div className="flex flex-wrap gap-2">
+                          <p className="font-medium">{p.title}</p>
+                          <Badge variant="outline">{p.kind}</Badge>
+                        </div>
+                        <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">{p.statement}</p>
+                      </div>
+                    ),
+                  )}
+                </div>
+              )}
+            </ResultShell>
+          ) : null}
+
+          {result && tab === "quality" && result.issues ? (
+            <ResultShell technical={result}>
+              <SectionTitle>Kualitas data</SectionTitle>
+              <p className="text-sm text-[hsl(var(--muted-foreground))]">Periode: sampel catatan terbaru</p>
+              <ul className="space-y-2">
+                {(result.issues as Array<{ code: string; message: string; severity: string }>).map(
+                  (issue) => (
+                    <li
+                      key={issue.code}
+                      className="flex flex-wrap items-start justify-between gap-2 rounded-xl border p-3 text-sm"
+                    >
+                      <div className="flex gap-2">
+                        <Badge
+                          variant={
+                            issue.severity === "info" || issue.code === "ok"
+                              ? "success"
+                              : issue.severity === "low"
+                                ? "outline"
+                                : "warning"
+                          }
+                        >
+                          {issue.severity === "info" || issue.code === "ok"
+                            ? "Informasi"
+                            : "Perlu ditinjau"}
+                        </Badge>
+                        <span>{issue.message}</span>
+                      </div>
+                      {issue.code === "weight_missing" ? (
+                        <Link href="/onboarding">
+                          <Button variant="outline">Perbarui profil</Button>
+                        </Link>
+                      ) : null}
+                      {issue.code === "ai_unreviewed" ? (
+                        <Link href="/food/scan">
+                          <Button variant="outline">Ke pindai AI</Button>
+                        </Link>
+                      ) : null}
+                      {issue.code === "missing_portion" ? (
+                        <Link href="/history">
+                          <Button variant="outline">Lengkapi di histori</Button>
+                        </Link>
+                      ) : null}
+                    </li>
+                  ),
+                )}
+              </ul>
+            </ResultShell>
+          ) : null}
+
+          {result && tab === "target" && (result.calorie_target != null || result.explanation) ? (
+            <ResultShell technical={result}>
+              <SectionTitle>Target harian Anda</SectionTitle>
+              {result.calorie_target != null ? (
+                <p className="text-3xl font-bold tabular-nums">
+                  {result.calorie_target}{" "}
+                  <span className="text-base font-medium text-[hsl(var(--muted-foreground))]">kkal</span>
+                </p>
+              ) : null}
+              <p className="text-sm leading-relaxed text-[hsl(var(--muted-foreground))]">
+                {result.explanation}
+              </p>
+              {result.inputs ? (
+                <div className="grid gap-2 rounded-xl bg-[hsl(var(--muted))] p-3 text-sm sm:grid-cols-2">
+                  <p>Berat: {result.inputs.weight_kg ?? "—"} kg</p>
+                  <p>Tinggi: {result.inputs.height_cm ?? "—"} cm</p>
+                  <p>Usia: {result.inputs.age_years ?? "—"}</p>
+                  <p>Aktivitas: {result.inputs.activity_level ?? "—"}</p>
+                  <p>Formula: {result.inputs.metabolic_formula ?? "—"}</p>
+                  <p>Versi: {result.inputs.formula_version ?? "—"}</p>
+                </div>
+              ) : null}
+              <div className="grid gap-2 sm:grid-cols-3">
+                <div className="rounded-xl border p-3 text-center">
+                  <p className="text-xs text-[hsl(var(--muted-foreground))]">BMR (istirahat)</p>
+                  <p className="font-semibold tabular-nums">{result.bmr_kcal ?? "—"}</p>
+                </div>
+                <div className="rounded-xl border p-3 text-center">
+                  <p className="text-xs text-[hsl(var(--muted-foreground))]">TDEE (harian)</p>
+                  <p className="font-semibold tabular-nums">{result.tdee_kcal ?? "—"}</p>
+                </div>
+                <div className="rounded-xl border p-3 text-center">
+                  <p className="text-xs text-[hsl(var(--muted-foreground))]">Tujuan</p>
+                  <p className="font-semibold">{result.goal ?? "—"}</p>
+                </div>
               </div>
-              <div>
-                <Label>Tujuan</Label>
-                <Select value={sim.goal} onChange={(e) => setSim({ ...sim, goal: e.target.value })}>
-                  <option value="lose_weight">Menurunkan</option>
-                  <option value="maintain">Mempertahankan</option>
-                  <option value="gain_weight">Meningkatkan</option>
-                </Select>
+              <div className="flex flex-wrap gap-2">
+                <Link href="/onboarding">
+                  <Button variant="secondary">Edit data profil</Button>
+                </Link>
+                <Button variant="outline" onClick={() => setTab("simulate")}>
+                  Bandingkan skenario
+                </Button>
               </div>
-            </div>
-            <Button onClick={() => run.mutate()} loading={run.isPending}>
-              Simulasikan
-            </Button>
-          </>
-        ) : null}
+            </ResultShell>
+          ) : null}
 
-        {tab === "brief" ? (
-          <>
-            <SectionTitle>AI Weekly Planning Brief</SectionTitle>
-            <Button onClick={() => run.mutate()} loading={run.isPending}>
-              Buat brief minggu
-            </Button>
-          </>
-        ) : null}
+          {result && tab === "simulate" && result.simulated_target != null ? (
+            <ResultShell technical={result} badges={<Badge variant="secondary">Simulasi</Badge>}>
+              <SectionTitle>Hasil simulasi</SectionTitle>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="rounded-xl border p-4">
+                  <p className="text-sm text-[hsl(var(--muted-foreground))]">Target saat ini</p>
+                  <p className="text-2xl font-bold tabular-nums">
+                    {result.current_target ?? "—"} kkal
+                  </p>
+                </div>
+                <div className="rounded-xl border border-[hsl(var(--primary)/0.3)] bg-[hsl(var(--secondary))] p-4">
+                  <p className="text-sm text-[hsl(var(--secondary-foreground))]">Skenario</p>
+                  <p className="text-2xl font-bold tabular-nums">
+                    {result.simulated_target} kkal
+                  </p>
+                  {result.delta != null ? (
+                    <p className="text-sm tabular-nums">
+                      {result.delta > 0 ? "+" : ""}
+                      {result.delta} kkal/hari
+                    </p>
+                  ) : null}
+                </div>
+              </div>
+              <p className="rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                {result.message || "Ini hanya simulasi. Target Anda belum berubah."}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Link href="/onboarding">
+                  <Button
+                    onClick={() => {
+                      if (
+                        !confirm(
+                          "Menerapkan skenario membuka onboarding untuk meninjau target. Lanjutkan?",
+                        )
+                      )
+                        return;
+                    }}
+                  >
+                    Terapkan setelah meninjau…
+                  </Button>
+                </Link>
+                <Button variant="ghost" onClick={() => setResult(null)}>
+                  Batalkan
+                </Button>
+              </div>
+            </ResultShell>
+          ) : null}
 
-        {err ? <ErrorBox message={err} /> : null}
-      </Card>
-
-      {result ? (
-        <Card>
-          <SectionTitle>Hasil (draft)</SectionTitle>
-          <Badge variant="secondary" className="mt-1">
-            Estimasi · tinjau manual
-          </Badge>
-          <pre className="mt-3 max-h-[28rem] overflow-auto rounded-xl bg-[hsl(var(--muted))] p-3 text-xs leading-relaxed">
-            {JSON.stringify(result, null, 2)}
-          </pre>
-        </Card>
-      ) : null}
+          {result && tab === "brief" ? (
+            <ResultShell technical={result}>
+              <SectionTitle>Brief minggu</SectionTitle>
+              <div className="space-y-3 text-sm">
+                {[
+                  ["Ringkasan minggu lalu", result.last_week_pattern],
+                  ["Rencana yang belum selesai", result.unfinished_plans],
+                  ["Bahan / pantry", result.leftover_ingredients],
+                  ["Fokus kecil", result.habit_nudge],
+                  ["Agenda aktivitas", result.activity_agenda],
+                ].map(([t, body]) => (
+                  <div key={String(t)} className="rounded-xl border p-3">
+                    <p className="font-medium">{t}</p>
+                    <p className="mt-1 text-[hsl(var(--muted-foreground))]">{body || "—"}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Link href="/meal-plans">
+                  <Button variant="secondary">Ke rencana makan</Button>
+                </Link>
+                <Link href="/food/new">
+                  <Button>Catat makanan</Button>
+                </Link>
+              </div>
+            </ResultShell>
+          ) : null}
+        </div>
+      </div>
     </div>
   );
 }
