@@ -222,6 +222,12 @@ export default function NewFoodPage() {
         </Card>
       ) : null}
 
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (canSave) mut.mutate();
+        }}
+      >
       <Card className="space-y-4">
         <div>
           <Label htmlFor="mealType">Jenis makan</Label>
@@ -338,7 +344,7 @@ export default function NewFoodPage() {
           <HelperText>Isi nama makanan untuk mengaktifkan tombol simpan.</HelperText>
         ) : null}
         <div className="sticky bottom-20 z-10 flex flex-wrap gap-2 border-t border-[hsl(var(--border))] bg-white/95 pt-3 md:static md:border-0 md:bg-transparent md:pt-0">
-          <Button onClick={() => mut.mutate()} loading={mut.isPending} disabled={!canSave}>
+          <Button type="submit" loading={mut.isPending} disabled={!canSave}>
             Simpan catatan
           </Button>
           <Button variant="ghost" type="button" onClick={() => router.push("/food/scan")}>
@@ -346,6 +352,7 @@ export default function NewFoodPage() {
           </Button>
         </div>
       </Card>
+      </form>
     </div>
   );
 }

@@ -4,11 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Activity,
-  Barcode,
   Camera,
-  CreditCard,
   Download,
-  Heart,
   Home,
   History,
   Menu,
@@ -16,13 +13,11 @@ import {
   Sparkles,
   User,
   Utensils,
-  Users,
-  Watch,
   Wand2,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components";
 import { Logo } from "@/components/logo";
 
@@ -54,28 +49,18 @@ const groups: { title: string; items: NavItem[] }[] = [
     items: [
       { href: "/history", label: "Histori", icon: History },
       { href: "/insights", label: "Insight", icon: Sparkles },
-      { href: "/barcode", label: "Barcode", icon: Barcode },
     ],
-  },
-  {
-    title: "Rencanakan",
-    items: [{ href: "/meal-plans", label: "Rencana makan", icon: Heart }],
   },
   {
     title: "Akun",
     items: [
       { href: "/profile", label: "Profil", icon: User },
       { href: "/settings", label: "Setelan", icon: Settings },
-      { href: "/billing", label: "Langganan", icon: CreditCard },
-      { href: "/social", label: "Sosial", icon: Users },
     ],
   },
   {
     title: "Data & integrasi",
-    items: [
-      { href: "/wearables", label: "Wearable", icon: Watch },
-      { href: "/export", label: "Ekspor", icon: Download },
-    ],
+    items: [{ href: "/export", label: "Ekspor", icon: Download }],
   },
 ];
 
@@ -118,6 +103,22 @@ function NavLink({
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [sheetOpen, setSheetOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!sheetOpen) return;
+    const menuButton = menuButtonRef.current;
+    closeButtonRef.current?.focus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setSheetOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      menuButton?.focus();
+    };
+  }, [sheetOpen]);
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + "/");
 
@@ -158,6 +159,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             type="button"
             className="inline-flex size-10 items-center justify-center rounded-xl hover:bg-[hsl(var(--muted))]"
             aria-label="Buka menu"
+            aria-expanded={sheetOpen}
+            aria-controls="mobile-navigation"
+            ref={menuButtonRef}
             onClick={() => setSheetOpen(true)}
           >
             <Menu size={20} />
@@ -181,13 +185,20 @@ export function AppShell({ children }: { children: ReactNode }) {
             aria-label="Tutup menu"
             onClick={() => setSheetOpen(false)}
           />
-          <div className="absolute inset-y-0 left-0 w-[min(100%,20rem)] overflow-y-auto bg-white p-4 shadow-xl">
+          <div
+            id="mobile-navigation"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menu navigasi"
+            className="absolute inset-y-0 left-0 w-[min(100%,20rem)] overflow-y-auto bg-white p-4 shadow-xl"
+          >
             <div className="mb-4 flex items-center justify-between">
               <Logo size={24} />
               <button
                 type="button"
                 className="inline-flex size-10 items-center justify-center rounded-xl hover:bg-[hsl(var(--muted))]"
                 aria-label="Tutup"
+                ref={closeButtonRef}
                 onClick={() => setSheetOpen(false)}
               >
                 <X size={18} />

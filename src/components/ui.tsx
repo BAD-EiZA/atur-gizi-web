@@ -163,13 +163,14 @@ export function EmptyState({
   );
 }
 
-export function ErrorBox({ message }: { message: string }) {
+export function ErrorBox({ message, action }: { message: string; action?: ReactNode }) {
   return (
     <div
       role="alert"
-      className="rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-800"
+      className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-800"
     >
-      {message}
+      <span>{message}</span>
+      {action}
     </div>
   );
 }

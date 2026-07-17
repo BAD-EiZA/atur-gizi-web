@@ -10,6 +10,7 @@ import {
   Button,
   Card,
   EmptyState,
+  ErrorBox,
   Input,
   PageTitle,
   Select,
@@ -115,7 +116,14 @@ export default function HistoryPage() {
 
       {list.isLoading ? <Skeleton className="h-40" /> : null}
 
-      {!list.isLoading && filtered.length === 0 ? (
+      {list.isError ? (
+        <ErrorBox
+          message="Gagal memuat histori."
+          action={<Button variant="outline" onClick={() => list.refetch()}>Coba lagi</Button>}
+        />
+      ) : null}
+
+      {!list.isLoading && !list.isError && filtered.length === 0 ? (
         <EmptyState
           title="Belum ada catatan pada rentang ini"
           description="Mulai catat makanan atau aktivitas — langkah kecil sudah cukup."
@@ -131,7 +139,7 @@ export default function HistoryPage() {
             </>
           }
         />
-      ) : (
+      ) : !list.isLoading && !list.isError ? (
         <div className="space-y-4">
           {Object.entries(byDay)
             .sort((a, b) => b[0].localeCompare(a[0]))
@@ -175,7 +183,7 @@ export default function HistoryPage() {
               </Card>
             ))}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

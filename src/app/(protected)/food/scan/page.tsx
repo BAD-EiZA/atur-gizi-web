@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Camera, ImagePlus } from "lucide-react";
@@ -57,6 +57,10 @@ export default function FoodScanPage() {
   const [mealType, setMealType] = useState("lunch");
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => () => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+  }, [previewUrl]);
 
   const analyze = useMutation({
     mutationFn: async () => {
@@ -159,6 +163,11 @@ export default function FoodScanPage() {
   };
 
   const onFile = (f: File | null) => {
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (f && (!allowedTypes.includes(f.type) || f.size > 10 * 1024 * 1024)) {
+      setErr("Gunakan foto JPEG, PNG, atau WebP dengan ukuran maksimal 10 MB.");
+      return;
+    }
     setFile(f);
     setAnalysis(null);
     setItems([]);
@@ -207,7 +216,7 @@ export default function FoodScanPage() {
           <Input
             id="photo"
             type="file"
-            accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+            accept="image/jpeg,image/png,image/webp"
             capture="environment"
             className="mt-3 max-w-xs"
             onChange={(e) => onFile(e.target.files?.[0] ?? null)}
@@ -292,7 +301,7 @@ export default function FoodScanPage() {
                 onChange={(e) => updateItem(idx, "name", e.target.value)}
                 aria-label={`Nama item ${idx + 1}`}
               />
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid gap-2 sm:grid-cols-3">
                 <Input
                   type="number"
                   value={item.portion_amount}

@@ -11,6 +11,7 @@ import {
   Button,
   Card,
   EmptyState,
+  ErrorBox,
   HelperText,
   Input,
   PageTitle,
@@ -21,11 +22,17 @@ import {
 } from "@/components/ui";
 import { formatKcal } from "@/lib/utils";
 
+type FavoriteFood = { id: string; name: string; calories: number };
+
 export default function DashboardPage() {
   const [date, setDate] = useState("");
   const q = useQuery({
     queryKey: ["dashboard", date],
     queryFn: () => api<Dashboard>(`/v1/dashboard${date ? `?date=${date}` : ""}`),
+  });
+  const favorites = useQuery({
+    queryKey: ["favorites-foods"],
+    queryFn: () => api<{ data: FavoriteFood[] }>("/v1/favorites/foods"),
   });
 
   const d = q.data;
@@ -58,6 +65,13 @@ export default function DashboardPage() {
           <Skeleton className="h-48 lg:col-span-4" />
           <Skeleton className="h-32 lg:col-span-12" />
         </div>
+      ) : null}
+
+      {q.isError ? (
+        <ErrorBox
+          message="Gagal memuat ringkasan hari ini."
+          action={<Button variant="outline" onClick={() => q.refetch()}>Coba lagi</Button>}
+        />
       ) : null}
 
       {d ? (
@@ -137,7 +151,7 @@ export default function DashboardPage() {
                 { href: "/food/new", label: "Catat makanan", icon: Utensils },
                 { href: "/food/scan", label: "Pindai AI", icon: Camera },
                 { href: "/activities/new", label: "Aktivitas", icon: Activity },
-                { href: "/barcode", label: "Barcode", icon: Plus },
+                { href: "/insights", label: "Review minggu", icon: Sparkles },
               ].map((a) => {
                 const Icon = a.icon;
                 return (
@@ -155,6 +169,31 @@ export default function DashboardPage() {
               })}
             </div>
           </div>
+
+          {(favorites.data?.data.length ?? 0) > 0 ? (
+            <Card className="lg:col-span-12">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <div>
+                  <SectionTitle>Catat ulang cepat</SectionTitle>
+                  <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
+                    Pilih favorit, lalu tinjau porsi sebelum menyimpan.
+                  </p>
+                </div>
+                <Link href="/food/new" className="text-sm font-medium text-[hsl(var(--primary))]">Kelola favorit</Link>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {favorites.data!.data.slice(0, 6).map((food) => (
+                  <Link
+                    key={food.id}
+                    href={`/food/new?name=${encodeURIComponent(food.name)}&calories=${food.calories}`}
+                    className="rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--muted))] px-3 py-2 text-sm font-medium transition hover:border-[hsl(var(--primary)/0.4)]"
+                  >
+                    {food.name} · {food.calories} kkal
+                  </Link>
+                ))}
+              </div>
+            </Card>
+          ) : null}
 
           {/* Timeline food */}
           <Card className="lg:col-span-6">
