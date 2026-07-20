@@ -59,11 +59,6 @@ export function LandingMotion() {
                   alt: "Sayur dan bahan segar",
                   cap: "Aktivitas menambah ruang kalori net",
                 },
-                {
-                  src: "/brand/gallery-insight.svg",
-                  alt: "Ilustrasi piring makanan",
-                  cap: "Insight netral, tanpa shaming",
-                },
               ].map((img) => (
                 <figure
                   key={img.src}
