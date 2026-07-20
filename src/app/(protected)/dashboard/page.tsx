@@ -39,7 +39,7 @@ export default function DashboardPage() {
   const pct = Math.min(100, Math.max(0, d?.progress_pct ?? 0));
 
   return (
-    <div>
+    <div className="animate-fade-up">
       <PageTitle
         title="Hari ini"
         subtitle={d?.motivational_message ?? "Langkah kecil sudah cukup."}
@@ -77,8 +77,12 @@ export default function DashboardPage() {
       {d ? (
         <div className="grid gap-4 lg:grid-cols-12">
           {/* Primary summary */}
-          <Card className="lg:col-span-8">
-            <div className="flex flex-wrap items-start justify-between gap-3">
+          <Card className="relative overflow-hidden bg-gradient-to-br from-emerald-50/80 via-white to-white lg:col-span-8">
+            <div
+              className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-[hsl(var(--primary)/0.08)] blur-2xl"
+              aria-hidden
+            />
+            <div className="relative flex flex-wrap items-start justify-between gap-3">
               <Stat
                 label="Sisa anggaran kalori (net)"
                 value={formatKcal(d.remaining_calories)}
@@ -87,27 +91,27 @@ export default function DashboardPage() {
               />
               <Badge variant="secondary">{d.date}</Badge>
             </div>
-            <div className="mt-5">
+            <div className="relative mt-6">
               <div className="mb-1.5 flex justify-between text-xs text-[hsl(var(--muted-foreground))]">
                 <span>Progres menuju target</span>
                 <span className="tabular-nums">{pct}%</span>
               </div>
-              <Progress value={pct} label="Progres kalori harian" />
+              <Progress value={pct} label="Progres kalori harian" className="h-3" />
             </div>
-            <div className="mt-5 grid grid-cols-3 gap-3 border-t border-[hsl(var(--border))] pt-4 text-center">
-              <div>
+            <div className="relative mt-6 grid grid-cols-3 gap-3 border-t border-[hsl(var(--border))] pt-5 text-center">
+              <div className="rounded-2xl bg-white/70 p-3 ring-1 ring-[hsl(var(--border)/0.6)]">
                 <p className="text-xs text-[hsl(var(--muted-foreground))]">Konsumsi</p>
-                <p className="text-lg font-semibold tabular-nums">{formatKcal(d.consumed_calories)}</p>
+                <p className="mt-0.5 text-lg font-semibold tabular-nums">{formatKcal(d.consumed_calories)}</p>
               </div>
-              <div>
+              <div className="rounded-2xl bg-white/70 p-3 ring-1 ring-[hsl(var(--border)/0.6)]">
                 <p className="text-xs text-[hsl(var(--muted-foreground))]">Aktivitas</p>
-                <p className="text-lg font-semibold tabular-nums text-[hsl(var(--activity))]">
+                <p className="mt-0.5 text-lg font-semibold tabular-nums text-[hsl(var(--activity))]">
                   {formatKcal(d.burned_calories)}
                 </p>
               </div>
-              <div>
+              <div className="rounded-2xl bg-white/70 p-3 ring-1 ring-[hsl(var(--border)/0.6)]">
                 <p className="text-xs text-[hsl(var(--muted-foreground))]">Net</p>
-                <p className="text-lg font-semibold tabular-nums">{formatKcal(d.net_calories)}</p>
+                <p className="mt-0.5 text-lg font-semibold tabular-nums">{formatKcal(d.net_calories)}</p>
               </div>
             </div>
             <HelperText>
@@ -116,7 +120,7 @@ export default function DashboardPage() {
           </Card>
 
           {/* Side panel */}
-          <Card className="lg:col-span-4">
+          <Card className="lg:col-span-4" interactive>
             <SectionTitle>Ringkasan cepat</SectionTitle>
             <dl className="mt-4 space-y-3 text-sm">
               <div className="flex justify-between">
@@ -149,7 +153,7 @@ export default function DashboardPage() {
             <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
               {[
                 { href: "/food/new", label: "Catat makanan", icon: Utensils },
-                { href: "/food/scan", label: "Pindai AI", icon: Camera },
+                { href: "/food/scan", label: "Pindai makanan", icon: Camera },
                 { href: "/activities/new", label: "Aktivitas", icon: Activity },
                 { href: "/insights", label: "Review minggu", icon: Sparkles },
               ].map((a) => {
@@ -158,9 +162,9 @@ export default function DashboardPage() {
                   <Link
                     key={a.href}
                     href={a.href}
-                    className="flex min-h-14 items-center gap-2 rounded-xl border border-[hsl(var(--border))] bg-white px-3 py-3 text-sm font-medium shadow-sm transition hover:border-[hsl(var(--primary)/0.3)] hover:shadow-md"
+                    className="group flex min-h-16 items-center gap-3 overflow-hidden rounded-2xl border border-[hsl(var(--border))] bg-white px-4 py-3 text-sm font-medium shadow-[var(--shadow-sm)] transition duration-500 hover:border-[hsl(var(--primary)/0.3)] hover:shadow-[var(--shadow-md)]"
                   >
-                    <span className="rounded-lg bg-[hsl(var(--secondary))] p-2 text-[hsl(var(--secondary-foreground))]">
+                    <span className="rounded-xl bg-[hsl(var(--secondary))] p-2.5 text-[hsl(var(--secondary-foreground))] transition group-hover:scale-105">
                       <Icon size={16} aria-hidden />
                     </span>
                     {a.label}

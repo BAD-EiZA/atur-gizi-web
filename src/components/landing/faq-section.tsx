@@ -43,35 +43,33 @@ export function FaqSection() {
   const [open, setOpen] = useState<number | null>(0);
 
   return (
-    <section id="faq" className="mx-auto max-w-3xl px-4 py-16 md:px-6 md:py-20">
-      <h2 className="text-center text-2xl font-semibold tracking-tight sm:text-3xl">
-        Pertanyaan umum
-      </h2>
-      <p className="mx-auto mt-3 max-w-xl text-center text-sm text-[hsl(var(--muted-foreground))] md:text-base">
+    <section id="faq" className="mx-auto max-w-3xl px-4 py-28 md:px-6 md:py-40">
+      <h2 className="display-h2 text-center">Pertanyaan umum</h2>
+      <p className="mx-auto mt-4 max-w-xl text-center text-[hsl(var(--muted-foreground))]">
         Jawaban singkat tentang cara kerja, privasi, dan batasan produk.
       </p>
-      <div className="mt-8 divide-y divide-[hsl(var(--border))] rounded-2xl border border-[hsl(var(--border))] bg-white shadow-sm">
+      <div className="mt-12 divide-y divide-[hsl(var(--border))] overflow-hidden rounded-3xl border border-[hsl(var(--border))] bg-white shadow-[var(--shadow-sm)]">
         {faqs.map((item, i) => {
           const isOpen = open === i;
           return (
             <div key={item.q}>
               <button
                 type="button"
-                className="flex w-full items-center justify-between gap-3 px-4 py-4 text-left text-sm font-medium md:px-5 md:text-base"
+                className="flex w-full items-center justify-between gap-3 px-5 py-5 text-left text-sm font-medium md:text-base"
                 aria-expanded={isOpen}
                 onClick={() => setOpen(isOpen ? null : i)}
               >
                 <span>{item.q}</span>
                 <ChevronDown
                   className={cn(
-                    "size-5 shrink-0 text-[hsl(var(--muted-foreground))] transition-transform",
+                    "size-5 shrink-0 text-[hsl(var(--muted-foreground))] transition-transform duration-300",
                     isOpen && "rotate-180",
                   )}
                   aria-hidden
                 />
               </button>
               {isOpen ? (
-                <p className="px-4 pb-4 text-sm leading-relaxed text-[hsl(var(--muted-foreground))] md:px-5 md:text-base">
+                <p className="px-5 pb-5 text-sm leading-relaxed text-[hsl(var(--muted-foreground))] md:text-base">
                   {item.a}
                 </p>
               ) : null}

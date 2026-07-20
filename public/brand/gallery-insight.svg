@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Ilustrasi piring makanan</title>
+  <desc id="desc">Piring dengan nasi, ayam, dan sayur sebagai contoh foto makanan</desc>
+  <rect width="320" height="240" rx="24" fill="#F1F5F9"/>
+  <ellipse cx="160" cy="128" rx="118" ry="86" fill="#E2E8F0"/>
+  <ellipse cx="160" cy="124" rx="102" ry="74" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="2"/>
+  <!-- nasi -->
+  <ellipse cx="118" cy="118" rx="38" ry="28" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <path d="M95 115c8-10 22-14 38-10 6 12-2 24-16 28-12 2-22-6-22-18z" fill="#F1F5F9"/>
+  <!-- ayam -->
+  <path d="M168 100c18-8 42-2 48 18 4 14-6 28-22 32-18 4-36-6-40-22-2-10 4-22 14-28z" fill="#D97706"/>
+  <path d="M178 112c10-4 22 0 26 10 2 8-2 16-12 18-12 2-22-4-24-14-1-6 3-12 10-14z" fill="#F59E0B"/>
+  <!-- sayur -->
+  <ellipse cx="150" cy="150" rx="22" ry="12" fill="#16A34A"/>
+  <ellipse cx="172" cy="156" rx="16" ry="9" fill="#22C55E"/>
+  <ellipse cx="132" cy="158" rx="12" ry="7" fill="#4ADE80"/>
+  <!-- highlight -->
+  <ellipse cx="120" cy="90" rx="40" ry="12" fill="white" opacity="0.35"/>
+</svg>

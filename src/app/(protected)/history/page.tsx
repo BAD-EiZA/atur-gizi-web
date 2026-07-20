@@ -66,7 +66,7 @@ export default function HistoryPage() {
   }, {});
 
   return (
-    <div>
+    <div className="animate-fade-up">
       <PageTitle
         title="Histori"
         subtitle={`Timeline ${from} – ${to}`}

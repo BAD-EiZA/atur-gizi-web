@@ -155,14 +155,14 @@ export default function NewFoodPage() {
   };
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-3xl animate-fade-up">
       <PageTitle
         title="Catat makanan"
         subtitle="Input manual. Semua angka divalidasi di server. Estimasi dapat dikoreksi kapan saja."
       />
 
-      <Card className="mb-4 space-y-2">
-        <p className="text-sm font-medium">AI Smart Search</p>
+      <Card className="mb-4 space-y-3 border-[hsl(var(--primary)/0.12)] bg-gradient-to-br from-emerald-50/40 to-white">
+        <p className="text-sm font-semibold">Pencarian cerdas</p>
         <div className="flex flex-wrap gap-2">
           <Input
             value={searchQ}

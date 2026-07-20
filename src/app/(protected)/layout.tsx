@@ -23,8 +23,9 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center text-sm text-slate-500">
-        Memuat...
+      <div className="mesh-bg flex min-h-screen flex-col items-center justify-center gap-4">
+        <div className="size-10 animate-pulse rounded-2xl bg-[hsl(var(--secondary))] ring-1 ring-[hsl(var(--primary)/0.15)]" />
+        <p className="text-sm text-[hsl(var(--muted-foreground))]">Memuat sesi...</p>
       </div>
     );
   }
@@ -54,8 +55,11 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
   // Block dashboard shell until onboarding done (avoids flash then bounce)
   if (data && !data.onboarding_completed) {
     return (
-      <div className="flex min-h-screen items-center justify-center text-sm text-slate-500">
-        Mengalihkan ke onboarding...
+      <div className="mesh-bg flex min-h-screen flex-col items-center justify-center gap-3">
+        <div className="h-1.5 w-32 overflow-hidden rounded-full bg-[hsl(var(--muted))]">
+          <div className="h-full w-2/3 animate-pulse rounded-full bg-[hsl(var(--primary))]" />
+        </div>
+        <p className="text-sm text-[hsl(var(--muted-foreground))]">Mengalihkan ke onboarding...</p>
       </div>
     );
   }

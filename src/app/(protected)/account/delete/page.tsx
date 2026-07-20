@@ -12,7 +12,7 @@ export default function AccountDeletePage() {
   const [loading, setLoading] = useState(false);
 
   return (
-    <div>
+    <div className="animate-fade-up">
       <PageTitle
         title="Hapus akun"
         subtitle="Semua data domain, log, dan foto Cloudinary akan dihapus. Tindakan tidak dapat dibatalkan."

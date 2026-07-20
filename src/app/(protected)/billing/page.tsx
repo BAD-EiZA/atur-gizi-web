@@ -29,19 +29,22 @@ export default function BillingPage() {
   });
 
   return (
-    <div>
+    <div className="animate-fade-up">
       <PageTitle title="Langganan" subtitle="Payment gateway stub — siap dihubungkan nanti." />
-      <Card className="mb-4 text-sm">
+      <Card className="mb-5 text-sm">
         <p>
           Paket aktif: <strong>{sub.data?.plan ?? "—"}</strong> ({sub.data?.status ?? "—"})
         </p>
       </Card>
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-3">
         {(sub.data?.plans ?? []).map((p) => (
-          <Card key={p.id} className="space-y-2 text-sm">
+          <Card key={p.id} className="space-y-3 text-sm" interactive>
             <p className="font-semibold">{p.name}</p>
-            <p>Rp {p.price_idr.toLocaleString("id-ID")}/bln</p>
-            <p className="text-xs text-slate-500">Kuota AI {p.ai_quota}/hari</p>
+            <p className="text-lg font-bold tabular-nums">
+              Rp {p.price_idr.toLocaleString("id-ID")}
+              <span className="text-sm font-medium text-[hsl(var(--muted-foreground))]">/bln</span>
+            </p>
+            <p className="text-xs text-[hsl(var(--muted-foreground))]">Kuota AI {p.ai_quota}/hari</p>
             <Button
               variant={p.id === sub.data?.plan ? "secondary" : "primary"}
               onClick={() => checkout.mutate(p.id)}

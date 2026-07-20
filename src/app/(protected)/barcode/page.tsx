@@ -61,7 +61,7 @@ export default function BarcodePage() {
   });
 
   return (
-    <div>
+    <div className="animate-fade-up">
       <PageTitle title="Barcode" subtitle="Cari produk demo: 8991002101151, 8996001301135, 8999999000001" />
       <Card className="space-y-3">
         <div>

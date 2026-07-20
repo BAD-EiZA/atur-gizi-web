@@ -38,7 +38,7 @@ export default function ExportPage() {
   };
 
   return (
-    <div>
+    <div className="animate-fade-up">
       <PageTitle title="Ekspor data" subtitle="JSON/CSV profil, food logs, activity logs. Foto tidak disertakan." />
       <Card className="flex flex-wrap gap-2">
         <Button onClick={() => void downloadJson()}>Unduh JSON</Button>

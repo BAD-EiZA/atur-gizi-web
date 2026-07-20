@@ -1,17 +1,10 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import {
-  Check,
-  ChevronDown,
-  ChevronRight,
-  HelpCircle,
-  Search,
-  Sparkles,
-} from "lucide-react";
+import { Check, HelpCircle, Search, Sparkles, Utensils } from "lucide-react";
 import { api } from "@/lib/api-client";
 import {
   Badge,
@@ -28,6 +21,10 @@ import {
   Skeleton,
 } from "@/components/ui";
 import { cn } from "@/lib/utils";
+import { ResultShell } from "@/components/ai-tools/result-shell";
+import { IdleHint, EmptyResult } from "@/components/ai-tools/empty-result";
+import { ConfirmDialog } from "@/components/ai-tools/confirm-dialog";
+import { AssumptionList, ConfidenceBadge, SourceBadge } from "@/components/ai-tools/badges";
 
 type Tab =
   | "search"
@@ -118,52 +115,12 @@ const tabMeta: Record<Tab, { title: string; desc: string }> = {
   },
 };
 
-function ResultShell({
-  children,
-  technical,
-  badges,
-  actions,
-}: {
-  children: ReactNode;
-  technical?: unknown;
-  badges?: ReactNode;
-  actions?: ReactNode;
-}) {
-  const [openTech, setOpenTech] = useState(false);
-  return (
-    <Card className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <Badge variant="secondary">Draft</Badge>
-        <Badge variant="outline">Belum disimpan</Badge>
-        <Badge variant="outline">Estimasi</Badge>
-        {badges}
-      </div>
-      {children}
-      {actions ? <div className="flex flex-wrap gap-2 border-t border-[hsl(var(--border))] pt-3">{actions}</div> : null}
-      {technical != null ? (
-        <div className="border-t border-[hsl(var(--border))] pt-2">
-          <button
-            type="button"
-            className="inline-flex items-center gap-1 text-sm text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
-            onClick={() => setOpenTech((v) => !v)}
-          >
-            {openTech ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
-            Lihat detail teknis
-          </button>
-          {openTech ? (
-            <pre className="mt-2 max-h-64 overflow-auto rounded-xl bg-[hsl(var(--muted))] p-3 text-xs leading-relaxed whitespace-pre-wrap break-words">
-              {JSON.stringify(technical, null, 2)}
-            </pre>
-          ) : null}
-        </div>
-      ) : null}
-    </Card>
-  );
-}
-
 export default function AiToolsPage() {
   const [tab, setTab] = useState<Tab>("search");
   const [err, setErr] = useState<string | null>(null);
+  const [confirmReset, setConfirmReset] = useState(false);
+  const [confirmApply, setConfirmApply] = useState(false);
+  const [resetting, setResetting] = useState(false);
   const [q, setQ] = useState("");
   const [alias, setAlias] = useState("");
   const [foodA, setFoodA] = useState("nasi goreng");
@@ -248,11 +205,12 @@ export default function AiToolsPage() {
     },
     onSuccess: (data) => {
       setResult(data);
-      toast.success(`${tabMeta[tab].title} selesai`, {
-        description: "Hasil siap ditinjau.",
-      });
+      // Hasil muncul di bawah form — toast hanya untuk error/aksi background
     },
-    onError: (e: Error) => setErr(e.message),
+    onError: (e: Error) => {
+      setErr(e.message);
+      toast.error("Gagal menjalankan alat", { description: e.message });
+    },
   });
 
   const goToFoodLog = (name: string, calories?: number) => {
@@ -264,7 +222,7 @@ export default function AiToolsPage() {
   const meta = tabMeta[tab];
 
   return (
-    <div className="space-y-4">
+    <div className="animate-fade-up space-y-5">
       <PageTitle
         title="Asisten AI"
         subtitle="Pilih alat untuk membuat draft yang dapat ditinjau sebelum disimpan."
@@ -276,16 +234,16 @@ export default function AiToolsPage() {
         }
       />
 
-      <div className="grid gap-4 lg:grid-cols-12">
+      <div className="grid gap-5 lg:grid-cols-12">
         {/* Secondary tool nav */}
         <aside className="lg:col-span-3">
-          <Card className="sticky top-20 space-y-4 p-3">
+          <Card className="sticky top-20 space-y-5 border-[hsl(var(--border)/0.8)] bg-white/90 p-3 backdrop-blur">
             {categories.map((cat) => (
               <div key={cat.title}>
-                <p className="mb-1.5 px-2 text-[11px] font-semibold uppercase tracking-wide text-[hsl(var(--muted-foreground))]">
+                <p className="mb-2 px-2 text-[11px] font-medium tracking-wide text-[hsl(var(--muted-foreground))]">
                   {cat.title}
                 </p>
-                <div className="space-y-0.5">
+                <div className="space-y-1">
                   {cat.items.map((item) => (
                     <button
                       key={item.id}
@@ -297,9 +255,9 @@ export default function AiToolsPage() {
                         setErr(null);
                       }}
                       className={cn(
-                        "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm transition",
+                        "flex w-full items-center gap-2 rounded-2xl px-3 py-2.5 text-left text-sm transition duration-300",
                         tab === item.id
-                          ? "bg-[hsl(var(--secondary))] font-medium text-[hsl(var(--secondary-foreground))]"
+                          ? "bg-[hsl(var(--secondary))] font-medium text-[hsl(var(--secondary-foreground))] shadow-[var(--shadow-sm)] ring-1 ring-[hsl(var(--primary)/0.12)]"
                           : "text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--muted))]",
                       )}
                     >
@@ -334,12 +292,16 @@ export default function AiToolsPage() {
         </aside>
 
         <div className="space-y-4 lg:col-span-9">
-          <Card className="space-y-3">
-            <div className="flex items-start gap-2">
-              <Sparkles className="mt-0.5 size-5 text-[hsl(var(--primary))]" aria-hidden />
+          <Card className="space-y-4 bg-gradient-to-br from-white to-emerald-50/30">
+            <div className="flex items-start gap-3">
+              <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-2xl bg-[hsl(var(--secondary))] text-[hsl(var(--primary))]">
+                <Sparkles className="size-5" aria-hidden />
+              </span>
               <div>
                 <SectionTitle>{meta.title}</SectionTitle>
-                <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">{meta.desc}</p>
+                <p className="mt-1 text-sm leading-relaxed text-[hsl(var(--muted-foreground))]">
+                  {meta.desc}
+                </p>
               </div>
             </div>
 
@@ -434,15 +396,7 @@ export default function AiToolsPage() {
                       ))}
                     </ul>
                     <div className="border-t border-[hsl(var(--border))] p-2">
-                      <Button
-                        variant="outline"
-                        onClick={async () => {
-                          if (!confirm("Hapus semua memori AI? Tindakan ini tidak dapat dibatalkan.")) return;
-                          await api("/v1/ai/meal-memory/reset", { method: "POST", body: "{}" });
-                          toast.message("Memori direset");
-                          await qc.invalidateQueries({ queryKey: ["meal-memory"] });
-                        }}
-                      >
+                      <Button variant="outline" onClick={() => setConfirmReset(true)}>
                         Reset semua memori…
                       </Button>
                     </div>
@@ -591,9 +545,31 @@ export default function AiToolsPage() {
               </Button>
             ) : null}
 
-            {err ? <ErrorBox message={err} /> : null}
-            {run.isPending ? <Skeleton className="h-24" /> : null}
+            {err ? (
+              <ErrorBox
+                message={err}
+                action={
+                  <Button variant="outline" onClick={() => run.mutate()}>
+                    Coba lagi
+                  </Button>
+                }
+              />
+            ) : null}
+            {run.isPending ? (
+              <div className="space-y-2">
+                <Skeleton className="h-20" />
+                <Skeleton className="h-12" />
+                <p className="text-xs text-[hsl(var(--muted-foreground))]">Menyusun draft…</p>
+              </div>
+            ) : null}
           </Card>
+
+          {!result && !run.isPending && !err ? (
+            <IdleHint>
+              Isi formulir di atas, lalu jalankan alat. Hasil muncul di sini sebagai draft yang bisa
+              ditinjau — bukan data final.
+            </IdleHint>
+          ) : null}
 
           {/* STRUCTURED RESULTS */}
           {result && tab === "search" ? (
@@ -638,9 +614,9 @@ export default function AiToolsPage() {
                           {item.calories != null ? `${item.calories} kkal` : "—"}
                           {item.unit ? ` · ${item.unit}` : ""}
                         </p>
-                        <Badge variant="outline" className="mt-1">
-                          {item.sourceLabel}
-                        </Badge>
+                        <div className="mt-1">
+                          <SourceBadge source={item.sourceLabel} />
+                        </div>
                       </div>
                       <Button
                         variant="secondary"
@@ -656,8 +632,18 @@ export default function AiToolsPage() {
                 (result.from_memory?.length ?? 0) +
                 (result.from_ai?.length ?? 0) ===
               0 ? (
-                <p className="text-sm text-[hsl(var(--muted-foreground))]">Tidak ada hasil. Coba kata lain.</p>
+                <EmptyResult
+                  title="Tidak ada hasil"
+                  description="Coba kata kunci lain atau catat manual."
+                  icon={<Utensils className="size-5" aria-hidden />}
+                />
               ) : null}
+              <AssumptionList
+                items={
+                  result.assumptions ??
+                  ["Hasil dari katalog, memori, atau AI — selalu tinjau sebelum menyimpan."]
+                }
+              />
             </ResultShell>
           ) : null}
 
@@ -855,11 +841,16 @@ export default function AiToolsPage() {
           {result && tab === "recover" ? (
             <ResultShell
               technical={result}
-              badges={<Badge variant="warning">Direkonstruksi</Badge>}
+              badges={
+                <>
+                  <Badge variant="warning">Direkonstruksi</Badge>
+                  <ConfidenceBadge label="Rendah" />
+                </>
+              }
             >
               <SectionTitle>Draft rekonstruksi</SectionTitle>
               <p className="text-sm text-[hsl(var(--muted-foreground))]">
-                {result.label || "Berdasarkan ingatan Anda"} · Confidence: Rendah
+                {result.label || "Berdasarkan ingatan Anda"}
               </p>
               <ul className="space-y-2">
                 {(result.draft_items ?? []).map(
@@ -978,7 +969,7 @@ export default function AiToolsPage() {
                       ) : null}
                       {issue.code === "ai_unreviewed" ? (
                         <Link href="/food/scan">
-                          <Button variant="outline">Ke pindai AI</Button>
+                          <Button variant="outline">Ke pindai makanan</Button>
                         </Link>
                       ) : null}
                       {issue.code === "missing_portion" ? (
@@ -1066,21 +1057,14 @@ export default function AiToolsPage() {
               <p className="rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-900">
                 {result.message || "Ini hanya simulasi. Target Anda belum berubah."}
               </p>
+              <AssumptionList
+                items={[
+                  "Simulasi tidak mengubah target tersimpan.",
+                  "Terapkan hanya setelah meninjau di profil/onboarding.",
+                ]}
+              />
               <div className="flex flex-wrap gap-2">
-                <Link href="/onboarding">
-                  <Button
-                    onClick={() => {
-                      if (
-                        !confirm(
-                          "Menerapkan skenario membuka onboarding untuk meninjau target. Lanjutkan?",
-                        )
-                      )
-                        return;
-                    }}
-                  >
-                    Terapkan setelah meninjau…
-                  </Button>
-                </Link>
+                <Button onClick={() => setConfirmApply(true)}>Terapkan setelah meninjau…</Button>
                 <Button variant="ghost" onClick={() => setResult(null)}>
                   Batalkan
                 </Button>
@@ -1106,8 +1090,8 @@ export default function AiToolsPage() {
                 ))}
               </div>
               <div className="flex flex-wrap gap-2">
-                <Link href="/meal-plans">
-                  <Button variant="secondary">Ke rencana makan</Button>
+                <Link href="/insights">
+                  <Button variant="secondary">Ke insight</Button>
                 </Link>
                 <Link href="/food/new">
                   <Button>Catat makanan</Button>
@@ -1117,6 +1101,41 @@ export default function AiToolsPage() {
           ) : null}
         </div>
       </div>
+
+      <ConfirmDialog
+        open={confirmReset}
+        title="Reset semua memori?"
+        description="Semua alias dan memori makanan AI akan dihapus. Tindakan ini tidak dapat dibatalkan."
+        confirmLabel="Ya, reset"
+        danger
+        loading={resetting}
+        onCancel={() => setConfirmReset(false)}
+        onConfirm={async () => {
+          setResetting(true);
+          try {
+            await api("/v1/ai/meal-memory/reset", { method: "POST", body: "{}" });
+            toast.success("Memori direset");
+            await qc.invalidateQueries({ queryKey: ["meal-memory"] });
+            setConfirmReset(false);
+          } catch (e) {
+            toast.error((e as Error).message);
+          } finally {
+            setResetting(false);
+          }
+        }}
+      />
+
+      <ConfirmDialog
+        open={confirmApply}
+        title="Tinjau target di onboarding?"
+        description="Simulasi tidak mengubah target otomatis. Anda akan diarahkan ke onboarding untuk meninjau dan menyimpan perubahan secara sadar."
+        confirmLabel="Buka onboarding"
+        onCancel={() => setConfirmApply(false)}
+        onConfirm={() => {
+          setConfirmApply(false);
+          window.location.href = "/onboarding";
+        }}
+      />
     </div>
   );
 }

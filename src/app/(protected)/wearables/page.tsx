@@ -30,15 +30,15 @@ export default function WearablesPage() {
   });
 
   return (
-    <div>
+    <div className="animate-fade-up">
       <PageTitle title="Wearable" subtitle="Integrasi stub — OAuth native menyusul." />
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2">
         {(q.data?.available ?? []).map((provider) => {
           const linked = q.data?.data.find((d) => d.provider === provider);
           return (
-            <Card key={provider} className="space-y-2 text-sm">
+            <Card key={provider} className="space-y-3 text-sm" interactive>
               <p className="font-medium">{labels[provider] ?? provider}</p>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-[hsl(var(--muted-foreground))]">
                 {linked ? `Terhubung · sync ${linked.last_sync_at ?? "—"}` : "Belum terhubung"}
               </p>
               {linked ? (

@@ -46,7 +46,7 @@ export default function MealPlansPage() {
   });
 
   return (
-    <div className="space-y-4">
+    <div className="animate-fade-up space-y-4">
       <PageTitle title="Rencana makan" subtitle="Meal plan sederhana per tanggal." />
       <Card className="space-y-2">
         <div>

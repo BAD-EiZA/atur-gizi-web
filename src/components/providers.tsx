@@ -21,9 +21,10 @@ export function Providers({ children }: { children: ReactNode }) {
         position="bottom-right"
         richColors
         closeButton
-        offset={16}
+        offset={{ top: 16, right: 16, bottom: 16 }}
+        mobileOffset={{ bottom: 88, right: 12, left: 12 }}
         toastOptions={{
-          className: "text-sm",
+          className: "text-sm !rounded-2xl",
         }}
       />
     </QueryClientProvider>

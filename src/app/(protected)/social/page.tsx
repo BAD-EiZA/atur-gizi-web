@@ -37,7 +37,7 @@ export default function SocialPage() {
   });
 
   return (
-    <div className="space-y-4">
+    <div className="animate-fade-up space-y-4">
       <PageTitle title="Sosial" subtitle="Bagikan progres singkat — tanpa leaderboard toxic." />
       <Card className="space-y-2">
         <textarea

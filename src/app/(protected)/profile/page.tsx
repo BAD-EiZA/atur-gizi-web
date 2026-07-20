@@ -18,7 +18,7 @@ export default function ProfilePage() {
     .toUpperCase();
 
   return (
-    <div className="mx-auto max-w-3xl space-y-4">
+    <div className="mx-auto max-w-3xl animate-fade-up space-y-5">
       <PageTitle title="Profil" subtitle="Data dasar dan preferensi akun." />
 
       <Card className="flex flex-wrap items-center gap-4">

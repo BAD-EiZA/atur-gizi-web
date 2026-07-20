@@ -60,25 +60,25 @@ export function SiteHeader() {
     .toUpperCase();
 
   return (
-    <header
-      className={cn(
-        "sticky top-0 z-50 transition-colors",
-        scrolled
-          ? "border-b border-[hsl(var(--border))] bg-white/85 backdrop-blur-md shadow-sm"
-          : "bg-transparent",
-      )}
-    >
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 md:px-6">
-        <Link href="/" className="inline-flex items-center" aria-label="Atur Gizi beranda">
-          <Logo size={28} priority />
+    <header className="sticky top-0 z-50 px-3 pt-3 md:px-4 md:pt-4">
+      <div
+        className={cn(
+          "mx-auto flex h-14 max-w-5xl items-center justify-between gap-3 rounded-full px-3 transition duration-500 md:h-16 md:px-5",
+          scrolled
+            ? "border border-white/60 bg-white/80 shadow-[var(--shadow-md)] backdrop-blur-xl"
+            : "border border-transparent bg-white/40 backdrop-blur-md",
+        )}
+      >
+        <Link href="/" className="inline-flex items-center pl-1" aria-label="Atur Gizi beranda">
+          <Logo size={26} priority />
         </Link>
 
-        <nav className="hidden items-center gap-1 lg:flex" aria-label="Navigasi utama">
+        <nav className="hidden items-center gap-0.5 lg:flex" aria-label="Navigasi utama">
           {links.map((l) => (
             <a
               key={l.href}
               href={l.href}
-              className="rounded-lg px-3 py-2 text-sm text-[hsl(var(--muted-foreground))] transition hover:bg-white/80 hover:text-[hsl(var(--foreground))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))]"
+              className="rounded-full px-3.5 py-2 text-sm text-[hsl(var(--muted-foreground))] transition hover:bg-white/80 hover:text-[hsl(var(--foreground))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))]"
             >
               {l.label}
             </a>
@@ -88,7 +88,7 @@ export function SiteHeader() {
         <div className="flex items-center gap-2">
           {isLoading ? (
             <>
-              <div className="hidden h-9 w-28 animate-pulse rounded-lg bg-[hsl(var(--muted))] sm:block" />
+              <div className="hidden h-9 w-28 animate-pulse rounded-full bg-[hsl(var(--muted))] sm:block" />
               <div className="size-9 animate-pulse rounded-full bg-[hsl(var(--muted))]" />
             </>
           ) : user ? (
@@ -96,7 +96,7 @@ export function SiteHeader() {
               <div className="relative hidden sm:block" onClick={(e) => e.stopPropagation()}>
                 <button
                   type="button"
-                  className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-[hsl(var(--border))] bg-white px-3 text-sm font-medium hover:bg-[hsl(var(--muted))]"
+                  className="inline-flex min-h-10 items-center gap-1.5 rounded-full border border-[hsl(var(--border))] bg-white px-3.5 text-sm font-medium hover:bg-[hsl(var(--muted))]"
                   onClick={() => {
                     setQuickOpen((v) => !v);
                     setMenuOpen(false);
@@ -107,7 +107,7 @@ export function SiteHeader() {
                   <ChevronDown className="size-3.5 opacity-60" aria-hidden />
                 </button>
                 {quickOpen ? (
-                  <div className="absolute right-0 mt-2 w-48 rounded-xl border border-[hsl(var(--border))] bg-white py-1 shadow-lg">
+                  <div className="absolute right-0 mt-2 w-48 overflow-hidden rounded-2xl border border-[hsl(var(--border))] bg-white py-1 shadow-[var(--shadow-lg)]">
                     <Link
                       href="/food/new"
                       className="flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-[hsl(var(--muted))]"
@@ -118,13 +118,13 @@ export function SiteHeader() {
                       href="/food/scan"
                       className="flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-[hsl(var(--muted))]"
                     >
-                      <Camera className="size-4" aria-hidden /> Pindai AI
+                      <Camera className="size-4" aria-hidden /> Pindai makanan
                     </Link>
                     <Link
                       href="/ai-tools"
                       className="flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-[hsl(var(--muted))]"
                     >
-                      <Camera className="size-4" aria-hidden /> Alat AI
+                      <Camera className="size-4" aria-hidden /> Asisten AI
                     </Link>
                   </div>
                 ) : null}
@@ -132,11 +132,10 @@ export function SiteHeader() {
 
               <Link
                 href="/dashboard"
-                className="inline-flex min-h-10 items-center gap-1.5 rounded-lg bg-[hsl(var(--primary))] px-3.5 py-2 text-sm font-medium text-white hover:brightness-95"
+                className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-[hsl(var(--primary))] px-4 py-2 text-sm font-medium text-white shadow-[var(--shadow-sm)] hover:brightness-95"
               >
                 <LayoutDashboard className="size-4" aria-hidden />
-                <span className="hidden sm:inline">Buka dashboard</span>
-                <span className="sm:hidden">Dashboard</span>
+                <span className="hidden sm:inline">Dashboard</span>
               </Link>
 
               <div className="relative" onClick={(e) => e.stopPropagation()}>
@@ -157,7 +156,7 @@ export function SiteHeader() {
                   )}
                 </button>
                 {menuOpen ? (
-                  <div className="absolute right-0 mt-2 w-64 rounded-xl border border-[hsl(var(--border))] bg-white py-2 shadow-lg">
+                  <div className="absolute right-0 mt-2 w-64 overflow-hidden rounded-2xl border border-[hsl(var(--border))] bg-white py-2 shadow-[var(--shadow-lg)]">
                     <div className="border-b border-[hsl(var(--border))] px-3 pb-2">
                       <p className="text-sm font-medium">{user.name}</p>
                       <p className="truncate text-xs text-[hsl(var(--muted-foreground))]">
@@ -180,7 +179,7 @@ export function SiteHeader() {
                       href="/food/scan"
                       className="flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-[hsl(var(--muted))]"
                     >
-                      <Camera className="size-4" aria-hidden /> Pindai AI
+                      <Camera className="size-4" aria-hidden /> Pindai makanan
                     </Link>
                     <Link
                       href="/profile"
@@ -210,13 +209,13 @@ export function SiteHeader() {
             <>
               <LoginLink
                 postLoginRedirectURL="/dashboard"
-                className="hidden rounded-lg px-3 py-2 text-sm text-[hsl(var(--foreground))] transition hover:bg-white/80 sm:inline-flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))]"
+                className="hidden rounded-full px-3.5 py-2 text-sm text-[hsl(var(--foreground))] transition hover:bg-white/80 sm:inline-flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))]"
               >
                 Masuk
               </LoginLink>
               <RegisterLink
                 postLoginRedirectURL="/onboarding"
-                className="inline-flex min-h-10 items-center rounded-lg bg-[hsl(var(--primary))] px-3.5 py-2 text-sm font-medium text-white transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2"
+                className="inline-flex min-h-10 items-center rounded-full bg-[hsl(var(--primary))] px-4 py-2 text-sm font-medium text-white shadow-[var(--shadow-sm)] transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2"
               >
                 Daftar gratis
               </RegisterLink>
@@ -225,7 +224,7 @@ export function SiteHeader() {
 
           <button
             type="button"
-            className="inline-flex size-10 items-center justify-center rounded-lg hover:bg-white/80 lg:hidden"
+            className="inline-flex size-10 items-center justify-center rounded-full hover:bg-white/80 lg:hidden"
             aria-label={open ? "Tutup menu" : "Buka menu"}
             aria-expanded={open}
             onClick={() => setOpen((v) => !v)}
@@ -236,44 +235,30 @@ export function SiteHeader() {
       </div>
 
       {open ? (
-        <div className="border-t border-[hsl(var(--border))] bg-white px-4 py-3 lg:hidden">
-          <nav className="flex flex-col gap-1" aria-label="Menu mobile">
+        <div className="mx-auto mt-2 max-w-5xl overflow-hidden rounded-3xl border border-[hsl(var(--border))] bg-white px-3 py-3 shadow-[var(--shadow-lg)] lg:hidden">
+          <nav className="flex flex-col gap-0.5" aria-label="Menu mobile">
             {user ? (
               <>
                 <Link
                   href="/dashboard"
-                  className="rounded-lg px-3 py-3 text-sm font-medium hover:bg-[hsl(var(--muted))]"
+                  className="rounded-2xl px-3 py-3 text-sm font-medium hover:bg-[hsl(var(--muted))]"
                   onClick={() => setOpen(false)}
                 >
                   Dashboard
                 </Link>
                 <Link
                   href="/food/new"
-                  className="rounded-lg px-3 py-3 text-sm font-medium hover:bg-[hsl(var(--muted))]"
+                  className="rounded-2xl px-3 py-3 text-sm font-medium hover:bg-[hsl(var(--muted))]"
                   onClick={() => setOpen(false)}
                 >
                   Catat makanan
                 </Link>
                 <Link
                   href="/food/scan"
-                  className="rounded-lg px-3 py-3 text-sm font-medium hover:bg-[hsl(var(--muted))]"
+                  className="rounded-2xl px-3 py-3 text-sm font-medium hover:bg-[hsl(var(--muted))]"
                   onClick={() => setOpen(false)}
                 >
-                  Pindai AI
-                </Link>
-                <Link
-                  href="/profile"
-                  className="rounded-lg px-3 py-3 text-sm font-medium hover:bg-[hsl(var(--muted))]"
-                  onClick={() => setOpen(false)}
-                >
-                  Profil
-                </Link>
-                <Link
-                  href="/settings"
-                  className="rounded-lg px-3 py-3 text-sm font-medium hover:bg-[hsl(var(--muted))]"
-                  onClick={() => setOpen(false)}
-                >
-                  Setelan
+                  Pindai makanan
                 </Link>
                 <div className="my-1 border-t border-[hsl(var(--border))]" />
               </>
@@ -282,7 +267,7 @@ export function SiteHeader() {
               <a
                 key={l.href}
                 href={l.href}
-                className="rounded-lg px-3 py-3 text-sm font-medium text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))]"
+                className="rounded-2xl px-3 py-3 text-sm font-medium text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))]"
                 onClick={() => setOpen(false)}
               >
                 {l.label}
@@ -291,7 +276,7 @@ export function SiteHeader() {
             {!user ? (
               <LoginLink
                 postLoginRedirectURL="/dashboard"
-                className="rounded-lg px-3 py-3 text-sm font-medium text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))]"
+                className="rounded-2xl px-3 py-3 text-sm font-medium text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))]"
                 onClick={() => setOpen(false)}
               >
                 Masuk
@@ -299,7 +284,7 @@ export function SiteHeader() {
             ) : (
               <LogoutLink
                 postLogoutRedirectURL="/"
-                className="rounded-lg px-3 py-3 text-sm font-medium hover:bg-[hsl(var(--muted))]"
+                className="rounded-2xl px-3 py-3 text-sm font-medium hover:bg-[hsl(var(--muted))]"
                 onClick={() => {
                   clearTokenCache();
                   setOpen(false);

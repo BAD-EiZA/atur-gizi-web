@@ -70,7 +70,7 @@ export default function NewActivityPage() {
   });
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-3xl animate-fade-up">
       <PageTitle
         title="Catat aktivitas"
         subtitle="Tambah cepat dengan estimasi kalori dari data berat terbaru dan intensitas."

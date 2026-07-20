@@ -56,11 +56,8 @@ const groups: { title: string; items: NavItem[] }[] = [
     items: [
       { href: "/profile", label: "Profil", icon: User },
       { href: "/settings", label: "Setelan", icon: Settings },
+      { href: "/export", label: "Ekspor", icon: Download },
     ],
-  },
-  {
-    title: "Data & integrasi",
-    items: [{ href: "/export", label: "Ekspor", icon: Download }],
   },
 ];
 
@@ -88,13 +85,22 @@ function NavLink({
       title={item.tip}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "flex min-h-10 items-center gap-2.5 rounded-xl px-3 py-2 text-sm transition",
+        "group flex min-h-11 items-center gap-2.5 rounded-2xl px-3 py-2.5 text-sm transition duration-300",
         active
-          ? "bg-[hsl(var(--secondary))] font-medium text-[hsl(var(--secondary-foreground))]"
+          ? "bg-[hsl(var(--secondary))] font-medium text-[hsl(var(--secondary-foreground))] shadow-[var(--shadow-sm)] ring-1 ring-[hsl(var(--primary)/0.12)]"
           : "text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))]",
       )}
     >
-      <Icon size={18} aria-hidden />
+      <span
+        className={cn(
+          "inline-flex size-8 items-center justify-center rounded-xl transition",
+          active
+            ? "bg-white text-[hsl(var(--primary))] shadow-sm"
+            : "bg-transparent text-current group-hover:bg-white/70",
+        )}
+      >
+        <Icon size={17} aria-hidden />
+      </span>
       {item.label}
     </Link>
   );
@@ -123,18 +129,18 @@ export function AppShell({ children }: { children: ReactNode }) {
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + "/");
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--background))] pb-20 md:pb-0 md:pl-64">
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 overflow-y-auto border-r border-[hsl(var(--border))] bg-white p-4 md:flex md:flex-col">
-        <Link href="/dashboard" className="mb-6 block px-2" aria-label="Dashboard Atur Gizi">
+    <div className="mesh-bg min-h-screen pb-24 md:pb-0 md:pl-[17rem]">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[17rem] overflow-y-auto border-r border-[hsl(var(--border)/0.8)] bg-white/80 p-4 backdrop-blur-xl md:flex md:flex-col">
+        <Link href="/dashboard" className="mb-7 block px-2" aria-label="Dashboard Atur Gizi">
           <Logo size={28} />
         </Link>
-        <nav className="flex-1 space-y-5">
+        <nav className="flex-1 space-y-6">
           {groups.map((g) => (
             <div key={g.title}>
-              <p className="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-wide text-[hsl(var(--muted-foreground))]">
+              <p className="mb-2 px-3 text-[11px] font-medium tracking-wide text-[hsl(var(--muted-foreground))]">
                 {g.title}
               </p>
-              <div className="space-y-0.5">
+              <div className="space-y-1">
                 {g.items.map((item) => (
                   <NavLink key={item.href} item={item} active={isActive(item.href)} />
                 ))}
@@ -142,22 +148,22 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           ))}
         </nav>
-        <div className="mt-4 border-t border-[hsl(var(--border))] pt-3">
+        <div className="mt-4 space-y-2 border-t border-[hsl(var(--border))] pt-4">
           <LogoutLink
             postLogoutRedirectURL="/"
-            className="flex min-h-10 items-center rounded-xl px-3 py-2 text-sm text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--muted))]"
+            className="flex min-h-11 items-center rounded-2xl px-3 py-2.5 text-sm text-[hsl(var(--muted-foreground))] transition hover:bg-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))]"
           >
             Keluar
           </LogoutLink>
-          <p className="mt-3 px-3 text-[10px] text-[hsl(var(--muted-foreground))]">© 2026 BAD-EiZA</p>
+          <p className="px-3 text-[10px] text-[hsl(var(--muted-foreground))]">© 2026 BAD-EiZA</p>
         </div>
       </aside>
 
-      <header className="sticky top-0 z-20 border-b border-[hsl(var(--border))] bg-white/90 backdrop-blur md:hidden">
+      <header className="sticky top-0 z-20 border-b border-[hsl(var(--border)/0.7)] bg-white/80 backdrop-blur-xl md:hidden">
         <div className="flex h-14 items-center justify-between px-4">
           <button
             type="button"
-            className="inline-flex size-10 items-center justify-center rounded-xl hover:bg-[hsl(var(--muted))]"
+            className="inline-flex size-10 items-center justify-center rounded-2xl hover:bg-[hsl(var(--muted))]"
             aria-label="Buka menu"
             aria-expanded={sheetOpen}
             aria-controls="mobile-navigation"
@@ -169,7 +175,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Logo size={24} />
           <Link
             href="/food/new"
-            className="inline-flex size-10 items-center justify-center rounded-xl bg-[hsl(var(--primary))] text-white"
+            className="inline-flex size-10 items-center justify-center rounded-2xl bg-[hsl(var(--primary))] text-white shadow-[var(--shadow-sm)]"
             aria-label="Catat makanan"
           >
             <Utensils size={18} />
@@ -181,7 +187,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="fixed inset-0 z-40 md:hidden">
           <button
             type="button"
-            className="absolute inset-0 bg-black/40"
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]"
             aria-label="Tutup menu"
             onClick={() => setSheetOpen(false)}
           />
@@ -190,13 +196,13 @@ export function AppShell({ children }: { children: ReactNode }) {
             role="dialog"
             aria-modal="true"
             aria-label="Menu navigasi"
-            className="absolute inset-y-0 left-0 w-[min(100%,20rem)] overflow-y-auto bg-white p-4 shadow-xl"
+            className="absolute inset-y-0 left-0 w-[min(100%,20rem)] overflow-y-auto bg-white p-4 shadow-2xl"
           >
-            <div className="mb-4 flex items-center justify-between">
+            <div className="mb-5 flex items-center justify-between">
               <Logo size={24} />
               <button
                 type="button"
-                className="inline-flex size-10 items-center justify-center rounded-xl hover:bg-[hsl(var(--muted))]"
+                className="inline-flex size-10 items-center justify-center rounded-2xl hover:bg-[hsl(var(--muted))]"
                 aria-label="Tutup"
                 ref={closeButtonRef}
                 onClick={() => setSheetOpen(false)}
@@ -204,13 +210,13 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <X size={18} />
               </button>
             </div>
-            <nav className="space-y-5">
+            <nav className="space-y-6">
               {groups.map((g) => (
                 <div key={g.title}>
-                  <p className="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-wide text-[hsl(var(--muted-foreground))]">
+                  <p className="mb-2 px-3 text-[11px] font-medium tracking-wide text-[hsl(var(--muted-foreground))]">
                     {g.title}
                   </p>
-                  <div className="space-y-0.5">
+                  <div className="space-y-1">
                     {g.items.map((item) => (
                       <NavLink
                         key={item.href}
@@ -227,10 +233,10 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       ) : null}
 
-      <main className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6 lg:px-8">{children}</main>
+      <main className="mx-auto w-full max-w-6xl px-4 py-6 md:px-6 md:py-8 lg:px-8">{children}</main>
 
       <nav
-        className="fixed inset-x-0 bottom-0 z-20 border-t border-[hsl(var(--border))] bg-white md:hidden"
+        className="fixed inset-x-0 bottom-0 z-20 border-t border-[hsl(var(--border)/0.8)] bg-white/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden"
         aria-label="Navigasi utama"
       >
         <div className="grid grid-cols-4">
@@ -243,11 +249,21 @@ export function AppShell({ children }: { children: ReactNode }) {
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex min-h-14 flex-col items-center justify-center gap-0.5 text-[10px]",
+                  "relative flex min-h-14 flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition",
                   active ? "text-[hsl(var(--primary))]" : "text-[hsl(var(--muted-foreground))]",
                 )}
               >
-                <Icon size={20} aria-hidden />
+                {active ? (
+                  <span className="absolute top-0 h-0.5 w-8 rounded-full bg-[hsl(var(--primary))]" />
+                ) : null}
+                <span
+                  className={cn(
+                    "inline-flex size-8 items-center justify-center rounded-xl transition",
+                    active && "bg-[hsl(var(--secondary))]",
+                  )}
+                >
+                  <Icon size={18} aria-hidden />
+                </span>
                 {item.label}
               </Link>
             );

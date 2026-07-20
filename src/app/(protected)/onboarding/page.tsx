@@ -120,20 +120,27 @@ export default function OnboardingPage() {
   const steps = ["Profil", "Aktivitas & tujuan", "Preview & setuju"];
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-8">
+    <div className="mesh-bg min-h-screen">
+    <div className="mx-auto max-w-lg animate-fade-up px-4 py-10 md:py-14">
       <PageTitle
         title="Profil & target"
         subtitle={`Langkah ${step + 1}/3 · ${steps[step]}. Usia min. 15. Dapat diperbarui kapan saja.`}
       />
-      <div className="mb-4 flex gap-1">
+      <div className="mb-6 flex gap-2">
         {steps.map((s, i) => (
-          <div
-            key={s}
-            className={`h-1.5 flex-1 rounded-full ${i <= step ? "bg-emerald-500" : "bg-slate-200"}`}
-          />
+          <div key={s} className="flex-1 space-y-1.5">
+            <div
+              className={`h-1.5 rounded-full transition-colors ${i <= step ? "bg-[hsl(var(--primary))]" : "bg-[hsl(var(--muted))]"}`}
+            />
+            <p
+              className={`hidden text-[10px] font-medium sm:block ${i <= step ? "text-[hsl(var(--primary))]" : "text-[hsl(var(--muted-foreground))]"}`}
+            >
+              {s}
+            </p>
+          </div>
         ))}
       </div>
-      <Card className="space-y-4">
+      <Card className="space-y-4 shadow-[var(--shadow-md)]">
         {step === 0 ? (
           <>
             <div>
@@ -250,6 +257,7 @@ export default function OnboardingPage() {
           )}
         </div>
       </Card>
+    </div>
     </div>
   );
 }

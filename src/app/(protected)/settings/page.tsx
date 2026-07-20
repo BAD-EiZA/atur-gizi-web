@@ -42,7 +42,7 @@ export default function SettingsPage() {
   });
 
   return (
-    <div>
+    <div className="animate-fade-up">
       <PageTitle title="Setelan" subtitle="Umum, privasi media, dan tautan akun." />
       <Card className="space-y-3">
         <SectionTitle>Umum</SectionTitle>

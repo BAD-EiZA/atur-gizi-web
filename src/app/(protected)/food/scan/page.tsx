@@ -178,15 +178,15 @@ export default function FoodScanPage() {
   };
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-3xl animate-fade-up">
       <PageTitle
         title="Pindai makanan dengan AI"
         subtitle="AI membuat draft. Kamu memegang keputusan. Foto dihapus setelah analisis (kecuali diaktifkan di setelan)."
       />
 
-      <Card className="space-y-4">
+      <Card className="space-y-5">
         <div
-          className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[hsl(var(--border))] bg-[hsl(var(--muted)/0.5)] px-4 py-8 text-center"
+          className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-[hsl(var(--primary)/0.25)] bg-gradient-to-b from-emerald-50/50 to-[hsl(var(--muted)/0.4)] px-4 py-12 text-center transition hover:border-[hsl(var(--primary)/0.45)]"
           onDragOver={(e) => e.preventDefault()}
           onDrop={(e) => {
             e.preventDefault();
@@ -199,15 +199,15 @@ export default function FoodScanPage() {
             <img
               src={previewUrl}
               alt="Pratinjau foto makanan"
-              className="mb-4 max-h-56 rounded-lg object-contain"
+              className="mb-4 max-h-64 rounded-2xl object-contain shadow-[var(--shadow-md)]"
             />
           ) : (
-            <div className="mb-3 rounded-full bg-white p-3 text-[hsl(var(--muted-foreground))]">
-              <ImagePlus className="size-6" aria-hidden />
+            <div className="mb-4 rounded-2xl bg-white p-4 text-[hsl(var(--primary))] shadow-[var(--shadow-sm)] ring-1 ring-[hsl(var(--border))]">
+              <ImagePlus className="size-7" aria-hidden />
             </div>
           )}
-          <p className="text-sm font-medium">Seret foto ke sini atau pilih file</p>
-          <p className="mt-1 max-w-sm text-xs text-[hsl(var(--muted-foreground))]">
+          <p className="text-sm font-semibold">Seret foto ke sini atau pilih file</p>
+          <p className="mt-1.5 max-w-sm text-xs leading-relaxed text-[hsl(var(--muted-foreground))]">
             Tips: pencahayaan cukup, semua makanan terlihat, JPEG/PNG/WebP max 10 MB.
           </p>
           <Label htmlFor="photo" className="mt-4 !mb-0">
@@ -258,19 +258,22 @@ export default function FoodScanPage() {
       </Card>
 
       {analysis?.result ? (
-        <Card className="mt-4 space-y-4">
+        <Card className="mt-5 animate-fade-up space-y-5 border-[hsl(var(--primary)/0.15)] bg-gradient-to-b from-emerald-50/50 to-white shadow-[var(--shadow-md)]">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="secondary">Estimasi AI</Badge>
+            <Badge variant="secondary">Draft AI</Badge>
+            <Badge variant="outline">Belum disimpan</Badge>
             <Badge variant={confVariant(analysis.result.overall_confidence_label)}>
               {analysis.result.overall_confidence_label}
             </Badge>
-            <span className="text-sm text-[hsl(var(--muted-foreground))]">
+            <span className="text-sm font-medium tabular-nums text-[hsl(var(--muted-foreground))]">
               Total ~{analysis.result.total_estimated_calories} kkal
             </span>
           </div>
-          <p className="text-sm text-[hsl(var(--muted-foreground))]">{analysis.disclaimer}</p>
+          <p className="text-sm leading-relaxed text-[hsl(var(--muted-foreground))]">
+            {analysis.disclaimer}
+          </p>
           {analysis.result.warnings?.map((w) => (
-            <p key={w} className="text-xs text-amber-800">
+            <p key={w} className="rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-900">
               {w}
             </p>
           ))}
@@ -289,7 +292,7 @@ export default function FoodScanPage() {
           {items.map((item, idx) => (
             <div
               key={idx}
-              className="space-y-2 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--muted)/0.3)] p-3"
+              className="space-y-3 rounded-2xl border border-[hsl(var(--border))] bg-white p-4 shadow-[var(--shadow-sm)]"
             >
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant={confVariant(item.confidence_label)}>

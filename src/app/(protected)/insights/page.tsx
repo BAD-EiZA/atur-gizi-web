@@ -58,7 +58,7 @@ export default function InsightsPage() {
   );
 
   return (
-    <div className="space-y-4">
+    <div className="animate-fade-up space-y-5">
       <PageTitle
         title="Insight mingguan"
         subtitle="Ringkasan netral, tanpa menghakimi. Insight awal jika data masih terbatas."
