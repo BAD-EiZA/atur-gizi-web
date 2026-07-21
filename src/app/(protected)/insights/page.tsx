@@ -36,6 +36,7 @@ type Macros = {
   protein_g: number;
   carbs_g: number;
   fat_g: number;
+  split?: { protein_pct?: number | null; carbs_pct?: number | null; fat_pct?: number | null; custom?: boolean };
 };
 
 export default function InsightsPage() {
@@ -68,7 +69,7 @@ export default function InsightsPage() {
 
       {weekly.data ? (
         <>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
             <Card>
               <Stat label="Hari tercatat" value={weekly.data.active_days} unit="/ 7" />
             </Card>
@@ -87,11 +88,13 @@ export default function InsightsPage() {
               />
             </Card>
             <Card>
-              <Stat
-                label="Protein minggu"
-                value={weekly.data.macros.protein_g}
-                unit="g"
-              />
+              <Stat label="Protein minggu" value={weekly.data.macros.protein_g} unit="g" />
+            </Card>
+            <Card>
+              <Stat label="Karbo minggu" value={weekly.data.macros.carbs_g} unit="g" />
+            </Card>
+            <Card>
+              <Stat label="Lemak minggu" value={weekly.data.macros.fat_g} unit="g" />
             </Card>
           </div>
 
@@ -149,7 +152,8 @@ export default function InsightsPage() {
         <Card>
           <SectionTitle>Target makronutrien (estimasi)</SectionTitle>
           <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))]">
-            Berdasarkan target kalori {macros.data.calorie_target} kkal · split 30/40/30
+            Berdasarkan target kalori {macros.data.calorie_target} kkal ·{" "}
+            {macros.data.split?.custom ? "target kustom" : "split 30/40/30"}
           </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
             {[

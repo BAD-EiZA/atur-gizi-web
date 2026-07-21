@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { api } from "@/lib/api-client";
+import { atwaterWarning, kcalFromMacros, PORTION_UNITS } from "@/lib/nutrition";
 import {
   Button,
   Card,
@@ -27,6 +28,16 @@ type Fav = {
   fat_g: number | null;
 };
 
+type SearchHit = {
+  name: string;
+  calories?: number;
+  unit?: string;
+  source?: string;
+  protein_g?: number;
+  carbs_g?: number;
+  fat_g?: number;
+};
+
 export default function NewFoodPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -45,20 +56,28 @@ export default function NewFoodPage() {
   });
 
   const [searchQ, setSearchQ] = useState("");
-  const [searchHits, setSearchHits] = useState<
-    Array<{ name: string; calories?: number; unit?: string; source?: string }>
-  >([]);
+  const [searchHits, setSearchHits] = useState<SearchHit[]>([]);
 
   useEffect(() => {
     const name = searchParams.get("name");
-    const calories = searchParams.get("calories");
-    if (name) {
-      setForm((f) => ({
-        ...f,
-        name,
-        calories: calories ? Number(calories) : f.calories,
-      }));
-    }
+    if (!name) return;
+    const proteinG = Number(searchParams.get("protein") ?? searchParams.get("protein_g") ?? 0);
+    const carbsG = Number(searchParams.get("carbs") ?? searchParams.get("carbs_g") ?? 0);
+    const fatG = Number(searchParams.get("fat") ?? searchParams.get("fat_g") ?? 0);
+    const caloriesParam = searchParams.get("calories");
+    const fromMacros = kcalFromMacros(proteinG, carbsG, fatG);
+    setForm((f) => ({
+      ...f,
+      name,
+      proteinG: proteinG || f.proteinG,
+      carbsG: carbsG || f.carbsG,
+      fatG: fatG || f.fatG,
+      calories: caloriesParam
+        ? Number(caloriesParam)
+        : fromMacros > 0
+          ? fromMacros
+          : f.calories,
+    }));
   }, [searchParams]);
 
   const favs = useQuery({
@@ -69,27 +88,58 @@ export default function NewFoodPage() {
   const searchMut = useMutation({
     mutationFn: () =>
       api<{
-        from_catalog: Array<{ name: string; calories: number; unit: string; source?: string }>;
-        from_memory: Array<{ name: string; calories?: number | null; source?: string }>;
-        from_ai: Array<{ name: string; calories?: number; unit?: string }>;
+        from_catalog: Array<{
+          name: string;
+          calories: number;
+          unit: string;
+          source?: string;
+          protein_g?: number;
+          carbs_g?: number;
+          fat_g?: number;
+        }>;
+        from_memory: Array<{
+          name: string;
+          calories?: number | null;
+          source?: string;
+          protein_g?: number | null;
+          carbs_g?: number | null;
+          fat_g?: number | null;
+        }>;
+        from_ai: Array<{
+          name: string;
+          calories?: number;
+          unit?: string;
+          protein_g?: number;
+          carbs_g?: number;
+          fat_g?: number;
+        }>;
       }>(`/v1/ai/food-search?q=${encodeURIComponent(searchQ)}`),
     onSuccess: (data) => {
-      const hits = [
+      const hits: SearchHit[] = [
         ...data.from_memory.map((m) => ({
           name: m.name,
           calories: m.calories ?? undefined,
+          protein_g: m.protein_g ?? undefined,
+          carbs_g: m.carbs_g ?? undefined,
+          fat_g: m.fat_g ?? undefined,
           source: "memory",
         })),
         ...data.from_catalog.map((c) => ({
           name: c.name,
           calories: c.calories,
           unit: c.unit,
+          protein_g: c.protein_g,
+          carbs_g: c.carbs_g,
+          fat_g: c.fat_g,
           source: "catalog",
         })),
         ...(data.from_ai ?? []).map((a) => ({
           name: a.name,
           calories: a.calories,
           unit: a.unit,
+          protein_g: a.protein_g,
+          carbs_g: a.carbs_g,
+          fat_g: a.fat_g,
           source: "ai",
         })),
       ];
@@ -97,12 +147,19 @@ export default function NewFoodPage() {
     },
   });
 
+  const setMacro = (key: "proteinG" | "carbsG" | "fatG", value: number) => {
+    setForm((prev) => {
+      const next = { ...prev, [key]: value };
+      next.calories = kcalFromMacros(next.proteinG, next.carbsG, next.fatG);
+      return next;
+    });
+  };
+
   const macroKcal = useMemo(
-    () => Math.round(Number(form.proteinG) * 4 + Number(form.carbsG) * 4 + Number(form.fatG) * 9),
+    () => kcalFromMacros(form.proteinG, form.carbsG, form.fatG),
     [form.proteinG, form.carbsG, form.fatG],
   );
-  const macroDiff = Math.abs(macroKcal - Number(form.calories));
-  const showMacroWarn = macroKcal > 0 && form.calories > 0 && macroDiff > 80;
+  const atwWarn = atwaterWarning(form.calories, form.proteinG, form.carbsG, form.fatG);
 
   const canSave =
     form.name.trim().length > 0 &&
@@ -186,14 +243,23 @@ export default function NewFoodPage() {
                 key={`${h.name}-${i}`}
                 type="button"
                 className="rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--muted))] px-3 py-1.5 text-xs font-medium"
-                onClick={() =>
+                onClick={() => {
+                  const p = Number(h.protein_g) || 0;
+                  const c = Number(h.carbs_g) || 0;
+                  const f = Number(h.fat_g) || 0;
+                  const fromM = kcalFromMacros(p, c, f);
                   setForm((prev) => ({
                     ...prev,
                     name: h.name,
-                    calories: h.calories ?? prev.calories,
                     portionUnit: h.unit ?? prev.portionUnit,
-                  }))
-                }
+                    proteinG: p || prev.proteinG,
+                    carbsG: c || prev.carbsG,
+                    fatG: f || prev.fatG,
+                    calories:
+                      h.calories ??
+                      (fromM > 0 ? fromM : prev.calories),
+                  }));
+                }}
               >
                 {h.name}
                 {h.calories != null ? ` · ${h.calories} kkal` : ""}
@@ -268,12 +334,18 @@ export default function NewFoodPage() {
           </div>
           <div>
             <Label htmlFor="unit">Satuan</Label>
-            <Input
+            <Select
               id="unit"
               value={form.portionUnit}
               onChange={(e) => setForm({ ...form, portionUnit: e.target.value })}
-              placeholder="porsi, g, centong..."
-            />
+            >
+              {PORTION_UNITS.map((u) => (
+                <option key={u.unit} value={u.unit}>
+                  {u.unit}
+                  {u.hint ? ` — ${u.hint}` : ""}
+                </option>
+              ))}
+            </Select>
           </div>
           <div>
             <Label htmlFor="kcal">Kalori (kkal)</Label>
@@ -295,8 +367,9 @@ export default function NewFoodPage() {
                 id="p"
                 type="number"
                 min={0}
+                step="0.1"
                 value={form.proteinG}
-                onChange={(e) => setForm({ ...form, proteinG: Number(e.target.value) })}
+                onChange={(e) => setMacro("proteinG", Number(e.target.value))}
               />
             </div>
             <div>
@@ -305,8 +378,9 @@ export default function NewFoodPage() {
                 id="c"
                 type="number"
                 min={0}
+                step="0.1"
                 value={form.carbsG}
-                onChange={(e) => setForm({ ...form, carbsG: Number(e.target.value) })}
+                onChange={(e) => setMacro("carbsG", Number(e.target.value))}
               />
             </div>
             <div>
@@ -315,20 +389,19 @@ export default function NewFoodPage() {
                 id="f"
                 type="number"
                 min={0}
+                step="0.1"
                 value={form.fatG}
-                onChange={(e) => setForm({ ...form, fatG: Number(e.target.value) })}
+                onChange={(e) => setMacro("fatG", Number(e.target.value))}
               />
             </div>
           </div>
           {macroKcal > 0 ? (
-            <HelperText>Estimasi dari makro: ~{macroKcal} kkal (P4 + K4 + L9).</HelperText>
+            <HelperText>
+              Kalori dihitung otomatis dari makro (~{macroKcal} kkal: P×4 + K×4 + L×9). Bisa diubah
+              manual.
+            </HelperText>
           ) : null}
-          {showMacroWarn ? (
-            <p className="mt-2 text-xs text-amber-800">
-              Angka kalori dan makro berbeda cukup jauh (~{macroDiff} kkal). Periksa kembali sebelum
-              menyimpan.
-            </p>
-          ) : null}
+          {atwWarn ? <p className="mt-2 text-xs text-amber-800">{atwWarn}</p> : null}
         </div>
         <div>
           <Label htmlFor="notes">Catatan (opsional)</Label>

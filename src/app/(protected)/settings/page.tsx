@@ -13,6 +13,7 @@ export default function SettingsPage() {
   const [timezone, setTimezone] = useState("Asia/Jakarta");
   const [unitSystem, setUnitSystem] = useState("metric");
   const [retainPhotos, setRetainPhotos] = useState(false);
+  const [budgetMode, setBudgetMode] = useState("intake_only");
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
@@ -21,6 +22,9 @@ export default function SettingsPage() {
     setTimezone(data.settings.timezone);
     setUnitSystem(data.settings.unit_system);
     setRetainPhotos(data.settings.retain_food_photos);
+    setBudgetMode(
+      (data.settings as { calorie_budget_mode?: string }).calorie_budget_mode ?? "intake_only",
+    );
   }, [data]);
 
   const save = useMutation({
@@ -31,6 +35,7 @@ export default function SettingsPage() {
           timezone,
           unitSystem,
           retainFoodPhotos: retainPhotos,
+          calorieBudgetMode: budgetMode,
         }),
       }),
     onSuccess: async () => {
@@ -62,6 +67,16 @@ export default function SettingsPage() {
             <option value="metric">Metrik (kg, cm)</option>
             <option value="imperial">Imperial</option>
           </Select>
+        </div>
+        <div>
+          <Label>Mode anggaran kalori</Label>
+          <Select value={budgetMode} onChange={(e) => setBudgetMode(e.target.value)}>
+            <option value="intake_only">Intake only (disarankan) — sisa = target − makan</option>
+            <option value="eat_back">Eat-back — sisa = target − (makan − aktivitas)</option>
+          </Select>
+          <HelperText>
+            Intake only menghindari double-count: target TDEE sudah memasukkan aktivitas harian.
+          </HelperText>
         </div>
         <SectionTitle>Privasi & AI</SectionTitle>
         <label className="flex items-start gap-2 text-sm text-[hsl(var(--foreground))]">

@@ -24,6 +24,7 @@ import {
   uploadToCloudinary,
   type UploadSignature,
 } from "@/lib/cloudinary-upload";
+import { atwaterWarning, fmtMacro, kcalFromMacros, sumMacros } from "@/lib/nutrition";
 
 type EditItem = {
   name: string;
@@ -57,6 +58,7 @@ export default function FoodScanPage() {
   const [mealType, setMealType] = useState("lunch");
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [reviewed, setReviewed] = useState(false);
 
   useEffect(() => () => {
     if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -100,6 +102,7 @@ export default function FoodScanPage() {
     },
     onSuccess: (data) => {
       setAnalysis(data);
+      setReviewed(false);
       setItems(
         (data.result?.items ?? []).map((i) => ({
           name: i.name,
@@ -159,8 +162,27 @@ export default function FoodScanPage() {
   });
 
   const updateItem = (idx: number, key: keyof EditItem, value: string | number) => {
-    setItems((prev) => prev.map((it, i) => (i === idx ? { ...it, [key]: value } : it)));
+    setItems((prev) =>
+      prev.map((it, i) => {
+        if (i !== idx) return it;
+        const next = { ...it, [key]: value };
+        if (key === "protein_g" || key === "carbs_g" || key === "fat_g") {
+          next.calories = kcalFromMacros(
+            Number(next.protein_g),
+            Number(next.carbs_g),
+            Number(next.fat_g),
+          );
+        }
+        return next;
+      }),
+    );
   };
+
+  const totals = sumMacros(items);
+  const atwWarn = atwaterWarning(totals.calories, totals.protein_g, totals.carbs_g, totals.fat_g);
+  const lowConf =
+    (analysis?.result?.overall_confidence != null && analysis.result.overall_confidence < 0.55) ||
+    Boolean(analysis?.result?.require_review);
 
   const onFile = (f: File | null) => {
     const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
@@ -225,7 +247,7 @@ export default function FoodScanPage() {
 
         <ul className="list-inside list-disc text-xs text-[hsl(var(--muted-foreground))]">
           <li>Hasil AI adalah perkiraan awal, bukan data final.</li>
-          <li>Edit porsi dan kalori sebelum menyimpan.</li>
+          <li>Edit porsi, kalori, dan makro sebelum menyimpan.</li>
           <li>Kuota AI 10 kali per hari per pengguna.</li>
         </ul>
 
@@ -265,9 +287,24 @@ export default function FoodScanPage() {
             <Badge variant={confVariant(analysis.result.overall_confidence_label)}>
               {analysis.result.overall_confidence_label}
             </Badge>
-            <span className="text-sm font-medium tabular-nums text-[hsl(var(--muted-foreground))]">
-              Total ~{analysis.result.total_estimated_calories} kkal
-            </span>
+          </div>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <div className="rounded-xl border border-[hsl(var(--border))] bg-white px-3 py-2">
+              <p className="text-[11px] text-[hsl(var(--muted-foreground))]">Kalori</p>
+              <p className="text-sm font-semibold tabular-nums">{Math.round(totals.calories)} kkal</p>
+            </div>
+            <div className="rounded-xl border border-[hsl(var(--border))] bg-white px-3 py-2">
+              <p className="text-[11px] text-[hsl(var(--muted-foreground))]">Protein</p>
+              <p className="text-sm font-semibold tabular-nums">{fmtMacro(totals.protein_g)} g</p>
+            </div>
+            <div className="rounded-xl border border-[hsl(var(--border))] bg-white px-3 py-2">
+              <p className="text-[11px] text-[hsl(var(--muted-foreground))]">Karbohidrat</p>
+              <p className="text-sm font-semibold tabular-nums">{fmtMacro(totals.carbs_g)} g</p>
+            </div>
+            <div className="rounded-xl border border-[hsl(var(--border))] bg-white px-3 py-2">
+              <p className="text-[11px] text-[hsl(var(--muted-foreground))]">Lemak</p>
+              <p className="text-sm font-semibold tabular-nums">{fmtMacro(totals.fat_g)} g</p>
+            </div>
           </div>
           <p className="text-sm leading-relaxed text-[hsl(var(--muted-foreground))]">
             {analysis.disclaimer}
@@ -305,35 +342,90 @@ export default function FoodScanPage() {
                 aria-label={`Nama item ${idx + 1}`}
               />
               <div className="grid gap-2 sm:grid-cols-3">
-                <Input
-                  type="number"
-                  value={item.portion_amount}
-                  onChange={(e) => updateItem(idx, "portion_amount", Number(e.target.value))}
-                  aria-label="Jumlah porsi"
-                />
-                <Input
-                  value={item.portion_unit}
-                  onChange={(e) => updateItem(idx, "portion_unit", e.target.value)}
-                  aria-label="Satuan"
-                />
-                <Input
-                  type="number"
-                  value={item.calories}
-                  onChange={(e) => updateItem(idx, "calories", Number(e.target.value))}
-                  aria-label="Kalori"
-                />
+                <div>
+                  <Label className="text-xs">Porsi</Label>
+                  <Input
+                    type="number"
+                    value={item.portion_amount}
+                    onChange={(e) => updateItem(idx, "portion_amount", Number(e.target.value))}
+                    aria-label="Jumlah porsi"
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs">Satuan</Label>
+                  <Input
+                    value={item.portion_unit}
+                    onChange={(e) => updateItem(idx, "portion_unit", e.target.value)}
+                    aria-label="Satuan"
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs">Kalori</Label>
+                  <Input
+                    type="number"
+                    value={item.calories}
+                    onChange={(e) => updateItem(idx, "calories", Number(e.target.value))}
+                    aria-label="Kalori"
+                  />
+                </div>
               </div>
-              <p className="text-xs text-[hsl(var(--muted-foreground))]">
-                P {item.protein_g}g · K {item.carbs_g}g · L {item.fat_g}g
-              </p>
+              <div className="grid gap-2 sm:grid-cols-3">
+                <div>
+                  <Label className="text-xs">Protein (g)</Label>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    value={item.protein_g}
+                    onChange={(e) => updateItem(idx, "protein_g", Number(e.target.value))}
+                    aria-label="Protein"
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs">Karbohidrat (g)</Label>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    value={item.carbs_g}
+                    onChange={(e) => updateItem(idx, "carbs_g", Number(e.target.value))}
+                    aria-label="Karbohidrat"
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs">Lemak (g)</Label>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    value={item.fat_g}
+                    onChange={(e) => updateItem(idx, "fat_g", Number(e.target.value))}
+                    aria-label="Lemak"
+                  />
+                </div>
+              </div>
             </div>
           ))}
+
+          {atwWarn ? (
+            <p className="rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-900">{atwWarn}</p>
+          ) : null}
+          {lowConf ? (
+            <label className="flex items-start gap-2 text-sm">
+              <input
+                type="checkbox"
+                className="mt-1 size-4"
+                checked={reviewed}
+                onChange={(e) => setReviewed(e.target.checked)}
+              />
+              <span>
+                Keyakinan AI rendah — saya sudah meninjau porsi dan angka sebelum menyimpan.
+              </span>
+            </label>
+          ) : null}
 
           <div className="flex flex-wrap gap-2">
             <Button
               onClick={() => confirm.mutate()}
               loading={confirm.isPending}
-              disabled={items.length === 0}
+              disabled={items.length === 0 || (lowConf && !reviewed)}
             >
               Simpan hasil yang sudah ditinjau
             </Button>

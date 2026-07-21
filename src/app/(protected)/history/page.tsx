@@ -25,6 +25,9 @@ type Item =
       title: string;
       calories: number;
       meal_type: string;
+      protein_g?: number | null;
+      carbs_g?: number | null;
+      fat_g?: number | null;
     }
   | {
       kind: "activity";
@@ -168,7 +171,11 @@ export default function HistoryPage() {
                             <p className="font-medium">{item.title}</p>
                             <p className="text-xs text-[hsl(var(--muted-foreground))]">
                               {item.kind === "food"
-                                ? item.meal_type
+                                ? `${item.meal_type}${
+                                    item.protein_g != null || item.carbs_g != null || item.fat_g != null
+                                      ? ` · P ${Number(item.protein_g) || 0} · K ${Number(item.carbs_g) || 0} · L ${Number(item.fat_g) || 0}`
+                                      : ""
+                                  }`
                                 : `${item.duration_minutes} mnt`}
                             </p>
                           </div>

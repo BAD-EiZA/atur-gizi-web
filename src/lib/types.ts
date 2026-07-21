@@ -17,6 +17,7 @@ export type Me = {
     unit_system: string;
     locale: string;
     retain_food_photos: boolean;
+    calorie_budget_mode?: "intake_only" | "eat_back";
   } | null;
 };
 
@@ -24,9 +25,18 @@ export type Dashboard = {
   date: string;
   intake_target: number;
   consumed_calories: number;
+  consumed_protein_g?: number;
+  consumed_carbs_g?: number;
+  consumed_fat_g?: number;
+  protein_target_g?: number | null;
+  carbs_target_g?: number | null;
+  fat_target_g?: number | null;
   burned_calories: number;
   net_calories: number;
   remaining_calories: number;
+  remaining_intake?: number;
+  remaining_net?: number;
+  budget_mode?: "intake_only" | "eat_back";
   progress_pct: number;
   food_log_count: number;
   activity_duration_minutes: number;
@@ -42,6 +52,9 @@ export type Dashboard = {
     title: string;
     meal_type: string;
     total_calories: number;
+    protein_g?: number | null;
+    carbs_g?: number | null;
+    fat_g?: number | null;
     consumed_at: string;
   }>;
   recent_activity: Array<{
@@ -87,9 +100,26 @@ export type ActivityLog = {
   id: string;
   name: string;
   log_date: string;
+  started_at?: string | null;
   duration_minutes: number;
   calories_burned: number;
+  calculated_calories?: number;
   intensity: string;
+  met_value?: number;
+  met_source?: string | null;
+  weight_snapshot_kg?: number;
+  formula_version?: string;
+  notes?: string | null;
+  distance_m?: number | null;
+  speed_kmh?: number | null;
+  rpe?: number | null;
+  avg_hr?: number | null;
+  sets?: number | null;
+  reps?: number | null;
+  load_kg?: number | null;
+  source?: string;
+  device_calories?: number | null;
+  activity_type?: { id: string; name: string; slug: string; category?: string } | null;
 };
 
 export type AiAnalysis = {
@@ -114,6 +144,7 @@ export type AiAnalysis = {
     overall_confidence_label: string;
     warnings: string[];
     needs_user_input: boolean;
+    require_review?: boolean;
   } | null;
   disclaimer: string;
   quota?: { used: number; quota: number; remaining: number };

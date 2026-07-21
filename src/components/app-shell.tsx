@@ -42,6 +42,12 @@ const groups: { title: string; items: NavItem[] }[] = [
         tip: "Cari, bandingkan, insight",
       },
       { href: "/activities/new", label: "Aktivitas", icon: Activity },
+      {
+        href: "/activities/import-screenshot",
+        label: "Impor screenshot",
+        icon: Camera,
+        tip: "Baca workout dari screenshot app jam",
+      },
     ],
   },
   {

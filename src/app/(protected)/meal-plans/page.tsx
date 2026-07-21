@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
+import { fmtMacro, kcalFromMacros } from "@/lib/nutrition";
 import { Button, Card, EmptyState, ErrorBox, Input, Label, PageTitle, Select } from "@/components/ui";
 
 type Plan = {
@@ -11,6 +12,9 @@ type Plan = {
   plan_date: string;
   meal_type: string;
   total_calories: number;
+  protein_g?: number | null;
+  carbs_g?: number | null;
+  fat_g?: number | null;
 };
 
 export default function MealPlansPage() {
@@ -20,6 +24,19 @@ export default function MealPlansPage() {
   const [planDate, setPlanDate] = useState(new Date().toISOString().slice(0, 10));
   const [mealType, setMealType] = useState("lunch");
   const [calories, setCalories] = useState(500);
+  const [proteinG, setProteinG] = useState(0);
+  const [carbsG, setCarbsG] = useState(0);
+  const [fatG, setFatG] = useState(0);
+
+  const setMacro = (key: "p" | "c" | "f", value: number) => {
+    const p = key === "p" ? value : proteinG;
+    const c = key === "c" ? value : carbsG;
+    const f = key === "f" ? value : fatG;
+    if (key === "p") setProteinG(value);
+    if (key === "c") setCarbsG(value);
+    if (key === "f") setFatG(value);
+    setCalories(kcalFromMacros(p, c, f) || calories);
+  };
 
   const list = useQuery({
     queryKey: ["meal-plans"],
@@ -35,11 +52,25 @@ export default function MealPlansPage() {
           planDate,
           mealType,
           totalCalories: Number(calories),
-          items: [{ name: title, calories: Number(calories) }],
+          proteinG: Number(proteinG) || undefined,
+          carbsG: Number(carbsG) || undefined,
+          fatG: Number(fatG) || undefined,
+          items: [
+            {
+              name: title,
+              calories: Number(calories),
+              protein_g: Number(proteinG) || undefined,
+              carbs_g: Number(carbsG) || undefined,
+              fat_g: Number(fatG) || undefined,
+            },
+          ],
         }),
       }),
     onSuccess: async () => {
       setTitle("");
+      setProteinG(0);
+      setCarbsG(0);
+      setFatG(0);
       await qc.invalidateQueries({ queryKey: ["meal-plans"] });
     },
     onError: (e: Error) => setErr(e.message),
@@ -47,7 +78,7 @@ export default function MealPlansPage() {
 
   return (
     <div className="animate-fade-up space-y-4">
-      <PageTitle title="Rencana makan" subtitle="Meal plan sederhana per tanggal." />
+      <PageTitle title="Rencana makan" subtitle="Meal plan sederhana per tanggal dengan makro." />
       <Card className="space-y-2">
         <div>
           <Label>Judul</Label>
@@ -61,6 +92,20 @@ export default function MealPlansPage() {
           <div>
             <Label>Kalori</Label>
             <Input type="number" value={calories} onChange={(e) => setCalories(Number(e.target.value))} />
+          </div>
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          <div>
+            <Label className="text-xs">Protein (g)</Label>
+            <Input type="number" step="0.1" value={proteinG} onChange={(e) => setMacro("p", Number(e.target.value))} />
+          </div>
+          <div>
+            <Label className="text-xs">Karbo (g)</Label>
+            <Input type="number" step="0.1" value={carbsG} onChange={(e) => setMacro("c", Number(e.target.value))} />
+          </div>
+          <div>
+            <Label className="text-xs">Lemak (g)</Label>
+            <Input type="number" step="0.1" value={fatG} onChange={(e) => setMacro("f", Number(e.target.value))} />
           </div>
         </div>
         <Select value={mealType} onChange={(e) => setMealType(e.target.value)}>
@@ -85,6 +130,9 @@ export default function MealPlansPage() {
                   <p className="font-medium">{p.title}</p>
                   <p className="text-xs text-slate-500">
                     {p.plan_date} · {p.meal_type} · {p.total_calories} kkal
+                    {p.protein_g != null || p.carbs_g != null || p.fat_g != null
+                      ? ` · P ${fmtMacro(Number(p.protein_g) || 0)} · K ${fmtMacro(Number(p.carbs_g) || 0)} · L ${fmtMacro(Number(p.fat_g) || 0)}`
+                      : ""}
                   </p>
                 </div>
                 <Button

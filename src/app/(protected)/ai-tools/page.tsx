@@ -213,9 +213,16 @@ export default function AiToolsPage() {
     },
   });
 
-  const goToFoodLog = (name: string, calories?: number) => {
+  const goToFoodLog = (
+    name: string,
+    calories?: number,
+    macros?: { protein_g?: number | null; carbs_g?: number | null; fat_g?: number | null },
+  ) => {
     const params = new URLSearchParams({ name });
     if (calories != null) params.set("calories", String(calories));
+    if (macros?.protein_g != null) params.set("protein", String(macros.protein_g));
+    if (macros?.carbs_g != null) params.set("carbs", String(macros.carbs_g));
+    if (macros?.fat_g != null) params.set("fat", String(macros.fat_g));
     window.location.href = `/food/new?${params.toString()}`;
   };
 
@@ -585,23 +592,57 @@ export default function AiToolsPage() {
               ) : null}
               <div className="space-y-2">
                 {[
-                  ...(result.from_memory ?? []).map((m: { name: string; calories?: number; source?: string }) => ({
-                    ...m,
-                    sourceLabel: "Memori",
-                  })),
+                  ...(result.from_memory ?? []).map(
+                    (m: {
+                      name: string;
+                      calories?: number;
+                      source?: string;
+                      protein_g?: number;
+                      carbs_g?: number;
+                      fat_g?: number;
+                    }) => ({
+                      ...m,
+                      sourceLabel: "Memori",
+                    }),
+                  ),
                   ...(result.from_catalog ?? []).map(
-                    (c: { name: string; calories?: number; unit?: string; source?: string }) => ({
+                    (c: {
+                      name: string;
+                      calories?: number;
+                      unit?: string;
+                      source?: string;
+                      protein_g?: number;
+                      carbs_g?: number;
+                      fat_g?: number;
+                    }) => ({
                       ...c,
                       sourceLabel: "Katalog",
                     }),
                   ),
-                  ...(result.from_ai ?? []).map((a: { name: string; calories?: number; unit?: string }) => ({
-                    ...a,
-                    sourceLabel: "AI",
-                  })),
+                  ...(result.from_ai ?? []).map(
+                    (a: {
+                      name: string;
+                      calories?: number;
+                      unit?: string;
+                      protein_g?: number;
+                      carbs_g?: number;
+                      fat_g?: number;
+                    }) => ({
+                      ...a,
+                      sourceLabel: "AI",
+                    }),
+                  ),
                 ].map(
                   (
-                    item: { name: string; calories?: number; unit?: string; sourceLabel?: string },
+                    item: {
+                      name: string;
+                      calories?: number;
+                      unit?: string;
+                      sourceLabel?: string;
+                      protein_g?: number;
+                      carbs_g?: number;
+                      fat_g?: number;
+                    },
                     i: number,
                   ) => (
                     <div
@@ -620,7 +661,13 @@ export default function AiToolsPage() {
                       </div>
                       <Button
                         variant="secondary"
-                        onClick={() => goToFoodLog(item.name, item.calories)}
+                        onClick={() =>
+                          goToFoodLog(item.name, item.calories, {
+                            protein_g: item.protein_g,
+                            carbs_g: item.carbs_g,
+                            fat_g: item.fat_g,
+                          })
+                        }
                       >
                         Gunakan di catatan
                       </Button>
@@ -662,7 +709,17 @@ export default function AiToolsPage() {
               ) : null}
               <div className="space-y-2">
                 {(result.candidates ?? []).map(
-                  (c: { name: string; calories?: number; unit?: string }, i: number) => (
+                  (
+                    c: {
+                      name: string;
+                      calories?: number;
+                      unit?: string;
+                      protein_g?: number | null;
+                      carbs_g?: number | null;
+                      fat_g?: number | null;
+                    },
+                    i: number,
+                  ) => (
                     <div
                       key={i}
                       className="flex flex-wrap items-center justify-between gap-2 rounded-xl border p-3 text-sm"
@@ -673,7 +730,16 @@ export default function AiToolsPage() {
                         {c.unit ? ` · ${c.unit}` : ""}
                       </span>
                       <div className="flex gap-2">
-                        <Button variant="secondary" onClick={() => goToFoodLog(c.name, c.calories)}>
+                        <Button
+                          variant="secondary"
+                          onClick={() =>
+                            goToFoodLog(c.name, c.calories, {
+                              protein_g: c.protein_g,
+                              carbs_g: c.carbs_g,
+                              fat_g: c.fat_g,
+                            })
+                          }
+                        >
                           Gunakan
                         </Button>
                         <Button
@@ -685,6 +751,9 @@ export default function AiToolsPage() {
                                 alias: result.input,
                                 resolvedName: c.name,
                                 calories: c.calories,
+                                proteinG: c.protein_g,
+                                carbsG: c.carbs_g,
+                                fatG: c.fat_g,
                                 portionUnit: c.unit,
                               }),
                             });
@@ -748,10 +817,28 @@ export default function AiToolsPage() {
                   "Perbedaan terbesar biasanya dari minyak, porsi, dan topping. Bukan label baik/buruk."}
               </p>
               <div className="flex flex-wrap gap-2">
-                <Button variant="secondary" onClick={() => goToFoodLog(result.food_a.name)}>
+                <Button
+                  variant="secondary"
+                  onClick={() =>
+                    goToFoodLog(result.food_a.name, undefined, {
+                      protein_g: result.food_a.protein_g,
+                      carbs_g: result.food_a.carbs_g,
+                      fat_g: result.food_a.fat_g,
+                    })
+                  }
+                >
                   Catat {result.food_a.name}
                 </Button>
-                <Button variant="outline" onClick={() => goToFoodLog(result.food_b?.name)}>
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    goToFoodLog(result.food_b?.name, undefined, {
+                      protein_g: result.food_b?.protein_g,
+                      carbs_g: result.food_b?.carbs_g,
+                      fat_g: result.food_b?.fat_g,
+                    })
+                  }
+                >
                   Catat {result.food_b?.name}
                 </Button>
               </div>

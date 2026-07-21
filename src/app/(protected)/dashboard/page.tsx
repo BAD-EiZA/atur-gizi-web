@@ -20,9 +20,17 @@ import {
   Skeleton,
   Stat,
 } from "@/components/ui";
+import { fmtMacro } from "@/lib/nutrition";
 import { formatKcal } from "@/lib/utils";
 
-type FavoriteFood = { id: string; name: string; calories: number };
+type FavoriteFood = {
+  id: string;
+  name: string;
+  calories: number;
+  protein_g?: number | null;
+  carbs_g?: number | null;
+  fat_g?: number | null;
+};
 
 export default function DashboardPage() {
   const [date, setDate] = useState("");
@@ -84,10 +92,18 @@ export default function DashboardPage() {
             />
             <div className="relative flex flex-wrap items-start justify-between gap-3">
               <Stat
-                label="Sisa anggaran kalori (net)"
+                label={
+                  d.budget_mode === "eat_back"
+                    ? "Sisa anggaran (net / eat-back)"
+                    : "Sisa anggaran makan"
+                }
                 value={formatKcal(d.remaining_calories)}
                 unit="kkal"
-                hint={`Target ${formatKcal(d.intake_target)} kkal · net = konsumsi − aktivitas`}
+                hint={
+                  d.budget_mode === "eat_back"
+                    ? `Target ${formatKcal(d.intake_target)} · sisa = target − (makan − aktivitas)`
+                    : `Target ${formatKcal(d.intake_target)} · sisa = target − konsumsi (default, tanpa double-count aktivitas)`
+                }
               />
               <Badge variant="secondary">{d.date}</Badge>
             </div>
@@ -98,7 +114,7 @@ export default function DashboardPage() {
               </div>
               <Progress value={pct} label="Progres kalori harian" className="h-3" />
             </div>
-            <div className="relative mt-6 grid grid-cols-3 gap-3 border-t border-[hsl(var(--border))] pt-5 text-center">
+            <div className="relative mt-6 grid grid-cols-2 gap-3 border-t border-[hsl(var(--border))] pt-5 text-center sm:grid-cols-4">
               <div className="rounded-2xl bg-white/70 p-3 ring-1 ring-[hsl(var(--border)/0.6)]">
                 <p className="text-xs text-[hsl(var(--muted-foreground))]">Konsumsi</p>
                 <p className="mt-0.5 text-lg font-semibold tabular-nums">{formatKcal(d.consumed_calories)}</p>
@@ -110,12 +126,44 @@ export default function DashboardPage() {
                 </p>
               </div>
               <div className="rounded-2xl bg-white/70 p-3 ring-1 ring-[hsl(var(--border)/0.6)]">
-                <p className="text-xs text-[hsl(var(--muted-foreground))]">Net</p>
-                <p className="mt-0.5 text-lg font-semibold tabular-nums">{formatKcal(d.net_calories)}</p>
+                <p className="text-xs text-[hsl(var(--muted-foreground))]">Sisa makan</p>
+                <p className="mt-0.5 text-lg font-semibold tabular-nums">
+                  {formatKcal(d.remaining_intake ?? d.intake_target - d.consumed_calories)}
+                </p>
+              </div>
+              <div className="rounded-2xl bg-white/70 p-3 ring-1 ring-[hsl(var(--border)/0.6)]">
+                <p className="text-xs text-[hsl(var(--muted-foreground))]">Sisa net</p>
+                <p className="mt-0.5 text-lg font-semibold tabular-nums">
+                  {formatKcal(d.remaining_net ?? d.remaining_calories)}
+                </p>
+              </div>
+            </div>
+            <div className="relative mt-3 grid grid-cols-3 gap-2 text-center">
+              <div className="rounded-xl bg-[hsl(var(--muted)/0.5)] px-2 py-2">
+                <p className="text-[11px] text-[hsl(var(--muted-foreground))]">Protein</p>
+                <p className="text-sm font-semibold tabular-nums">
+                  {fmtMacro(d.consumed_protein_g ?? 0)}
+                  {d.protein_target_g != null ? ` / ${fmtMacro(d.protein_target_g)}` : ""} g
+                </p>
+              </div>
+              <div className="rounded-xl bg-[hsl(var(--muted)/0.5)] px-2 py-2">
+                <p className="text-[11px] text-[hsl(var(--muted-foreground))]">Karbo</p>
+                <p className="text-sm font-semibold tabular-nums">
+                  {fmtMacro(d.consumed_carbs_g ?? 0)}
+                  {d.carbs_target_g != null ? ` / ${fmtMacro(d.carbs_target_g)}` : ""} g
+                </p>
+              </div>
+              <div className="rounded-xl bg-[hsl(var(--muted)/0.5)] px-2 py-2">
+                <p className="text-[11px] text-[hsl(var(--muted-foreground))]">Lemak</p>
+                <p className="text-sm font-semibold tabular-nums">
+                  {fmtMacro(d.consumed_fat_g ?? 0)}
+                  {d.fat_target_g != null ? ` / ${fmtMacro(d.fat_target_g)}` : ""} g
+                </p>
               </div>
             </div>
             <HelperText>
-              Angka adalah estimasi. Aktivitas menambah ruang kalori (mode net).
+              Mode {d.budget_mode === "eat_back" ? "eat-back (net)" : "intake-only (default)"}. Ubah di
+              Setelan. Angka estimasi.
             </HelperText>
           </Card>
 
@@ -186,15 +234,24 @@ export default function DashboardPage() {
                 <Link href="/food/new" className="text-sm font-medium text-[hsl(var(--primary))]">Kelola favorit</Link>
               </div>
               <div className="flex flex-wrap gap-2">
-                {favorites.data!.data.slice(0, 6).map((food) => (
-                  <Link
-                    key={food.id}
-                    href={`/food/new?name=${encodeURIComponent(food.name)}&calories=${food.calories}`}
-                    className="rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--muted))] px-3 py-2 text-sm font-medium transition hover:border-[hsl(var(--primary)/0.4)]"
-                  >
-                    {food.name} · {food.calories} kkal
-                  </Link>
-                ))}
+                {favorites.data!.data.slice(0, 6).map((food) => {
+                  const params = new URLSearchParams({
+                    name: food.name,
+                    calories: String(food.calories),
+                  });
+                  if (food.protein_g != null) params.set("protein", String(food.protein_g));
+                  if (food.carbs_g != null) params.set("carbs", String(food.carbs_g));
+                  if (food.fat_g != null) params.set("fat", String(food.fat_g));
+                  return (
+                    <Link
+                      key={food.id}
+                      href={`/food/new?${params.toString()}`}
+                      className="rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--muted))] px-3 py-2 text-sm font-medium transition hover:border-[hsl(var(--primary)/0.4)]"
+                    >
+                      {food.name} · {food.calories} kkal
+                    </Link>
+                  );
+                })}
               </div>
             </Card>
           ) : null}
@@ -236,7 +293,12 @@ export default function DashboardPage() {
                     >
                       <div>
                         <p className="font-medium">{f.title}</p>
-                        <p className="text-xs text-[hsl(var(--muted-foreground))]">{f.meal_type}</p>
+                        <p className="text-xs text-[hsl(var(--muted-foreground))]">
+                          {f.meal_type}
+                          {f.protein_g != null || f.carbs_g != null || f.fat_g != null
+                            ? ` · P ${fmtMacro(Number(f.protein_g) || 0)} · K ${fmtMacro(Number(f.carbs_g) || 0)} · L ${fmtMacro(Number(f.fat_g) || 0)}`
+                            : ""}
+                        </p>
                       </div>
                       <span className="tabular-nums text-[hsl(var(--muted-foreground))]">
                         {f.total_calories} kkal

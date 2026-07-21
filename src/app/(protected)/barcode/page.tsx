@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, track } from "@/lib/api-client";
+import { fmtMacro } from "@/lib/nutrition";
 import { Button, Card, ErrorBox, Input, Label, PageTitle } from "@/components/ui";
 
 type Product = {
@@ -12,6 +13,10 @@ type Product = {
   name: string;
   brand: string | null;
   calories: number;
+  protein_g: number | null;
+  carbs_g: number | null;
+  fat_g: number | null;
+  serving_size?: string | null;
 };
 
 export default function BarcodePage() {
@@ -47,8 +52,11 @@ export default function BarcodePage() {
             {
               name: product!.name,
               portionAmount: 1,
-              portionUnit: "serving",
+              portionUnit: product!.serving_size || "serving",
               calories: product!.calories,
+              proteinG: product!.protein_g ?? undefined,
+              carbsG: product!.carbs_g ?? undefined,
+              fatG: product!.fat_g ?? undefined,
             },
           ],
         }),
@@ -77,6 +85,10 @@ export default function BarcodePage() {
             <p className="font-medium">{product.name}</p>
             <p className="text-slate-600">
               {product.brand ?? "—"} · {product.calories} kkal / porsi
+            </p>
+            <p className="mt-1 text-xs text-slate-600">
+              P {fmtMacro(Number(product.protein_g) || 0)}g · K {fmtMacro(Number(product.carbs_g) || 0)}g · L{" "}
+              {fmtMacro(Number(product.fat_g) || 0)}g
             </p>
             <Button className="mt-2" onClick={() => log.mutate()} disabled={log.isPending}>
               Catat sebagai makanan
