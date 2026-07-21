@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -155,12 +156,12 @@ export default function NewActivityPage() {
         title="Catat aktivitas"
         subtitle="Estimasi dari MET × berat × durasi. Intensitas, jarak, dan HR memperbaiki akurasi."
         actions={
-          <a
+          <Link
             href="/activities/import-screenshot"
             className="text-sm font-medium text-[hsl(var(--primary))]"
           >
             Impor screenshot
-          </a>
+          </Link>
         }
       />
       <Card className="space-y-4">
