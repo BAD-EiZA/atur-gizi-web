@@ -6,11 +6,13 @@ import { Camera, ShieldCheck, PencilLine } from "lucide-react";
 export function LandingMotion() {
   return (
     <>
-      {/* Desire: scrub text + scale images */}
       <section className="mx-auto max-w-5xl px-4 py-28 md:px-6 md:py-40">
         <Reveal>
+          <h2 className="mb-6 text-center text-sm font-medium text-[hsl(var(--primary))]">
+            AI membantu membaca. Kamu tetap menentukan.
+          </h2>
           <ScrubWords
-            text="Perkiraan AI bukan kebenaran mutlak. Setiap angka menampilkan asumsi, keyakinan, dan ruang untuk kamu mengoreksi sebelum data tersimpan."
+            text="Setiap angka adalah perkiraan awal, bukan keputusan final. Periksa nama makanan, porsi, kalori, dan makronutrien sebelum menyimpan."
             className="text-center text-2xl font-medium leading-snug tracking-tight text-[hsl(var(--foreground))] md:text-4xl md:leading-snug"
           />
         </Reveal>
@@ -21,16 +23,18 @@ export function LandingMotion() {
           className="min-h-[120vh]"
           left={
             <div className="space-y-4 py-4">
-              <p className="text-sm font-medium text-[hsl(var(--primary))]">Kenapa terasa berbeda</p>
+              <p className="text-sm font-medium text-[hsl(var(--primary))]">
+                Dibuat untuk keputusan yang lebih sadar
+              </p>
               <h2 className="display-h2">Kendali manusia di atas otomatisasi</h2>
-              <p className="text-[hsl(var(--muted-foreground))] leading-relaxed">
-                Scroll galeri. Setiap momen produk dibangun agar kamu tetap menjadi sumber
-                kebenaran — bukan model AI.
+              <p className="leading-relaxed text-[hsl(var(--muted-foreground))]">
+                Atur Gizi tidak menyimpan hasil AI secara diam-diam. Semua perkiraan ditampilkan
+                sebagai draf yang dapat kamu periksa, ubah, atau abaikan.
               </p>
               <ul className="space-y-3 pt-4 text-sm">
                 {[
-                  { icon: Camera, t: "Foto jadi draf, bukan catatan" },
-                  { icon: PencilLine, t: "Edit porsi & makro dulu" },
+                  { icon: Camera, t: "Pindai makanan, lalu periksa hasilnya" },
+                  { icon: PencilLine, t: "Cari cepat atau catat manual" },
                   { icon: ShieldCheck, t: "Privasi default aktif" },
                 ].map((x) => {
                   const Icon = x.icon;
@@ -51,13 +55,13 @@ export function LandingMotion() {
               {[
                 {
                   src: "/brand/gallery-bowl.jpg",
-                  alt: "Mangkuk makanan sehat",
-                  cap: "Pindai piring dalam hitungan detik",
+                  alt: "Contoh foto makanan yang siap dianalisis",
+                  cap: "Pindai makanan, lalu periksa hasilnya",
                 },
                 {
                   src: "/brand/gallery-activity.jpg",
-                  alt: "Sayur dan bahan segar",
-                  cap: "Aktivitas dapat diperhitungkan sesuai cara hitung yang kamu pilih",
+                  alt: "Contoh makanan yang dapat dicari atau dicatat manual",
+                  cap: "Cari cepat atau catat manual kapan saja",
                 },
               ].map((img) => (
                 <figure

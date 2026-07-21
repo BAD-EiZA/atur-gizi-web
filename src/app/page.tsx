@@ -17,18 +17,21 @@ import { Logo } from "@/components/logo";
 import { LandingMotion } from "@/components/landing/landing-motion";
 
 export const metadata = {
-  title: "Atur Gizi — Catat makan, aktivitas, dan ringkasan mingguan",
+  title: "Atur Gizi — Catat Makanan dan Aktivitas dengan Lebih Mudah",
   description:
-    "Catat makanan manual, dari barcode, atau melalui foto. Tinjau estimasi AI sebelum menyimpan dan pahami pola mingguan dengan bahasa yang netral.",
+    "Catat makanan lewat foto, pencarian, atau input manual. Periksa estimasi AI, pantau target harian, dan lihat ringkasan mingguan tanpa penilaian.",
 };
 
 const marqueeItems = [
-  "Draf AI · kamu konfirmasi",
-  "Target transparan",
-  "Foto default dihapus",
-  "Ekspor data kapan saja",
-  "Bukan alat medis",
-  "Estimasi yang bisa diedit",
+  "Pindai makanan dari foto",
+  "Cari makanan lebih cepat",
+  "Catat manual kapan saja",
+  "Pantau kalori dan makro",
+  "Catat aktivitas",
+  "Impor ringkasan olahraga",
+  "Lihat riwayat",
+  "Dapatkan ringkasan mingguan",
+  "Ekspor data",
 ];
 
 export default function LandingPage() {
@@ -37,7 +40,7 @@ export default function LandingPage() {
       <SiteHeader />
 
       <main className="w-full max-w-full overflow-x-hidden">
-        {/* HERO — cinematic center */}
+        {/* HERO */}
         <section className="relative min-h-[min(92vh,860px)] overflow-hidden">
           <div
             className="absolute inset-0 bg-cover bg-center"
@@ -45,7 +48,8 @@ export default function LandingPage() {
               backgroundImage: "url(/brand/hero-plate.jpg)",
               filter: "contrast(1.1) saturate(0.85)",
             }}
-            aria-hidden
+            role="img"
+            aria-label="Sepiring nasi, ayam panggang, dan sayuran"
           />
           <div
             className="absolute inset-0"
@@ -58,6 +62,9 @@ export default function LandingPage() {
           <div className="grain absolute inset-0" aria-hidden />
 
           <div className="relative z-10 mx-auto flex max-w-6xl flex-col items-center px-4 pb-24 pt-20 text-center md:px-6 md:pb-32 md:pt-28">
+            <p className="mb-4 text-sm font-medium text-white/70">
+              Pencatatan gizi yang lebih manusiawi
+            </p>
             <h1 className="display-h1 mx-auto max-w-5xl text-white">
               Catat makan tanpa{" "}
               <span
@@ -65,20 +72,26 @@ export default function LandingPage() {
                 style={{ backgroundImage: "url(/brand/inline-food.jpg)" }}
                 aria-hidden
               />{" "}
-              hidup terasa spreadsheet
+              hidup terasa seperti spreadsheet
             </h1>
             <p className="mt-6 max-w-2xl text-base leading-relaxed text-white/75 md:text-lg">
-              Manual, barcode, atau foto. Tinjau setiap estimasi AI sebelum menyimpan.
-              Pola mingguan tanpa penilaian berlebihan.
+              Foto makanan, cari dari katalog, atau catat manual. Atur Gizi membantu memperkirakan
+              kalori dan makronutrien, lalu kamu yang memeriksa dan menentukan hasil akhirnya.
             </p>
             <div className="mt-10">
               <HeroCta />
             </div>
+            <p className="mt-6 text-xs text-white/55 md:text-sm">
+              Tanpa kartu kredit · Hasil AI selalu bisa diedit · Bukan alat medis
+            </p>
           </div>
         </section>
 
         {/* Marquee */}
-        <section className="border-b border-[hsl(var(--border))] bg-white py-5 overflow-hidden" aria-hidden>
+        <section
+          className="overflow-hidden border-b border-[hsl(var(--border))] bg-white py-5"
+          aria-hidden
+        >
           <div className="marquee-track gap-10 whitespace-nowrap px-4 text-sm font-medium text-[hsl(var(--muted-foreground))]">
             {[...marqueeItems, ...marqueeItems].map((t, i) => (
               <span key={`${t}-${i}`} className="inline-flex items-center gap-3">
@@ -93,29 +106,30 @@ export default function LandingPage() {
 
         {/* CARA KERJA */}
         <section id="cara-kerja" className="mx-auto max-w-6xl px-4 py-28 md:px-6 md:py-40">
-          <h2 className="display-h2 text-center">Tiga langkah, kendali di tangan Anda</h2>
+          <h2 className="display-h2 text-center">Tiga langkah, kendali tetap di tanganmu</h2>
           <p className="mx-auto mt-4 max-w-2xl text-center text-[hsl(var(--muted-foreground))]">
-            AI membuat draf. Kamu yang menentukan hasil akhirnya.
+            Mulai dari foto, pencarian, atau input manual. Tidak ada data yang disimpan tanpa
+            persetujuanmu.
           </p>
 
           <ol className="mt-16 grid gap-6 md:grid-cols-3">
             {[
               {
                 n: "01",
-                t: "Catat dengan cara paling mudah",
-                d: "Manual, favorit, barcode, atau foto piring.",
+                t: "Foto, cari, atau tulis",
+                d: "Pilih cara tercepat untuk mencatat makananmu hari itu.",
                 icon: Utensils,
               },
               {
                 n: "02",
-                t: "Periksa sebelum tersimpan",
-                d: "Ubah nama, porsi, nutrisi. Tanpa konfirmasi, tidak ada log.",
+                t: "Periksa perkiraannya",
+                d: "Tinjau nama makanan, porsi, kalori, dan makronutrien yang ditampilkan.",
                 icon: PencilLine,
               },
               {
                 n: "03",
-                t: "Lihat pola, bukan penilaian",
-                d: "Ringkasan harian dan mingguan dengan bahasa netral.",
+                t: "Ubah lalu simpan",
+                d: "Koreksi bagian yang diperlukan, kemudian simpan saat datanya sudah terasa tepat.",
                 icon: Sparkles,
               },
             ].map((s) => {
@@ -145,9 +159,10 @@ export default function LandingPage() {
         <section id="demo-ai" className="border-y border-[hsl(var(--border))] bg-[hsl(var(--muted)/0.4)]">
           <div className="mx-auto max-w-6xl px-4 py-28 md:px-6 md:py-40">
             <div className="max-w-2xl">
-              <h2 className="display-h2">AI membuat draf. Kamu yang menentukan.</h2>
+              <h2 className="display-h2">AI menyiapkan draf. Kamu yang memutuskan.</h2>
               <p className="mt-4 text-[hsl(var(--muted-foreground))]">
-                Setiap item punya estimasi, keyakinan, dan asumsi — selalu bisa diedit.
+                Estimasi dibuat untuk mempercepat pencatatan, bukan menggantikan penilaianmu. Setiap
+                hasil dapat diperiksa dan diubah sebelum masuk ke riwayat.
               </p>
             </div>
 
@@ -156,7 +171,7 @@ export default function LandingPage() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="/illustrations/food.jpg"
-                  alt="Foto makanan untuk demo pindai AI"
+                  alt="Contoh foto makanan yang siap dianalisis"
                   className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
                 />
               </div>
@@ -164,7 +179,7 @@ export default function LandingPage() {
               <div className="flex flex-col justify-between space-y-3 rounded-3xl border border-[hsl(var(--border))] bg-white p-6 shadow-[var(--shadow-sm)] md:p-8">
                 <div>
                   <p className="text-sm font-medium text-[hsl(var(--muted-foreground))]">
-                    Terdeteksi (draf)
+                    Hasil perkiraan
                   </p>
                   <div className="mt-4 space-y-3">
                     {[
@@ -176,14 +191,14 @@ export default function LandingPage() {
                         kcal: "195 kkal",
                       },
                       {
-                        name: "Ayam bakar",
+                        name: "Ayam panggang",
                         portion: "1 potong",
                         conf: "Tinggi",
                         confClass: "bg-emerald-100 text-emerald-900",
                         kcal: "210 kkal",
                       },
                       {
-                        name: "Tumis sayur",
+                        name: "Tumis sayuran",
                         portion: "100 g",
                         conf: "Sedang",
                         confClass: "bg-amber-100 text-amber-900",
@@ -212,14 +227,14 @@ export default function LandingPage() {
                 <div>
                   <div className="flex flex-wrap gap-2 pt-2">
                     <span className="inline-flex min-h-11 items-center rounded-full border border-[hsl(var(--border))] px-5 text-sm font-medium">
-                      Edit
+                      Ubah detail
                     </span>
                     <span className="inline-flex min-h-11 items-center rounded-full bg-[hsl(var(--primary))] px-5 text-sm font-medium text-white">
-                      Konfirmasi
+                      Gunakan draf
                     </span>
                   </div>
                   <p className="mt-3 text-sm text-[hsl(var(--muted-foreground))]">
-                    Tidak ada hasil AI yang disimpan tanpa konfirmasi Anda.
+                    Belum ada data yang disimpan.
                   </p>
                 </div>
               </div>
@@ -227,14 +242,14 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* FEATURE BENTO — gapless dense */}
+        {/* FEATURE BENTO */}
         <section id="fitur" className="mx-auto max-w-6xl px-4 py-28 md:px-6 md:py-40">
           <h2 className="display-h2">Dirancang untuk kontrol, bukan otomatisasi buta</h2>
           <p className="mt-4 max-w-2xl text-[hsl(var(--muted-foreground))]">
-            Pencatatan ringan, target transparan, privasi di depan.
+            Setiap fitur membantu mempercepat pekerjaan kecil tanpa mengambil keputusan penting
+            darimu.
           </p>
 
-          {/* 4-col dense: 8+4 / 4+4+4 — fills 2 rows completely */}
           <div className="mt-14 grid auto-rows-fr grid-flow-dense gap-4 md:grid-cols-4">
             <article className="group relative overflow-hidden rounded-3xl border border-[hsl(var(--border))] bg-gradient-to-br from-emerald-50 via-white to-white p-8 shadow-[var(--shadow-sm)] md:col-span-2 md:row-span-2 md:p-10">
               <div
@@ -246,26 +261,32 @@ export default function LandingPage() {
                 Pindai makanan dengan AI
               </h3>
               <p className="relative mt-3 max-w-md text-sm leading-relaxed text-[hsl(var(--muted-foreground))] md:text-base">
-                Ambil foto, tinjau makanan dan porsi, koreksi sebelum menyimpan. Keyakinan dan
-                asumsi selalu terlihat.
+                Ambil foto makanan dan dapatkan perkiraan awal dalam beberapa langkah.
               </p>
               <ul className="relative mt-8 space-y-3 text-sm">
-                {["Multi-item + edit porsi", "Badge keyakinan", "Keputusan akhir di Anda"].map(
-                  (t) => (
-                    <li key={t} className="flex gap-2">
-                      <Check className="mt-0.5 size-4 text-[hsl(var(--primary))]" aria-hidden />
-                      {t}
-                    </li>
-                  ),
-                )}
+                {[
+                  "Nama makanan",
+                  "Perkiraan porsi",
+                  "Kalori dan makronutrien",
+                  "Dapat diedit sebelum disimpan",
+                ].map((t) => (
+                  <li key={t} className="flex gap-2">
+                    <Check className="mt-0.5 size-4 text-[hsl(var(--primary))]" aria-hidden />
+                    {t}
+                  </li>
+                ))}
               </ul>
             </article>
 
             <article className="rounded-3xl border border-[hsl(var(--border))] bg-white p-6 shadow-[var(--shadow-sm)] transition duration-500 hover:shadow-[var(--shadow-md)] md:col-span-2">
               <Sparkles className="size-5 text-[hsl(var(--primary))]" aria-hidden />
-              <h3 className="mt-4 text-lg font-semibold">Target transparan</h3>
+              <h3 className="mt-4 text-lg font-semibold">Target yang transparan</h3>
               <p className="mt-2 text-sm leading-relaxed text-[hsl(var(--muted-foreground))]">
-                BMR, TDEE, penyesuaian tujuan, versi formula. Tidak berubah diam-diam.
+                Lihat bagaimana target kalori dan makronutrien digunakan dalam perhitungan
+                harianmu.
+              </p>
+              <p className="mt-4 text-xs font-medium text-[hsl(var(--muted-foreground))]">
+                Target harian · Kalori masuk · Sisa kalori
               </p>
             </article>
 
@@ -284,36 +305,48 @@ export default function LandingPage() {
               </div>
               <h3 className="mt-4 text-lg font-semibold">Pencatatan cepat</h3>
               <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))]">
-                Bukan pekerjaan rumah.
+                Gunakan kembali makanan yang sering dicatat atau cari dari katalog tanpa harus
+                mengisi semuanya dari awal.
               </p>
             </article>
 
             <article className="rounded-3xl border border-[hsl(var(--border))] bg-slate-900 p-6 text-white shadow-[var(--shadow-sm)] md:col-span-1">
               <ShieldCheck className="size-5 text-emerald-300" aria-hidden />
-              <h3 className="mt-4 text-lg font-semibold">Privasi dulu</h3>
+              <h3 className="mt-4 text-lg font-semibold">Asisten AI</h3>
               <p className="mt-2 text-sm text-slate-300">
-                Foto default dihapus. Ekspor & hapus akun dari app.
+                Cari makanan, periksa catatan yang terlewat, bandingkan pilihan, dan pahami pola
+                pencatatanmu.
               </p>
+              <span className="mt-4 inline-flex rounded-full bg-white/10 px-2.5 py-1 text-xs font-medium text-emerald-200">
+                Selalu berupa draf
+              </span>
             </article>
           </div>
         </section>
 
-        {/* Desire — scrub text + images via client component already in LandingMotion pin */}
-
-        {/* INSIGHT */}
+        {/* RINGKASAN MINGGUAN */}
         <section className="border-y border-[hsl(var(--border))] bg-white">
           <div className="mx-auto grid max-w-6xl gap-12 px-4 py-28 md:grid-cols-2 md:items-center md:px-6 md:py-40">
             <div>
-              <h2 className="display-h2">Ringkasan mingguan yang netral</h2>
-              <p className="mt-4 text-[hsl(var(--muted-foreground))]">
-                Ringkasan menjelaskan pola, bukan menilai Anda. Selalu menyebut rentang data.
+              <p className="text-sm font-medium text-[hsl(var(--primary))]">
+                Lihat pola, bukan nilai rapor
               </p>
-              <p className="mt-6 rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--muted)/0.5)] p-5 text-base leading-relaxed">
-                “Protein lebih konsisten pada hari ketika sarapan dicatat sebelum pukul 09.00.”
+              <h2 className="display-h2 mt-2">Ringkasan mingguan yang netral</h2>
+              <p className="mt-4 text-[hsl(var(--muted-foreground))]">
+                Lihat pola kalori, protein, karbohidrat, lemak, dan aktivitas tanpa label “baik”
+                atau “buruk”.
+              </p>
+              <div className="mt-6 space-y-2 rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--muted)/0.5)] p-5 text-sm leading-relaxed md:text-base">
+                <p>Minggu ini kamu mencatat 5 dari 7 hari.</p>
+                <p>Rata-rata kalori masuk: 1.640 kkal per hari.</p>
+                <p>Hari dengan data yang belum lengkap tetap ditandai dengan jelas.</p>
+              </div>
+              <p className="mt-4 text-sm text-[hsl(var(--muted-foreground))]">
+                Ringkasan menjadi lebih representatif saat lebih banyak hari tercatat.
               </p>
             </div>
             <div className="rounded-3xl border border-[hsl(var(--border))] p-6 shadow-[var(--shadow-sm)]">
-              <p className="text-sm font-medium">Konsumsi vs target</p>
+              <p className="text-sm font-medium">Kalori masuk dibandingkan target</p>
               <div className="mt-5 space-y-3.5">
                 {[
                   { d: "Sen", c: 72 },
@@ -343,10 +376,10 @@ export default function LandingPage() {
         <section id="privasi" className="mx-auto max-w-6xl px-4 py-28 md:px-6 md:py-40">
           <div className="grid gap-10 overflow-hidden rounded-[2rem] bg-slate-950 px-6 py-12 text-white md:grid-cols-2 md:px-12 md:py-16">
             <div>
-              <h2 className="display-h2 text-white">Kamu tetap memegang kontrol</h2>
+              <h2 className="display-h2 text-white">Data kesehatanmu tetap milikmu</h2>
               <p className="mt-5 text-base leading-relaxed text-slate-300">
-                Tidak ada log AI tanpa konfirmasi. Foto default dihapus setelah analisis. Data
-                diekspor atau dihapus dari aplikasi.
+                Atur Gizi hanya menggunakan data untuk menjalankan fitur yang kamu pilih. Kamu dapat
+                mengubah pengaturan privasi, mengekspor data, atau menghapus akun kapan saja.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <RegisterLink
@@ -359,31 +392,34 @@ export default function LandingPage() {
                   href="#faq"
                   className="inline-flex min-h-12 items-center rounded-full border border-white/25 px-6 py-3 text-sm font-medium text-white transition hover:bg-white/10"
                 >
-                  Baca FAQ privasi
+                  Baca tentang privasi
                 </a>
               </div>
+              <p className="mt-6 text-xs text-slate-400">
+                Atur Gizi bukan alat medis dan tidak menggantikan saran dokter atau ahli gizi.
+              </p>
             </div>
             <ul className="grid gap-3">
               {[
                 {
-                  icon: Sparkles,
-                  t: "AI estimasi, bukan diagnosis",
-                  d: "Semua angka sebagai perkiraan.",
+                  icon: Trash2,
+                  t: "Foto tidak harus disimpan",
+                  d: "Secara default, foto makanan dihapus setelah analisis atau konfirmasi. Penyimpanan foto hanya aktif jika kamu memilihnya di Pengaturan.",
                 },
                 {
                   icon: PencilLine,
-                  t: "Tinjau sebelum tersimpan",
-                  d: "Tidak ada catatan otomatis dari draf.",
-                },
-                {
-                  icon: Trash2,
-                  t: "Foto default dihapus",
-                  d: "Ubah preferensi di Pengaturan kapan saja.",
+                  t: "Hasil AI dapat dikoreksi",
+                  d: "Nama makanan, porsi, kalori, dan makronutrien selalu dapat diubah sebelum dan setelah disimpan.",
                 },
                 {
                   icon: Download,
-                  t: "Ekspor & hapus akun",
-                  d: "Portabilitas dari dalam aplikasi.",
+                  t: "Ekspor data kapan saja",
+                  d: "Unduh salinan data makanan, aktivitas, berat badan, dan pengaturan akunmu.",
+                },
+                {
+                  icon: Sparkles,
+                  t: "Hapus akun secara permanen",
+                  d: "Kamu dapat menghapus akun beserta seluruh data melalui halaman Profil atau Pengaturan.",
                 },
               ].map((item) => {
                 const Icon = item.icon;
@@ -418,7 +454,8 @@ export default function LandingPage() {
           <div className="md:col-span-1">
             <Logo size={28} />
             <p className="mt-3 text-sm text-[hsl(var(--muted-foreground))]">
-              Catat dengan ringan. Tinjau dengan sadar.
+              Pencatatan makanan dan aktivitas yang lebih sederhana, transparan, dan tetap berada
+              dalam kendalimu.
             </p>
           </div>
           <div>
@@ -435,20 +472,45 @@ export default function LandingPage() {
                 </a>
               </li>
               <li>
-                <a href="#privasi" className="hover:text-[hsl(var(--foreground))]">
-                  Privasi
+                <a href="#demo-ai" className="hover:text-[hsl(var(--foreground))]">
+                  Pindai makanan
                 </a>
               </li>
               <li>
-                <a href="#faq" className="hover:text-[hsl(var(--foreground))]">
-                  FAQ
+                <a href="#fitur" className="hover:text-[hsl(var(--foreground))]">
+                  Ringkasan mingguan
                 </a>
               </li>
             </ul>
           </div>
           <div>
-            <p className="text-sm font-semibold">Akun</p>
+            <p className="text-sm font-semibold">Bantuan</p>
             <ul className="mt-3 space-y-2 text-sm text-[hsl(var(--muted-foreground))]">
+              <li>
+                <a href="#faq" className="hover:text-[hsl(var(--foreground))]">
+                  Pertanyaan umum
+                </a>
+              </li>
+              <li>
+                <a href="#cara-kerja" className="hover:text-[hsl(var(--foreground))]">
+                  Panduan penggunaan
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <p className="text-sm font-semibold">Legal & akun</p>
+            <ul className="mt-3 space-y-2 text-sm text-[hsl(var(--muted-foreground))]">
+              <li>
+                <a href="#privasi" className="hover:text-[hsl(var(--foreground))]">
+                  Kebijakan privasi
+                </a>
+              </li>
+              <li>
+                <a href="#privasi" className="hover:text-[hsl(var(--foreground))]">
+                  Keamanan data
+                </a>
+              </li>
               <li>
                 <LoginLink
                   postLoginRedirectURL="/dashboard"
@@ -462,33 +524,18 @@ export default function LandingPage() {
                   postLoginRedirectURL="/onboarding"
                   className="hover:text-[hsl(var(--foreground))]"
                 >
-                  Daftar
+                  Mulai gratis
                 </RegisterLink>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <p className="text-sm font-semibold">Legal</p>
-            <ul className="mt-3 space-y-2 text-sm text-[hsl(var(--muted-foreground))]">
-              <li>
-                <a href="#privasi" className="hover:text-[hsl(var(--foreground))]">
-                  Kebijakan privasi
-                </a>
-              </li>
-              <li>
-                <a href="#faq" className="hover:text-[hsl(var(--foreground))]">
-                  Disclaimer
-                </a>
               </li>
             </ul>
           </div>
         </div>
         <div className="border-t border-[hsl(var(--border))] px-4 py-6 text-center text-sm text-[hsl(var(--muted-foreground))]">
           <p>
-            Estimasi kalori dan nutrisi dapat tidak akurat. Aplikasi ini bukan pengganti nasihat
-            medis atau ahli gizi.
+            Atur Gizi bukan alat medis. Estimasi kalori dan makronutrien dapat berbeda dari nilai
+            sebenarnya.
           </p>
-          <p className="mt-2">© 2026 BAD-EiZA</p>
+          <p className="mt-2">© 2026 Atur Gizi. Seluruh hak dilindungi.</p>
         </div>
       </footer>
     </div>

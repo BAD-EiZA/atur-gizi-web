@@ -23,9 +23,8 @@ import { clearTokenCache } from "@/lib/api-client";
 const links = [
   { href: "#fitur", label: "Fitur" },
   { href: "#cara-kerja", label: "Cara kerja" },
-  { href: "#demo-ai", label: "Demo AI" },
-  { href: "#privasi", label: "Privasi" },
-  { href: "#faq", label: "FAQ" },
+  { href: "#privasi", label: "Keamanan data" },
+  { href: "#faq", label: "Tanya jawab" },
 ];
 
 export function SiteHeader() {
@@ -217,7 +216,7 @@ export function SiteHeader() {
                 postLoginRedirectURL="/onboarding"
                 className="inline-flex min-h-10 items-center rounded-full bg-[hsl(var(--primary))] px-4 py-2 text-sm font-medium text-white shadow-[var(--shadow-sm)] transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2"
               >
-                Daftar gratis
+                Mulai gratis
               </RegisterLink>
             </>
           )}

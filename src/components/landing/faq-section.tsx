@@ -6,36 +6,36 @@ import { cn } from "@/lib/utils";
 
 const faqs = [
   {
-    q: "Apakah Atur Gizi alat medis?",
-    a: "Bukan. Atur Gizi adalah wellness tracker untuk membantu pencatatan. Estimasi nutrisi bukan diagnosis dan tidak menggantikan ahli gizi atau tenaga medis.",
+    q: "Apakah Atur Gizi merupakan aplikasi diet?",
+    a: "Atur Gizi adalah alat pencatatan makanan dan aktivitas. Aplikasi ini membantu kamu melihat data dan pola, tetapi tidak menilai makanan sebagai “baik” atau “buruk” dan tidak memberikan diagnosis medis.",
   },
   {
-    q: "Seberapa akurat estimasi foto?",
-    a: "Perkiraan AI bergantung pada kualitas foto, porsi yang terlihat, dan bahan yang tidak terlihat. Hasil selalu ditandai sebagai perkiraan dan dapat kamu ubah sebelum disimpan.",
+    q: "Seberapa akurat hasil dari AI?",
+    a: "Hasil AI adalah perkiraan awal berdasarkan foto atau informasi yang tersedia. Akurasinya dapat dipengaruhi oleh pencahayaan, sudut foto, ukuran porsi, bahan, dan cara memasak. Karena itu, semua hasil perlu diperiksa sebelum disimpan.",
   },
   {
-    q: "Apakah hasil AI dapat diedit?",
-    a: "Ya. AI hanya membuat draf. Kamu meninjau nama, porsi, kalori, dan makronutrien, lalu mengonfirmasi. Tidak ada catatan yang disimpan tanpa konfirmasi.",
+    q: "Apakah saya bisa mengubah hasil AI?",
+    a: "Bisa. Kamu dapat mengubah nama makanan, jumlah, satuan, kalori, protein, karbohidrat, lemak, dan catatan sebelum maupun setelah data disimpan.",
   },
   {
-    q: "Apa yang terjadi pada foto saya?",
-    a: "Secara default foto dihapus setelah proses analisis selesai. Kamu dapat mengubah preferensi simpan foto di Pengaturan kapan saja.",
+    q: "Apakah saya harus menggunakan foto?",
+    a: "Tidak. Kamu dapat mencari makanan dari katalog, menggunakan kembali catatan sebelumnya, atau mengisi data secara manual.",
   },
   {
-    q: "Bisakah data diekspor?",
-    a: "Ya. Ekspor JSON dan CSV tersedia dari menu Ekspor di aplikasi, termasuk profil, catatan makanan, dan aktivitas.",
+    q: "Apakah foto makanan saya disimpan?",
+    a: "Secara default, foto dihapus setelah analisis atau setelah hasil dikonfirmasi. Kamu dapat memilih untuk menyimpan foto melalui Pengaturan.",
   },
   {
-    q: "Apakah tersedia makanan Indonesia?",
-    a: "Ya, alur AI dan pencatatan mendukung nama serta porsi rumah tangga yang umum di Indonesia. Database akan terus diperluas.",
+    q: "Apakah saya bisa mencatat aktivitas?",
+    a: "Bisa. Pilih jenis aktivitas dan durasinya, atau impor screenshot ringkasan dari aplikasi kebugaran untuk membuat draf yang dapat kamu periksa.",
   },
   {
-    q: "Apakah ada batas pindai AI?",
-    a: "Ada kuota harian (10 pindai/hari pada paket gratis). Kamu tetap dapat mencatat makanan secara manual, favorit, atau barcode.",
+    q: "Apakah Atur Gizi memberikan saran medis?",
+    a: "Tidak. Informasi di Atur Gizi bersifat umum dan digunakan untuk membantu pencatatan. Untuk kebutuhan medis atau rencana gizi khusus, konsultasikan dengan dokter atau ahli gizi.",
   },
   {
-    q: "Apakah perlu kartu pembayaran untuk mulai?",
-    a: "Tidak. Mulai gratis tanpa kartu pembayaran. Paket berbayar opsional untuk kuota AI lebih besar.",
+    q: "Bisakah saya mengekspor atau menghapus data?",
+    a: "Bisa. Kamu dapat mengekspor data dan menghapus akun beserta seluruh datanya melalui halaman Profil atau Pengaturan.",
   },
 ];
 

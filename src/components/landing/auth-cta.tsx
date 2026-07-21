@@ -32,7 +32,7 @@ export function HeroCta() {
         <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link href="/dashboard" className={btnPrimary}>
             <LayoutDashboard className="size-4" aria-hidden />
-            Buka dashboard
+            Buka beranda
           </Link>
           <Link
             href="/food/new"
@@ -74,14 +74,14 @@ export function FinalCta() {
   if (loggedIn) {
     return (
       <div className="space-y-6 text-center">
-        <h2 className="display-h2">Siap melanjutkan hari ini?</h2>
+        <h2 className="display-h2">Siap mencatat dengan lebih ringan?</h2>
         <p className="mx-auto max-w-xl text-base text-[hsl(var(--muted-foreground))]">
-          Kembali ke dashboard atau catat makanan berikutnya.
+          Kembali ke beranda atau catat makanan berikutnya. Kamu tetap memegang keputusan akhirnya.
         </p>
         <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link href="/dashboard" className={btnPrimary}>
             <LayoutDashboard className="size-4" aria-hidden />
-            Buka dashboard
+            Buka beranda
           </Link>
           <Link href="/food/scan" className={btnOutline}>
             <Camera className="size-4" aria-hidden />
@@ -94,21 +94,23 @@ export function FinalCta() {
 
   return (
     <div className="space-y-6 text-center">
-      <h2 className="display-h2 mx-auto max-w-3xl">
-        Mulai mencatat tanpa menjadikan setiap makan sebagai ujian
-      </h2>
+      <h2 className="display-h2 mx-auto max-w-3xl">Siap mencatat dengan lebih ringan?</h2>
       <p className="mx-auto max-w-xl text-base text-[hsl(var(--muted-foreground))]">
-        Buat akun, atur target, lalu catat makanan pertama. Gratis untuk mulai.
+        Mulai dari satu makanan hari ini. Foto, cari, atau tulis sendiri. Kamu tetap memegang
+        keputusan akhirnya.
       </p>
       <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
         <RegisterLink postLoginRedirectURL="/onboarding" className={btnPrimary}>
           Mulai gratis
           <ArrowRight className="size-4" aria-hidden />
         </RegisterLink>
-        <a href="#demo-ai" className={btnOutline}>
-          Lihat demo AI
+        <a href="#cara-kerja" className={btnOutline}>
+          Lihat cara kerja
         </a>
       </div>
+      <p className="text-xs text-[hsl(var(--muted-foreground))]">
+        Tanpa kartu kredit · Bisa digunakan secara manual · Hasil AI dapat diedit
+      </p>
     </div>
   );
 }
