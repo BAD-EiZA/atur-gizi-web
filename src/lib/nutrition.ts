@@ -52,6 +52,33 @@ export function fmtMacro(n: number, digits = 1): string {
 }
 
 /** Common portion units + rough gram hints for UI */
+/** Scale nutrition when portion amount changes (baseline from first load). */
+export function scaleByPortion(
+  baseline: { calories: number; protein_g: number; carbs_g: number; fat_g: number; portion_amount: number },
+  newAmount: number,
+) {
+  const baseAmt = Number(baseline.portion_amount) || 1;
+  const amt = Number(newAmount) || 0;
+  if (!(baseAmt > 0) || amt < 0) return baseline;
+  const s = amt / baseAmt;
+  return {
+    calories: Math.round(baseline.calories * s),
+    protein_g: Math.round(baseline.protein_g * s * 10) / 10,
+    carbs_g: Math.round(baseline.carbs_g * s * 10) / 10,
+    fat_g: Math.round(baseline.fat_g * s * 10) / 10,
+    portion_amount: amt,
+  };
+}
+
+export const PORTION_PRESETS: Array<{ label: string; amount: number; unit: string; hint: string }> = [
+  { label: "½ porsi", amount: 0.5, unit: "porsi", hint: "setengah piring" },
+  { label: "1 kepalan", amount: 1, unit: "centong", hint: "~100–150 g nasi" },
+  { label: "1 telapak", amount: 1, unit: "potong", hint: "~80–120 g protein" },
+  { label: "1 piring", amount: 1, unit: "piring", hint: "porsi rumah" },
+  { label: "1½×", amount: 1.5, unit: "porsi", hint: "porsi besar" },
+  { label: "2×", amount: 2, unit: "porsi", hint: "dobel" },
+];
+
 export const PORTION_UNITS: Array<{ unit: string; hint?: string }> = [
   { unit: "g", hint: "gram" },
   { unit: "ml", hint: "mililiter" },

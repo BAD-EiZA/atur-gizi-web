@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, ApiError } from "@/lib/api-client";
 import { Button, Card, ErrorBox, Input, Label, PageTitle, Select } from "@/components/ui";
+import { LabelWithTip } from "@/components/info-tip";
 import type { Me } from "@/lib/types";
 
 type Preview = {
@@ -26,6 +27,7 @@ export default function OnboardingPage() {
     dateOfBirth: "2000-01-01",
     heightCm: 165,
     weightKg: 60,
+    sex: "unspecified",
     metabolicFormula: "mifflin_b",
     activityLevel: "moderate",
     fitnessGoal: "maintain",
@@ -65,7 +67,13 @@ export default function OnboardingPage() {
           dateOfBirth: form.dateOfBirth,
           heightCm: Number(form.heightCm),
           weightKg: Number(form.weightKg),
-          metabolicFormula: form.metabolicFormula,
+          sex: form.sex === "unspecified" ? undefined : form.sex,
+          metabolicFormula:
+            form.sex === "male"
+              ? "mifflin_a"
+              : form.sex === "female"
+                ? "mifflin_b"
+                : form.metabolicFormula,
           activityLevel: form.activityLevel,
           fitnessGoal: form.fitnessGoal,
           targetRate: Number(form.targetRate),
@@ -89,7 +97,13 @@ export default function OnboardingPage() {
           dateOfBirth: form.dateOfBirth,
           heightCm: Number(form.heightCm),
           weightKg: Number(form.weightKg),
-          metabolicFormula: form.metabolicFormula,
+          sex: form.sex === "unspecified" ? undefined : form.sex,
+          metabolicFormula:
+            form.sex === "male"
+              ? "mifflin_a"
+              : form.sex === "female"
+                ? "mifflin_b"
+                : form.metabolicFormula,
           activityLevel: form.activityLevel,
           fitnessGoal: form.fitnessGoal,
           targetRate: Number(form.targetRate),
@@ -162,6 +176,22 @@ export default function OnboardingPage() {
               </div>
             </div>
             <div>
+              <LabelWithTip tip="sex_bmr">Jenis kelamin (untuk BMR)</LabelWithTip>
+              <Select
+                value={form.sex}
+                onChange={(e) => {
+                  const sex = e.target.value;
+                  set("sex", sex);
+                  if (sex === "male") set("metabolicFormula", "mifflin_a");
+                  if (sex === "female") set("metabolicFormula", "mifflin_b");
+                }}
+              >
+                <option value="unspecified">Tidak disebutkan</option>
+                <option value="male">Pria (Mifflin A)</option>
+                <option value="female">Wanita (Mifflin B)</option>
+              </Select>
+            </div>
+            <div>
               <Label>Unit</Label>
               <Select value={form.unitSystem} onChange={(e) => set("unitSystem", e.target.value)}>
                 <option value="metric">Metrik</option>
@@ -173,10 +203,10 @@ export default function OnboardingPage() {
         {step === 1 ? (
           <>
             <div>
-              <Label>Formula metabolik</Label>
+              <LabelWithTip tip="mifflin">Formula metabolik</LabelWithTip>
               <Select value={form.metabolicFormula} onChange={(e) => set("metabolicFormula", e.target.value)}>
-                <option value="mifflin_a">Mifflin–St Jeor A</option>
-                <option value="mifflin_b">Mifflin–St Jeor B</option>
+                <option value="mifflin_a">Mifflin–St Jeor A (pria)</option>
+                <option value="mifflin_b">Mifflin–St Jeor B (wanita)</option>
                 <option value="manual">Manual</option>
               </Select>
             </div>

@@ -6,6 +6,7 @@ import { useState } from "react";
 import { api } from "@/lib/api-client";
 import type { ActivityLog } from "@/lib/types";
 import { Button, Card, ErrorBox, Input, Label, PageTitle, Select } from "@/components/ui";
+import { InfoTip, TipLabel } from "@/components/info-tip";
 
 export default function ActivityDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -105,24 +106,34 @@ export default function ActivityDetailPage() {
                 <p className="font-semibold tabular-nums">{d.duration_minutes} mnt</p>
               </div>
               <div className="rounded-xl border border-[hsl(var(--border))] px-3 py-2">
-                <p className="text-[11px] text-[hsl(var(--muted-foreground))]">Terbakar</p>
+                <p className="text-[11px] text-[hsl(var(--muted-foreground))]">
+                  <TipLabel tip="burned">Terbakar</TipLabel>
+                </p>
                 <p className="font-semibold tabular-nums">{d.calories_burned} kkal</p>
               </div>
               <div className="rounded-xl border border-[hsl(var(--border))] px-3 py-2">
-                <p className="text-[11px] text-[hsl(var(--muted-foreground))]">Intensitas</p>
+                <p className="text-[11px] text-[hsl(var(--muted-foreground))]">
+                  <TipLabel tip="intensity">Intensitas</TipLabel>
+                </p>
                 <p className="font-semibold">{d.intensity}</p>
               </div>
               <div className="rounded-xl border border-[hsl(var(--border))] px-3 py-2">
-                <p className="text-[11px] text-[hsl(var(--muted-foreground))]">Sumber</p>
+                <p className="text-[11px] text-[hsl(var(--muted-foreground))]">
+                  <TipLabel tip="device_source">Sumber</TipLabel>
+                </p>
                 <p className="font-semibold">{d.source ?? "estimate"}</p>
               </div>
             </div>
             <ul className="space-y-1 text-xs text-[hsl(var(--muted-foreground))]">
               {d.met_value != null ? (
-                <li>
-                  MET {d.met_value}
-                  {d.met_source ? ` · ${d.met_source}` : ""}
-                  {d.formula_version ? ` · ${d.formula_version}` : ""}
+                <li className="inline-flex flex-wrap items-center gap-1">
+                  <span>
+                    MET {d.met_value}
+                    {d.met_source ? ` · ${d.met_source}` : ""}
+                    {d.formula_version ? ` · ${d.formula_version}` : ""}
+                  </span>
+                  <InfoTip tip="met" />
+                  {d.formula_version ? <InfoTip tip="formula_version" /> : null}
                 </li>
               ) : null}
               {d.weight_snapshot_kg != null ? <li>Berat snapshot {d.weight_snapshot_kg} kg</li> : null}
@@ -133,13 +144,24 @@ export default function ActivityDetailPage() {
                 </li>
               ) : null}
               {d.distance_m != null ? (
-                <li>
-                  Jarak {(d.distance_m / 1000).toFixed(2)} km
-                  {d.speed_kmh != null ? ` · ~${d.speed_kmh} km/jam` : ""}
+                <li className="inline-flex items-center gap-1">
+                  <span>
+                    Jarak {(d.distance_m / 1000).toFixed(2)} km
+                    {d.speed_kmh != null ? ` · ~${d.speed_kmh} km/jam` : ""}
+                  </span>
+                  <InfoTip tip="distance" />
                 </li>
               ) : null}
-              {d.avg_hr != null ? <li>HR rata-rata {d.avg_hr} bpm</li> : null}
-              {d.rpe != null ? <li>RPE {d.rpe}/10</li> : null}
+              {d.avg_hr != null ? (
+                <li className="inline-flex items-center gap-1">
+                  HR rata-rata {d.avg_hr} bpm <InfoTip tip="avg_hr" />
+                </li>
+              ) : null}
+              {d.rpe != null ? (
+                <li className="inline-flex items-center gap-1">
+                  RPE {d.rpe}/10 <InfoTip tip="rpe" />
+                </li>
+              ) : null}
               {d.sets != null || d.reps != null ? (
                 <li>
                   Strength: {d.sets ?? "—"} set × {d.reps ?? "—"} rep

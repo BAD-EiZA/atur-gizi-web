@@ -17,6 +17,7 @@ import {
   Label,
   PageTitle,
 } from "@/components/ui";
+import { InfoTip, LabelWithTip } from "@/components/info-tip";
 import { cn } from "@/lib/utils";
 
 type Estimate = {
@@ -167,7 +168,9 @@ export default function NewActivityPage() {
       <Card className="space-y-4">
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
-            <Label htmlFor="duration">Durasi (menit)</Label>
+            <LabelWithTip tip="Durasi sesi dalam menit. Dipakai rumus MET × berat × waktu." htmlFor="duration">
+              Durasi (menit)
+            </LabelWithTip>
             <Input
               id="duration"
               type="number"
@@ -177,7 +180,9 @@ export default function NewActivityPage() {
             />
           </div>
           <div>
-            <Label htmlFor="logDate">Tanggal</Label>
+            <LabelWithTip tip="Tanggal log aktivitas (zona waktu akun)." htmlFor="logDate">
+              Tanggal
+            </LabelWithTip>
             <Input
               id="logDate"
               type="date"
@@ -188,7 +193,7 @@ export default function NewActivityPage() {
         </div>
 
         <div>
-          <Label>Intensitas</Label>
+          <LabelWithTip tip="intensity">Intensitas</LabelWithTip>
           <div className="mt-1.5 flex flex-wrap gap-2">
             {(
               [
@@ -239,7 +244,10 @@ export default function NewActivityPage() {
 
         <div>
           <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-            <p className="text-sm font-medium">Jenis aktivitas</p>
+            <p className="inline-flex items-center gap-1 text-sm font-medium">
+              Jenis aktivitas
+              <InfoTip tip="met" />
+            </p>
             <div className="flex flex-wrap gap-1">
               {categories.map((c) => (
                 <button
@@ -301,7 +309,9 @@ export default function NewActivityPage() {
           <summary className="cursor-pointer text-sm font-medium">Detail opsional (jarak, HR, RPE, beban)</summary>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <div>
-              <Label className="text-xs">Jarak (km)</Label>
+              <LabelWithTip tip="distance" className="text-xs">
+                Jarak (km)
+              </LabelWithTip>
               <Input
                 type="number"
                 step="0.1"
@@ -312,7 +322,9 @@ export default function NewActivityPage() {
               />
             </div>
             <div>
-              <Label className="text-xs">Denyut rata-rata (bpm)</Label>
+              <LabelWithTip tip="avg_hr" className="text-xs">
+                Denyut rata-rata (bpm)
+              </LabelWithTip>
               <Input
                 type="number"
                 min={60}
@@ -322,11 +334,15 @@ export default function NewActivityPage() {
               />
             </div>
             <div>
-              <Label className="text-xs">RPE (1–10)</Label>
+              <LabelWithTip tip="rpe" className="text-xs">
+                RPE (1–10)
+              </LabelWithTip>
               <Input type="number" min={1} max={10} value={rpe} onChange={(e) => setRpe(e.target.value)} />
             </div>
             <div>
-              <Label className="text-xs">MET override</Label>
+              <LabelWithTip tip="met" className="text-xs">
+                MET override
+              </LabelWithTip>
               <Input
                 type="number"
                 step="0.1"
@@ -365,11 +381,14 @@ export default function NewActivityPage() {
               Estimasi pembakaran:{" "}
               <span className="tabular-nums">{estimate.calculated_calories} kkal</span>
             </p>
-            <p className="mt-1 text-xs opacity-90">
-              MET {estimate.met_value}
-              {estimate.met_source ? ` (${estimate.met_source})` : ""} · berat ~
-              {estimate.weight_kg} kg · {duration} mnt
-              {estimate.speed_kmh != null ? ` · ~${estimate.speed_kmh} km/jam` : ""}
+            <p className="mt-1 inline-flex flex-wrap items-center gap-1 text-xs opacity-90">
+              <span>
+                MET {estimate.met_value}
+                {estimate.met_source ? ` (${estimate.met_source})` : ""} · berat ~
+                {estimate.weight_kg} kg · {duration} mnt
+                {estimate.speed_kmh != null ? ` · ~${estimate.speed_kmh} km/jam` : ""}
+              </span>
+              <InfoTip tip="met" />
             </p>
             <div className="mt-2 flex flex-wrap gap-2">
               <Badge variant="outline">Estimasi</Badge>

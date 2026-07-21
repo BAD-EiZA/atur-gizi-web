@@ -5,7 +5,8 @@ import { useMutation } from "@tanstack/react-query";
 import { useMe } from "@/hooks/use-me";
 import { api } from "@/lib/api-client";
 import { toast } from "sonner";
-import { Button, Card, ErrorBox, HelperText, Label, PageTitle, SectionTitle, Select } from "@/components/ui";
+import { Button, Card, ErrorBox, HelperText, PageTitle, SectionTitle, Select } from "@/components/ui";
+import { InfoTip, LabelWithTip } from "@/components/info-tip";
 import Link from "next/link";
 
 export default function SettingsPage() {
@@ -52,7 +53,9 @@ export default function SettingsPage() {
       <Card className="space-y-3">
         <SectionTitle>Umum</SectionTitle>
         <div>
-          <Label>Zona waktu (IANA)</Label>
+          <LabelWithTip tip="Zona waktu menentukan tanggal log harian (mis. Asia/Jakarta).">
+            Zona waktu (IANA)
+          </LabelWithTip>
           <Select value={timezone} onChange={(e) => setTimezone(e.target.value)}>
             <option value="Asia/Jakarta">Asia/Jakarta</option>
             <option value="Asia/Makassar">Asia/Makassar</option>
@@ -62,14 +65,16 @@ export default function SettingsPage() {
           </Select>
         </div>
         <div>
-          <Label>Sistem unit</Label>
+          <LabelWithTip tip="Metrik memakai kg dan cm. Imperial untuk lb/in (jika diaktifkan di alur terkait).">
+            Sistem unit
+          </LabelWithTip>
           <Select value={unitSystem} onChange={(e) => setUnitSystem(e.target.value)}>
             <option value="metric">Metrik (kg, cm)</option>
             <option value="imperial">Imperial</option>
           </Select>
         </div>
         <div>
-          <Label>Mode anggaran kalori</Label>
+          <LabelWithTip tip="budget_mode">Mode anggaran kalori</LabelWithTip>
           <Select value={budgetMode} onChange={(e) => setBudgetMode(e.target.value)}>
             <option value="intake_only">Intake only (disarankan) — sisa = target − makan</option>
             <option value="eat_back">Eat-back — sisa = target − (makan − aktivitas)</option>
@@ -87,7 +92,10 @@ export default function SettingsPage() {
             className="mt-1 size-4"
           />
           <span>
-            Simpan foto makanan setelah analisis AI
+            <span className="inline-flex items-center gap-1">
+              Simpan foto makanan setelah analisis AI
+              <InfoTip tip="retain_photos" />
+            </span>
             <HelperText>Default nonaktif — foto dihapus setelah analisis atau konfirmasi.</HelperText>
           </span>
         </label>

@@ -7,6 +7,7 @@ import { api } from "@/lib/api-client";
 import { fmtMacro, kcalFromMacros } from "@/lib/nutrition";
 import type { FoodLog } from "@/lib/types";
 import { Button, Card, ErrorBox, Input, Label, PageTitle, Select } from "@/components/ui";
+import { TipLabel } from "@/components/info-tip";
 
 export default function FoodDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -125,19 +126,27 @@ export default function FoodDetailPage() {
           <p className="text-[hsl(var(--muted-foreground))]">{q.data.meal_type}</p>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             <div className="rounded-xl border border-[hsl(var(--border))] px-3 py-2">
-              <p className="text-[11px] text-[hsl(var(--muted-foreground))]">Kalori</p>
+              <p className="text-[11px] text-[hsl(var(--muted-foreground))]">
+                <TipLabel tip="atwater">Kalori</TipLabel>
+              </p>
               <p className="font-semibold tabular-nums">{q.data.total_calories} kkal</p>
             </div>
             <div className="rounded-xl border border-[hsl(var(--border))] px-3 py-2">
-              <p className="text-[11px] text-[hsl(var(--muted-foreground))]">Protein</p>
+              <p className="text-[11px] text-[hsl(var(--muted-foreground))]">
+                <TipLabel tip="protein">Protein</TipLabel>
+              </p>
               <p className="font-semibold tabular-nums">{fmtMacro(Number(q.data.protein_g) || 0)} g</p>
             </div>
             <div className="rounded-xl border border-[hsl(var(--border))] px-3 py-2">
-              <p className="text-[11px] text-[hsl(var(--muted-foreground))]">Karbohidrat</p>
+              <p className="text-[11px] text-[hsl(var(--muted-foreground))]">
+                <TipLabel tip="carbs">Karbohidrat</TipLabel>
+              </p>
               <p className="font-semibold tabular-nums">{fmtMacro(Number(q.data.carbs_g) || 0)} g</p>
             </div>
             <div className="rounded-xl border border-[hsl(var(--border))] px-3 py-2">
-              <p className="text-[11px] text-[hsl(var(--muted-foreground))]">Lemak</p>
+              <p className="text-[11px] text-[hsl(var(--muted-foreground))]">
+                <TipLabel tip="fat">Lemak</TipLabel>
+              </p>
               <p className="font-semibold tabular-nums">{fmtMacro(Number(q.data.fat_g) || 0)} g</p>
             </div>
           </div>

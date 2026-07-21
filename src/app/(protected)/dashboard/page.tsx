@@ -20,6 +20,7 @@ import {
   Skeleton,
   Stat,
 } from "@/components/ui";
+import { InfoTip, TipLabel } from "@/components/info-tip";
 import { fmtMacro } from "@/lib/nutrition";
 import { formatKcal } from "@/lib/utils";
 
@@ -91,48 +92,63 @@ export default function DashboardPage() {
               aria-hidden
             />
             <div className="relative flex flex-wrap items-start justify-between gap-3">
-              <Stat
-                label={
-                  d.budget_mode === "eat_back"
-                    ? "Sisa anggaran (net / eat-back)"
-                    : "Sisa anggaran makan"
-                }
-                value={formatKcal(d.remaining_calories)}
-                unit="kkal"
-                hint={
-                  d.budget_mode === "eat_back"
-                    ? `Target ${formatKcal(d.intake_target)} · sisa = target − (makan − aktivitas)`
-                    : `Target ${formatKcal(d.intake_target)} · sisa = target − konsumsi (default, tanpa double-count aktivitas)`
-                }
-              />
+              <div className="min-w-0 flex-1">
+                <div className="mb-1 flex items-center gap-1.5">
+                  <span className="text-xs font-medium text-[hsl(var(--muted-foreground))]">
+                    {d.budget_mode === "eat_back"
+                      ? "Sisa anggaran (net / eat-back)"
+                      : "Sisa anggaran makan"}
+                  </span>
+                  <InfoTip
+                    tip={d.budget_mode === "eat_back" ? "remaining_net" : "remaining_intake"}
+                  />
+                </div>
+                <Stat
+                  label=""
+                  value={formatKcal(d.remaining_calories)}
+                  unit="kkal"
+                  hint={`Target ${formatKcal(d.intake_target)} kkal`}
+                />
+              </div>
               <Badge variant="secondary">{d.date}</Badge>
             </div>
             <div className="relative mt-6">
-              <div className="mb-1.5 flex justify-between text-xs text-[hsl(var(--muted-foreground))]">
-                <span>Progres menuju target</span>
+              <div className="mb-1.5 flex items-center justify-between text-xs text-[hsl(var(--muted-foreground))]">
+                <span className="inline-flex items-center gap-1">
+                  Progres menuju target
+                  <InfoTip tip="progress" side="bottom" />
+                </span>
                 <span className="tabular-nums">{pct}%</span>
               </div>
               <Progress value={pct} label="Progres kalori harian" className="h-3" />
             </div>
             <div className="relative mt-6 grid grid-cols-2 gap-3 border-t border-[hsl(var(--border))] pt-5 text-center sm:grid-cols-4">
               <div className="rounded-2xl bg-white/70 p-3 ring-1 ring-[hsl(var(--border)/0.6)]">
-                <p className="text-xs text-[hsl(var(--muted-foreground))]">Konsumsi</p>
+                <p className="text-xs text-[hsl(var(--muted-foreground))]">
+                  <TipLabel tip="consumed">Konsumsi</TipLabel>
+                </p>
                 <p className="mt-0.5 text-lg font-semibold tabular-nums">{formatKcal(d.consumed_calories)}</p>
               </div>
               <div className="rounded-2xl bg-white/70 p-3 ring-1 ring-[hsl(var(--border)/0.6)]">
-                <p className="text-xs text-[hsl(var(--muted-foreground))]">Aktivitas</p>
+                <p className="text-xs text-[hsl(var(--muted-foreground))]">
+                  <TipLabel tip="burned">Aktivitas</TipLabel>
+                </p>
                 <p className="mt-0.5 text-lg font-semibold tabular-nums text-[hsl(var(--activity))]">
                   {formatKcal(d.burned_calories)}
                 </p>
               </div>
               <div className="rounded-2xl bg-white/70 p-3 ring-1 ring-[hsl(var(--border)/0.6)]">
-                <p className="text-xs text-[hsl(var(--muted-foreground))]">Sisa makan</p>
+                <p className="text-xs text-[hsl(var(--muted-foreground))]">
+                  <TipLabel tip="remaining_intake">Sisa makan</TipLabel>
+                </p>
                 <p className="mt-0.5 text-lg font-semibold tabular-nums">
                   {formatKcal(d.remaining_intake ?? d.intake_target - d.consumed_calories)}
                 </p>
               </div>
               <div className="rounded-2xl bg-white/70 p-3 ring-1 ring-[hsl(var(--border)/0.6)]">
-                <p className="text-xs text-[hsl(var(--muted-foreground))]">Sisa net</p>
+                <p className="text-xs text-[hsl(var(--muted-foreground))]">
+                  <TipLabel tip="remaining_net">Sisa net</TipLabel>
+                </p>
                 <p className="mt-0.5 text-lg font-semibold tabular-nums">
                   {formatKcal(d.remaining_net ?? d.remaining_calories)}
                 </p>
@@ -140,21 +156,27 @@ export default function DashboardPage() {
             </div>
             <div className="relative mt-3 grid grid-cols-3 gap-2 text-center">
               <div className="rounded-xl bg-[hsl(var(--muted)/0.5)] px-2 py-2">
-                <p className="text-[11px] text-[hsl(var(--muted-foreground))]">Protein</p>
+                <p className="text-[11px] text-[hsl(var(--muted-foreground))]">
+                  <TipLabel tip="protein">Protein</TipLabel>
+                </p>
                 <p className="text-sm font-semibold tabular-nums">
                   {fmtMacro(d.consumed_protein_g ?? 0)}
                   {d.protein_target_g != null ? ` / ${fmtMacro(d.protein_target_g)}` : ""} g
                 </p>
               </div>
               <div className="rounded-xl bg-[hsl(var(--muted)/0.5)] px-2 py-2">
-                <p className="text-[11px] text-[hsl(var(--muted-foreground))]">Karbo</p>
+                <p className="text-[11px] text-[hsl(var(--muted-foreground))]">
+                  <TipLabel tip="carbs">Karbo</TipLabel>
+                </p>
                 <p className="text-sm font-semibold tabular-nums">
                   {fmtMacro(d.consumed_carbs_g ?? 0)}
                   {d.carbs_target_g != null ? ` / ${fmtMacro(d.carbs_target_g)}` : ""} g
                 </p>
               </div>
               <div className="rounded-xl bg-[hsl(var(--muted)/0.5)] px-2 py-2">
-                <p className="text-[11px] text-[hsl(var(--muted-foreground))]">Lemak</p>
+                <p className="text-[11px] text-[hsl(var(--muted-foreground))]">
+                  <TipLabel tip="fat">Lemak</TipLabel>
+                </p>
                 <p className="text-sm font-semibold tabular-nums">
                   {fmtMacro(d.consumed_fat_g ?? 0)}
                   {d.fat_target_g != null ? ` / ${fmtMacro(d.fat_target_g)}` : ""} g
@@ -162,8 +184,8 @@ export default function DashboardPage() {
               </div>
             </div>
             <HelperText>
-              Mode {d.budget_mode === "eat_back" ? "eat-back (net)" : "intake-only (default)"}. Ubah di
-              Setelan. Angka estimasi.
+              Mode {d.budget_mode === "eat_back" ? "eat-back (net)" : "intake-only (default)"}{" "}
+              <InfoTip tip="budget_mode" />. Ubah di Setelan. Angka estimasi.
             </HelperText>
           </Card>
 

@@ -19,12 +19,21 @@ import {
   Progress,
   Select,
 } from "@/components/ui";
+import { InfoTip, LabelWithTip } from "@/components/info-tip";
 import {
   fileToBase64,
   uploadToCloudinary,
   type UploadSignature,
 } from "@/lib/cloudinary-upload";
-import { atwaterWarning, fmtMacro, kcalFromMacros, sumMacros } from "@/lib/nutrition";
+import {
+  atwaterWarning,
+  fmtMacro,
+  kcalFromMacros,
+  PORTION_PRESETS,
+  PORTION_UNITS,
+  scaleByPortion,
+  sumMacros,
+} from "@/lib/nutrition";
 
 type EditItem = {
   name: string;
@@ -37,6 +46,14 @@ type EditItem = {
   fiber_g: number;
   confidence?: number;
   confidence_label?: string;
+  /** baseline for portion scaling */
+  _base?: {
+    calories: number;
+    protein_g: number;
+    carbs_g: number;
+    fat_g: number;
+    portion_amount: number;
+  };
 };
 
 function confVariant(label?: string): "success" | "warning" | "danger" | "outline" {
@@ -104,18 +121,28 @@ export default function FoodScanPage() {
       setAnalysis(data);
       setReviewed(false);
       setItems(
-        (data.result?.items ?? []).map((i) => ({
-          name: i.name,
-          portion_amount: i.portion_amount,
-          portion_unit: i.portion_unit,
-          calories: i.calories,
-          protein_g: i.protein_g,
-          carbs_g: i.carbs_g,
-          fat_g: i.fat_g,
-          fiber_g: i.fiber_g,
-          confidence: i.confidence,
-          confidence_label: i.confidence_label,
-        })),
+        (data.result?.items ?? []).map((i) => {
+          const base = {
+            calories: i.calories,
+            protein_g: i.protein_g,
+            carbs_g: i.carbs_g,
+            fat_g: i.fat_g,
+            portion_amount: i.portion_amount || 1,
+          };
+          return {
+            name: i.name,
+            portion_amount: i.portion_amount,
+            portion_unit: i.portion_unit,
+            calories: i.calories,
+            protein_g: i.protein_g,
+            carbs_g: i.carbs_g,
+            fat_g: i.fat_g,
+            fiber_g: i.fiber_g,
+            confidence: i.confidence,
+            confidence_label: i.confidence_label,
+            _base: base,
+          };
+        }),
       );
       setErr(null);
       setStatus(null);
@@ -165,6 +192,10 @@ export default function FoodScanPage() {
     setItems((prev) =>
       prev.map((it, i) => {
         if (i !== idx) return it;
+        if (key === "portion_amount" && it._base) {
+          const scaled = scaleByPortion(it._base, Number(value));
+          return { ...it, ...scaled };
+        }
         const next = { ...it, [key]: value };
         if (key === "protein_g" || key === "carbs_g" || key === "fat_g") {
           next.calories = kcalFromMacros(
@@ -178,11 +209,23 @@ export default function FoodScanPage() {
     );
   };
 
+  const applyScale = (idx: number, mult: number) => {
+    setItems((prev) =>
+      prev.map((it, i) => {
+        if (i !== idx || !it._base) return it;
+        const newAmt = Math.round(it._base.portion_amount * mult * 100) / 100;
+        return { ...it, ...scaleByPortion(it._base, newAmt) };
+      }),
+    );
+  };
+
   const totals = sumMacros(items);
   const atwWarn = atwaterWarning(totals.calories, totals.protein_g, totals.carbs_g, totals.fat_g);
   const lowConf =
     (analysis?.result?.overall_confidence != null && analysis.result.overall_confidence < 0.55) ||
-    Boolean(analysis?.result?.require_review);
+    Boolean(analysis?.result?.require_review) ||
+    analysis?.result?.image_quality === "poor" ||
+    items.some((it) => (it.confidence ?? 1) < 0.45);
 
   const onFile = (f: File | null) => {
     const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
@@ -282,10 +325,18 @@ export default function FoodScanPage() {
       {analysis?.result ? (
         <Card className="mt-5 animate-fade-up space-y-5 border-[hsl(var(--primary)/0.15)] bg-gradient-to-b from-emerald-50/50 to-white shadow-[var(--shadow-md)]">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="secondary">Draft AI</Badge>
+            <Badge variant="secondary">
+              <span className="inline-flex items-center gap-1">
+                Draft AI
+                <InfoTip tip="ai_draft" />
+              </span>
+            </Badge>
             <Badge variant="outline">Belum disimpan</Badge>
             <Badge variant={confVariant(analysis.result.overall_confidence_label)}>
-              {analysis.result.overall_confidence_label}
+              <span className="inline-flex items-center gap-1">
+                {analysis.result.overall_confidence_label}
+                <InfoTip tip="ai_confidence" />
+              </span>
             </Badge>
           </div>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -341,11 +392,47 @@ export default function FoodScanPage() {
                 onChange={(e) => updateItem(idx, "name", e.target.value)}
                 aria-label={`Nama item ${idx + 1}`}
               />
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="inline-flex items-center gap-1 text-[11px] text-[hsl(var(--muted-foreground))]">
+                  Skala porsi
+                  <InfoTip tip="portion_scale" side="bottom" />
+                </span>
+                {[0.5, 1, 1.5, 2].map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    className="rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--muted))] px-2.5 py-1 text-[11px] font-medium"
+                    onClick={() => applyScale(idx, m)}
+                  >
+                    {m}×
+                  </button>
+                ))}
+                {PORTION_PRESETS.slice(0, 3).map((p) => (
+                  <button
+                    key={p.label}
+                    type="button"
+                    title={p.hint}
+                    className="rounded-full border border-[hsl(var(--border))] px-2.5 py-1 text-[11px]"
+                    onClick={() => {
+                      updateItem(idx, "portion_unit", p.unit);
+                      if (item._base) {
+                        const scaled = scaleByPortion(item._base, p.amount);
+                        setItems((prev) =>
+                          prev.map((it, i) => (i === idx ? { ...it, ...scaled, portion_unit: p.unit } : it)),
+                        );
+                      }
+                    }}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
               <div className="grid gap-2 sm:grid-cols-3">
                 <div>
                   <Label className="text-xs">Porsi</Label>
                   <Input
                     type="number"
+                    step="0.1"
                     value={item.portion_amount}
                     onChange={(e) => updateItem(idx, "portion_amount", Number(e.target.value))}
                     aria-label="Jumlah porsi"
@@ -353,11 +440,24 @@ export default function FoodScanPage() {
                 </div>
                 <div>
                   <Label className="text-xs">Satuan</Label>
-                  <Input
-                    value={item.portion_unit}
+                  <Select
+                    value={
+                      PORTION_UNITS.some((u) => u.unit === item.portion_unit)
+                        ? item.portion_unit
+                        : item.portion_unit
+                    }
                     onChange={(e) => updateItem(idx, "portion_unit", e.target.value)}
                     aria-label="Satuan"
-                  />
+                  >
+                    {!PORTION_UNITS.some((u) => u.unit === item.portion_unit) ? (
+                      <option value={item.portion_unit}>{item.portion_unit}</option>
+                    ) : null}
+                    {PORTION_UNITS.map((u) => (
+                      <option key={u.unit} value={u.unit}>
+                        {u.unit}
+                      </option>
+                    ))}
+                  </Select>
                 </div>
                 <div>
                   <Label className="text-xs">Kalori</Label>
@@ -405,7 +505,12 @@ export default function FoodScanPage() {
           ))}
 
           {atwWarn ? (
-            <p className="rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-900">{atwWarn}</p>
+            <p className="rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-900">
+              <span className="inline-flex items-start gap-1">
+                {atwWarn}
+                <InfoTip tip="atwater" side="bottom" />
+              </span>
+            </p>
           ) : null}
           {lowConf ? (
             <label className="flex items-start gap-2 text-sm">

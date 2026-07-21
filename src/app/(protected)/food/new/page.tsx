@@ -16,6 +16,7 @@ import {
   PageTitle,
   Select,
 } from "@/components/ui";
+import { InfoTip, LabelWithTip } from "@/components/info-tip";
 
 type Fav = {
   id: string;
@@ -348,7 +349,9 @@ export default function NewFoodPage() {
             </Select>
           </div>
           <div>
-            <Label htmlFor="kcal">Kalori (kkal)</Label>
+            <LabelWithTip tip="atwater" htmlFor="kcal">
+              Kalori (kkal)
+            </LabelWithTip>
             <Input
               id="kcal"
               type="number"
@@ -359,10 +362,15 @@ export default function NewFoodPage() {
           </div>
         </div>
         <div>
-          <p className="mb-2 text-sm font-medium">Makronutrien (opsional)</p>
+          <p className="mb-2 inline-flex items-center gap-1 text-sm font-medium">
+            Makronutrien (opsional)
+            <InfoTip tip="macros" />
+          </p>
           <div className="grid gap-3 sm:grid-cols-3">
             <div>
-              <Label htmlFor="p">Protein (g)</Label>
+              <LabelWithTip tip="protein" htmlFor="p">
+                Protein (g)
+              </LabelWithTip>
               <Input
                 id="p"
                 type="number"
@@ -373,7 +381,9 @@ export default function NewFoodPage() {
               />
             </div>
             <div>
-              <Label htmlFor="c">Karbohidrat (g)</Label>
+              <LabelWithTip tip="carbs" htmlFor="c">
+                Karbohidrat (g)
+              </LabelWithTip>
               <Input
                 id="c"
                 type="number"
@@ -384,7 +394,9 @@ export default function NewFoodPage() {
               />
             </div>
             <div>
-              <Label htmlFor="f">Lemak (g)</Label>
+              <LabelWithTip tip="fat" htmlFor="f">
+                Lemak (g)
+              </LabelWithTip>
               <Input
                 id="f"
                 type="number"

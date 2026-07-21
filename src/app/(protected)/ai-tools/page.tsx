@@ -25,6 +25,7 @@ import { ResultShell } from "@/components/ai-tools/result-shell";
 import { IdleHint, EmptyResult } from "@/components/ai-tools/empty-result";
 import { ConfirmDialog } from "@/components/ai-tools/confirm-dialog";
 import { AssumptionList, ConfidenceBadge, SourceBadge } from "@/components/ai-tools/badges";
+import { InfoTip } from "@/components/info-tip";
 
 type Tab =
   | "search"
@@ -234,9 +235,10 @@ export default function AiToolsPage() {
         title="Asisten AI"
         subtitle="Pilih alat untuk membuat draft yang dapat ditinjau sebelum disimpan."
         actions={
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Badge variant="secondary">Draft, bukan keputusan</Badge>
             <Badge variant="outline">Bukan alat medis</Badge>
+            <InfoTip tip="ai_tools" />
           </div>
         }
       />

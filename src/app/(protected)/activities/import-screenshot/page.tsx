@@ -24,6 +24,7 @@ import {
   Progress,
   Select,
 } from "@/components/ui";
+import { InfoTip, LabelWithTip } from "@/components/info-tip";
 
 type Draft = {
   is_activity_screen: boolean;
@@ -75,6 +76,7 @@ export default function ImportActivityScreenshotPage() {
   const [draft, setDraft] = useState<Draft | null>(null);
   const [quota, setQuota] = useState<AnalyzeResult["quota"] | null>(null);
   const [disclaimer, setDisclaimer] = useState<string | null>(null);
+  const [reviewed, setReviewed] = useState(false);
 
   const [name, setName] = useState("");
   const [duration, setDuration] = useState(30);
@@ -108,6 +110,7 @@ export default function ImportActivityScreenshotPage() {
 
   const applyDraft = (d: Draft) => {
     setDraft(d);
+    setReviewed(false);
     setName(d.activity_name || "Aktivitas");
     setDuration(d.duration_minutes && d.duration_minutes > 0 ? d.duration_minutes : 30);
     setCalories(d.calories_burned != null && d.calories_burned >= 0 ? d.calories_burned : 0);
@@ -214,9 +217,12 @@ export default function ImportActivityScreenshotPage() {
         title="Impor lewat screenshot"
         subtitle="Screenshot ringkasan workout dari Apple Fitness, Fitbit, Strava, Garmin, dll. AI membaca angka — Anda yang mengonfirmasi."
         actions={
-          <Link href="/activities/new" className="text-sm font-medium text-[hsl(var(--primary))]">
-            Catat manual
-          </Link>
+          <span className="inline-flex items-center gap-2">
+            <InfoTip tip="screenshot_import" />
+            <Link href="/activities/new" className="text-sm font-medium text-[hsl(var(--primary))]">
+              Catat manual
+            </Link>
+          </span>
         }
       />
 
@@ -300,7 +306,10 @@ export default function ImportActivityScreenshotPage() {
             <Badge variant="secondary">Draf AI</Badge>
             <Badge variant="outline">{APP_LABEL[draft.detected_app] ?? draft.detected_app}</Badge>
             <Badge variant={draft.confidence >= 0.7 ? "success" : "warning"}>
-              Keyakinan {Math.round((draft.confidence || 0) * 100)}%
+              <span className="inline-flex items-center gap-1">
+                Keyakinan {Math.round((draft.confidence || 0) * 100)}%
+                <InfoTip tip="ai_confidence" />
+              </span>
             </Badge>
             {!draft.is_activity_screen ? <Badge variant="danger">Bukan layar aktivitas?</Badge> : null}
           </div>
@@ -328,7 +337,7 @@ export default function ImportActivityScreenshotPage() {
               />
             </div>
             <div>
-              <Label>Kalori terbakar</Label>
+              <LabelWithTip tip="burned">Kalori terbakar</LabelWithTip>
               <Input
                 type="number"
                 min={0}
@@ -337,7 +346,7 @@ export default function ImportActivityScreenshotPage() {
               />
             </div>
             <div>
-              <Label>Jarak (km)</Label>
+              <LabelWithTip tip="distance">Jarak (km)</LabelWithTip>
               <Input
                 type="number"
                 step="0.01"
@@ -348,7 +357,7 @@ export default function ImportActivityScreenshotPage() {
               />
             </div>
             <div>
-              <Label>HR rata-rata</Label>
+              <LabelWithTip tip="avg_hr">HR rata-rata</LabelWithTip>
               <Input
                 type="number"
                 min={60}
@@ -363,7 +372,7 @@ export default function ImportActivityScreenshotPage() {
               <Input type="date" value={logDate} onChange={(e) => setLogDate(e.target.value)} />
             </div>
             <div>
-              <Label>Intensitas</Label>
+              <LabelWithTip tip="intensity">Intensitas</LabelWithTip>
               <Select value={intensity} onChange={(e) => setIntensity(e.target.value)}>
                 <option value="low">Ringan</option>
                 <option value="moderate">Sedang</option>
@@ -372,11 +381,26 @@ export default function ImportActivityScreenshotPage() {
             </div>
           </div>
 
+          {(draft.confidence < 0.6 || !draft.is_activity_screen || draft.image_quality === "poor") && (
+            <label className="flex items-start gap-2 text-sm">
+              <input
+                type="checkbox"
+                className="mt-1 size-4"
+                checked={reviewed}
+                onChange={(e) => setReviewed(e.target.checked)}
+              />
+              <span>Saya sudah memeriksa angka dari screenshot sebelum menyimpan.</span>
+            </label>
+          )}
           <div className="flex flex-wrap gap-2">
             <Button
               onClick={() => save.mutate()}
               loading={save.isPending}
-              disabled={!draft.is_activity_screen && !name}
+              disabled={
+                !name ||
+                ((draft.confidence < 0.6 || !draft.is_activity_screen || draft.image_quality === "poor") &&
+                  !reviewed)
+              }
             >
               Simpan ke aktivitas
             </Button>

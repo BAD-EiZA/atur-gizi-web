@@ -142,6 +142,7 @@ export type AiAnalysis = {
     total_estimated_calories: number;
     overall_confidence: number;
     overall_confidence_label: string;
+    image_quality?: string;
     warnings: string[];
     needs_user_input: boolean;
     require_review?: boolean;

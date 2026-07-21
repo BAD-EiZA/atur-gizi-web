@@ -13,6 +13,7 @@ import {
   Skeleton,
   Stat,
 } from "@/components/ui";
+import { InfoTip, TipLabel } from "@/components/info-tip";
 
 type Weekly = {
   week_start: string;
@@ -135,7 +136,12 @@ export default function InsightsPage() {
                   </span>
                 </div>
               ))}
-              <HelperText>Batang gelap = konsumsi · area pudar = target hari itu.</HelperText>
+              <HelperText>
+                <span className="inline-flex items-center gap-1">
+                  Batang gelap = konsumsi · area pudar = target hari itu.
+                  <InfoTip tip="insights_bars" />
+                </span>
+              </HelperText>
             </div>
           </Card>
         </>
@@ -150,19 +156,24 @@ export default function InsightsPage() {
 
       {macros.data ? (
         <Card>
-          <SectionTitle>Target makronutrien (estimasi)</SectionTitle>
+          <div className="flex items-center gap-1.5">
+            <SectionTitle>Target makronutrien (estimasi)</SectionTitle>
+            <InfoTip tip="macro_targets" />
+          </div>
           <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))]">
             Berdasarkan target kalori {macros.data.calorie_target} kkal ·{" "}
-            {macros.data.split?.custom ? "target kustom" : "split 30/40/30"}
+            {macros.data.split?.custom ? "target kustom" : "berdasarkan berat & tujuan"}
           </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
             {[
-              { label: "Protein", g: macros.data.protein_g, color: "bg-purple-400" },
-              { label: "Karbohidrat", g: macros.data.carbs_g, color: "bg-orange-400" },
-              { label: "Lemak", g: macros.data.fat_g, color: "bg-amber-400" },
+              { label: "Protein", g: macros.data.protein_g, color: "bg-purple-400", tip: "protein" as const },
+              { label: "Karbohidrat", g: macros.data.carbs_g, color: "bg-orange-400", tip: "carbs" as const },
+              { label: "Lemak", g: macros.data.fat_g, color: "bg-amber-400", tip: "fat" as const },
             ].map((m) => (
               <div key={m.label} className="rounded-xl border border-[hsl(var(--border))] p-3">
-                <p className="text-xs text-[hsl(var(--muted-foreground))]">{m.label}</p>
+                <p className="text-xs text-[hsl(var(--muted-foreground))]">
+                  <TipLabel tip={m.tip}>{m.label}</TipLabel>
+                </p>
                 <p className="text-xl font-semibold tabular-nums">{m.g} g</p>
                 <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[hsl(var(--muted))]">
                   <div className={`h-full w-full ${m.color} opacity-80`} />

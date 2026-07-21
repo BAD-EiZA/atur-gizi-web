@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Camera } from "lucide-react";
 import { api } from "@/lib/api-client";
 import { Button, Card, PageTitle } from "@/components/ui";
+import { InfoTip } from "@/components/info-tip";
 
 type Wearables = {
   data: Array<{ id: string; provider: string; status: string; last_sync_at: string | null }>;
@@ -46,7 +47,10 @@ export default function WearablesPage() {
             <Camera className="size-5" aria-hidden />
           </div>
           <div className="flex-1">
-            <p className="font-semibold">Impor lewat screenshot</p>
+            <p className="inline-flex items-center gap-1.5 font-semibold">
+              Impor lewat screenshot
+              <InfoTip tip="screenshot_import" />
+            </p>
             <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
               Screenshot ringkasan workout di app jam/HP → AI membaca durasi, kalori, jarak → Anda
               tinjau lalu simpan. Bekerja untuk Apple Fitness, Fitbit, Strava, Garmin, dll.

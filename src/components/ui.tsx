@@ -285,7 +285,7 @@ export function Stat({
 }) {
   return (
     <div>
-      <p className="text-sm text-[hsl(var(--muted-foreground))]">{label}</p>
+      {label ? <p className="text-sm text-[hsl(var(--muted-foreground))]">{label}</p> : null}
       <p className="mt-0.5 text-3xl font-bold tabular-nums tracking-tight md:text-4xl">
         {value}
         {unit ? (

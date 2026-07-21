@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
 import { fmtMacro, kcalFromMacros } from "@/lib/nutrition";
 import { Button, Card, EmptyState, ErrorBox, Input, Label, PageTitle, Select } from "@/components/ui";
+import { InfoTip, LabelWithTip } from "@/components/info-tip";
 
 type Plan = {
   id: string;
@@ -78,7 +79,11 @@ export default function MealPlansPage() {
 
   return (
     <div className="animate-fade-up space-y-4">
-      <PageTitle title="Rencana makan" subtitle="Meal plan sederhana per tanggal dengan makro." />
+      <PageTitle
+        title="Rencana makan"
+        subtitle="Meal plan sederhana per tanggal dengan makro."
+        actions={<InfoTip tip="meal_plan" />}
+      />
       <Card className="space-y-2">
         <div>
           <Label>Judul</Label>
@@ -90,21 +95,27 @@ export default function MealPlansPage() {
             <Input type="date" value={planDate} onChange={(e) => setPlanDate(e.target.value)} />
           </div>
           <div>
-            <Label>Kalori</Label>
+            <LabelWithTip tip="atwater">Kalori</LabelWithTip>
             <Input type="number" value={calories} onChange={(e) => setCalories(Number(e.target.value))} />
           </div>
         </div>
         <div className="grid grid-cols-3 gap-2">
           <div>
-            <Label className="text-xs">Protein (g)</Label>
+            <LabelWithTip tip="protein" className="text-xs">
+              Protein (g)
+            </LabelWithTip>
             <Input type="number" step="0.1" value={proteinG} onChange={(e) => setMacro("p", Number(e.target.value))} />
           </div>
           <div>
-            <Label className="text-xs">Karbo (g)</Label>
+            <LabelWithTip tip="carbs" className="text-xs">
+              Karbo (g)
+            </LabelWithTip>
             <Input type="number" step="0.1" value={carbsG} onChange={(e) => setMacro("c", Number(e.target.value))} />
           </div>
           <div>
-            <Label className="text-xs">Lemak (g)</Label>
+            <LabelWithTip tip="fat" className="text-xs">
+              Lemak (g)
+            </LabelWithTip>
             <Input type="number" step="0.1" value={fatG} onChange={(e) => setMacro("f", Number(e.target.value))} />
           </div>
         </div>

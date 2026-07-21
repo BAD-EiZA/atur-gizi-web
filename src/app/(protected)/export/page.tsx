@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { api } from "@/lib/api-client";
 import { Button, Card, PageTitle } from "@/components/ui";
+import { InfoTip } from "@/components/info-tip";
 
 export default function ExportPage() {
   const [msg, setMsg] = useState<string | null>(null);
@@ -39,7 +40,11 @@ export default function ExportPage() {
 
   return (
     <div className="animate-fade-up">
-      <PageTitle title="Ekspor data" subtitle="JSON/CSV profil, food logs, activity logs. Foto tidak disertakan." />
+      <PageTitle
+        title="Ekspor data"
+        subtitle="JSON/CSV profil, food logs, activity logs. Foto tidak disertakan."
+        actions={<InfoTip tip="export_data" />}
+      />
       <Card className="flex flex-wrap gap-2">
         <Button onClick={() => void downloadJson()}>Unduh JSON</Button>
         <Button variant="secondary" onClick={() => void downloadCsv()}>

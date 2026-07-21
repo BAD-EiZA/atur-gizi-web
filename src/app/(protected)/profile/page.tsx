@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components";
+import { toast } from "sonner";
 import { useMe } from "@/hooks/use-me";
 import { api, clearTokenCache } from "@/lib/api-client";
 import {
@@ -14,10 +15,10 @@ import {
   ErrorBox,
   HelperText,
   Input,
-  Label,
   PageTitle,
   SectionTitle,
 } from "@/components/ui";
+import { InfoTip, LabelWithTip } from "@/components/info-tip";
 
 type WeightRow = {
   id: string;
@@ -25,6 +26,79 @@ type WeightRow = {
   logged_at: string;
   note: string | null;
 };
+
+function EnergySuggestionCard() {
+  const qc = useQueryClient();
+  const q = useQuery({
+    queryKey: ["energy-suggestion"],
+    queryFn: () =>
+      api<{
+        available: boolean;
+        message?: string;
+        suggested_target?: number;
+        adaptive_tdee_kcal?: number;
+        avg_intake_kcal?: number;
+        weight_slope_kg_wk?: number | null;
+        window_days?: number;
+      }>("/v1/me/energy-suggestion"),
+  });
+  const accept = useMutation({
+    mutationFn: () => api("/v1/me/energy-suggestion/accept", { method: "POST", body: "{}" }),
+    onSuccess: async () => {
+      toast.success("Target adaptif diterapkan.");
+      await qc.invalidateQueries({ queryKey: ["dashboard"] });
+      await qc.invalidateQueries({ queryKey: ["energy-suggestion"] });
+    },
+  });
+  if (!q.data) return null;
+  return (
+    <Card className="space-y-3">
+      <div className="flex items-center gap-1.5">
+        <SectionTitle>Saran TDEE adaptif</SectionTitle>
+        <InfoTip tip="adaptive_tdee" />
+      </div>
+      {!q.data.available ? (
+        <HelperText>{q.data.message}</HelperText>
+      ) : (
+        <>
+          <p className="text-sm text-[hsl(var(--muted-foreground))]">{q.data.message}</p>
+          <dl className="grid gap-1 text-sm sm:grid-cols-2">
+            <div>
+              <dt className="inline-flex items-center gap-1 text-[hsl(var(--muted-foreground))]">
+                TDEE adaptif <InfoTip tip="tdee" />
+              </dt>
+              <dd className="font-semibold tabular-nums">{q.data.adaptive_tdee_kcal} kkal</dd>
+            </div>
+            <div>
+              <dt className="inline-flex items-center gap-1 text-[hsl(var(--muted-foreground))]">
+                Saran target <InfoTip tip="calorie_target" />
+              </dt>
+              <dd className="font-semibold tabular-nums">{q.data.suggested_target} kkal</dd>
+            </div>
+            <div>
+              <dt className="text-[hsl(var(--muted-foreground))]">Rata-rata asupan</dt>
+              <dd className="tabular-nums">{q.data.avg_intake_kcal} kkal</dd>
+            </div>
+            <div>
+              <dt className="inline-flex items-center gap-1 text-[hsl(var(--muted-foreground))]">
+                Tren berat <InfoTip tip="weight_log" />
+              </dt>
+              <dd className="tabular-nums">
+                {q.data.weight_slope_kg_wk != null
+                  ? `${q.data.weight_slope_kg_wk > 0 ? "+" : ""}${q.data.weight_slope_kg_wk} kg/minggu`
+                  : "—"}{" "}
+                · {q.data.window_days} hari
+              </dd>
+            </div>
+          </dl>
+          <Button onClick={() => accept.mutate()} loading={accept.isPending}>
+            Terapkan saran target
+          </Button>
+        </>
+      )}
+    </Card>
+  );
+}
 
 export default function ProfilePage() {
   const { data, refetch } = useMe();
@@ -154,10 +228,13 @@ export default function ProfilePage() {
       </Card>
 
       <Card className="space-y-3">
-        <SectionTitle>Catat berat</SectionTitle>
+        <div className="flex items-center gap-1.5">
+          <SectionTitle>Catat berat</SectionTitle>
+          <InfoTip tip="weight_log" />
+        </div>
         <div className="flex flex-wrap gap-2">
           <div className="min-w-[8rem] flex-1">
-            <Label>Berat (kg)</Label>
+            <LabelWithTip tip="weight_log">Berat (kg)</LabelWithTip>
             <Input
               type="number"
               step="0.1"
@@ -206,22 +283,31 @@ export default function ProfilePage() {
       </Card>
 
       <Card className="space-y-3">
-        <SectionTitle>Target makro (g/hari)</SectionTitle>
+        <div className="flex items-center gap-1.5">
+          <SectionTitle>Target makro (g/hari)</SectionTitle>
+          <InfoTip tip="macro_targets" />
+        </div>
         <p className="text-sm text-[hsl(var(--muted-foreground))]">
           Saat ini: P {macros.data?.protein_g ?? "—"} · K {macros.data?.carbs_g ?? "—"} · L{" "}
           {macros.data?.fat_g ?? "—"} (target {macros.data?.calorie_target ?? "—"} kkal)
         </p>
         <div className="grid grid-cols-3 gap-2">
           <div>
-            <Label className="text-xs">Protein</Label>
+            <LabelWithTip tip="protein" className="text-xs">
+              Protein
+            </LabelWithTip>
             <Input type="number" value={p} onChange={(e) => setP(e.target.value)} placeholder="g" />
           </div>
           <div>
-            <Label className="text-xs">Karbo</Label>
+            <LabelWithTip tip="carbs" className="text-xs">
+              Karbo
+            </LabelWithTip>
             <Input type="number" value={c} onChange={(e) => setC(e.target.value)} placeholder="g" />
           </div>
           <div>
-            <Label className="text-xs">Lemak</Label>
+            <LabelWithTip tip="fat" className="text-xs">
+              Lemak
+            </LabelWithTip>
             <Input type="number" value={f} onChange={(e) => setF(e.target.value)} placeholder="g" />
           </div>
         </div>
@@ -233,6 +319,8 @@ export default function ProfilePage() {
           Simpan target makro
         </Button>
       </Card>
+
+      <EnergySuggestionCard />
 
       {err ? <ErrorBox message={err} /> : null}
 
