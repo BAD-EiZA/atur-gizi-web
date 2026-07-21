@@ -164,8 +164,8 @@ export default function FoodScanPage() {
 
   const onFile = (f: File | null) => {
     const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-    if (f && (!allowedTypes.includes(f.type) || f.size > 10 * 1024 * 1024)) {
-      setErr("Gunakan foto JPEG, PNG, atau WebP dengan ukuran maksimal 10 MB.");
+    if (f && (!allowedTypes.includes(f.type) || f.size > 50 * 1024 * 1024)) {
+      setErr("Gunakan foto JPEG, PNG, atau WebP dengan ukuran maksimal 50 MB.");
       return;
     }
     setFile(f);
@@ -208,7 +208,7 @@ export default function FoodScanPage() {
           )}
           <p className="text-sm font-semibold">Seret foto ke sini atau pilih file</p>
           <p className="mt-1.5 max-w-sm text-xs leading-relaxed text-[hsl(var(--muted-foreground))]">
-            Tips: pencahayaan cukup, semua makanan terlihat, JPEG/PNG/WebP max 10 MB.
+            Tips: pencahayaan cukup, semua makanan terlihat, JPEG/PNG/WebP max 50 MB.
           </p>
           <Label htmlFor="photo" className="mt-4 !mb-0">
             <span className="sr-only">Pilih foto</span>

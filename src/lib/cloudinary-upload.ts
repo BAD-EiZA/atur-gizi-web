@@ -21,7 +21,7 @@ export type CloudinaryUploadResult = {
   height?: number;
 };
 
-const MAX_BYTES = 10 * 1024 * 1024;
+const MAX_BYTES = 50 * 1024 * 1024;
 const ALLOWED = new Set(["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"]);
 
 export function validateFoodImage(file: File) {
@@ -29,7 +29,7 @@ export function validateFoodImage(file: File) {
     throw new Error("Format gambar tidak didukung. Gunakan JPEG, PNG, atau WebP.");
   }
   if (file.size > MAX_BYTES) {
-    throw new Error("Ukuran gambar maksimal 10 MB.");
+    throw new Error("Ukuran gambar maksimal 50 MB.");
   }
 }
 
