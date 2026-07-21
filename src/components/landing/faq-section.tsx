@@ -11,15 +11,15 @@ const faqs = [
   },
   {
     q: "Seberapa akurat estimasi foto?",
-    a: "Estimasi AI bergantung pada kualitas foto, porsi yang terlihat, dan bahan yang tidak terlihat. Hasil selalu ditandai sebagai estimasi dan dapat Anda edit sebelum disimpan.",
+    a: "Perkiraan AI bergantung pada kualitas foto, porsi yang terlihat, dan bahan yang tidak terlihat. Hasil selalu ditandai sebagai perkiraan dan dapat kamu ubah sebelum disimpan.",
   },
   {
     q: "Apakah hasil AI dapat diedit?",
-    a: "Ya. AI hanya membuat draft. Anda meninjau nama, porsi, kalori, dan makro, lalu mengonfirmasi. Tidak ada log yang disimpan tanpa konfirmasi.",
+    a: "Ya. AI hanya membuat draf. Kamu meninjau nama, porsi, kalori, dan makronutrien, lalu mengonfirmasi. Tidak ada catatan yang disimpan tanpa konfirmasi.",
   },
   {
     q: "Apa yang terjadi pada foto saya?",
-    a: "Secara default foto dihapus setelah proses analisis selesai. Anda dapat mengubah preferensi simpan foto di Setelan kapan saja.",
+    a: "Secara default foto dihapus setelah proses analisis selesai. Kamu dapat mengubah preferensi simpan foto di Pengaturan kapan saja.",
   },
   {
     q: "Bisakah data diekspor?",
@@ -31,7 +31,7 @@ const faqs = [
   },
   {
     q: "Apakah ada batas pindai AI?",
-    a: "Ada kuota harian (10 pindai/hari pada paket gratis). Anda tetap dapat mencatat makanan secara manual, favorit, atau barcode.",
+    a: "Ada kuota harian (10 pindai/hari pada paket gratis). Kamu tetap dapat mencatat makanan secara manual, favorit, atau barcode.",
   },
   {
     q: "Apakah perlu kartu pembayaran untuk mulai?",

@@ -9,7 +9,7 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "Atur Gizi — Catat Makan, Aktivitas, dan Insight Mingguan",
+  title: "Atur Gizi — Catat makan, aktivitas, dan ringkasan mingguan",
   description:
     "Catat makanan manual, dari barcode, atau melalui foto. Tinjau estimasi AI sebelum menyimpan dan pahami pola mingguan dengan bahasa yang netral.",
   icons: {

@@ -33,36 +33,36 @@ const groups: { title: string; items: NavItem[] }[] = [
         href: "/food/scan",
         label: "Pindai makanan",
         icon: Camera,
-        tip: "Analisis foto makanan",
+        tip: "Perkiraan dari foto makanan",
       },
       {
         href: "/ai-tools",
         label: "Asisten AI",
         icon: Wand2,
-        tip: "Cari, bandingkan, insight",
+        tip: "Cari, bandingkan, dan buat draf",
       },
-      { href: "/activities/new", label: "Aktivitas", icon: Activity },
+      { href: "/activities/new", label: "Catat aktivitas", icon: Activity },
       {
         href: "/activities/import-screenshot",
-        label: "Impor screenshot",
+        label: "Impor aktivitas",
         icon: Camera,
-        tip: "Baca workout dari screenshot app jam",
+        tip: "Baca data dari screenshot aplikasi kebugaran",
       },
     ],
   },
   {
-    title: "Lacak",
+    title: "Pantau",
     items: [
-      { href: "/history", label: "Histori", icon: History },
-      { href: "/insights", label: "Insight", icon: Sparkles },
+      { href: "/history", label: "Riwayat", icon: History },
+      { href: "/insights", label: "Ringkasan mingguan", icon: Sparkles },
     ],
   },
   {
     title: "Akun",
     items: [
       { href: "/profile", label: "Profil", icon: User },
-      { href: "/settings", label: "Setelan", icon: Settings },
-      { href: "/export", label: "Ekspor", icon: Download },
+      { href: "/settings", label: "Pengaturan", icon: Settings },
+      { href: "/export", label: "Ekspor data", icon: Download },
     ],
   },
 ];
@@ -71,7 +71,7 @@ const mobilePrimary: NavItem[] = [
   { href: "/dashboard", label: "Hari ini", icon: Home },
   { href: "/food/new", label: "Catat", icon: Utensils },
   { href: "/food/scan", label: "Pindai", icon: Camera },
-  { href: "/insights", label: "Insight", icon: Sparkles },
+  { href: "/insights", label: "Ringkasan", icon: Sparkles },
 ];
 
 function NavLink({

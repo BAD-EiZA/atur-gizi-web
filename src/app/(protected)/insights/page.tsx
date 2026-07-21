@@ -62,8 +62,8 @@ export default function InsightsPage() {
   return (
     <div className="animate-fade-up space-y-5">
       <PageTitle
-        title="Insight mingguan"
-        subtitle="Ringkasan netral, tanpa menghakimi. Insight awal jika data masih terbatas."
+        title="Ringkasan mingguan"
+        subtitle="Lihat pola makan dan aktivitasmu secara netral, tanpa penilaian."
       />
 
       {weekly.isLoading ? <Skeleton className="h-40" /> : null}
@@ -76,26 +76,30 @@ export default function InsightsPage() {
             </Card>
             <Card>
               <Stat
-                label="Rata-rata konsumsi"
+                label="Rata-rata kalori masuk"
                 value={weekly.data.avg_consumed_calories}
                 unit="kkal"
               />
             </Card>
             <Card>
               <Stat
-                label="Total aktivitas"
+                label="Kalori dari aktivitas"
                 value={weekly.data.total_activity_calories}
                 unit="kkal"
               />
             </Card>
             <Card>
-              <Stat label="Protein minggu" value={weekly.data.macros.protein_g} unit="g" />
+              <Stat label="Rata-rata protein" value={weekly.data.macros.protein_g} unit="g/hari" />
             </Card>
             <Card>
-              <Stat label="Karbo minggu" value={weekly.data.macros.carbs_g} unit="g" />
+              <Stat
+                label="Rata-rata karbohidrat"
+                value={weekly.data.macros.carbs_g}
+                unit="g/hari"
+              />
             </Card>
             <Card>
-              <Stat label="Lemak minggu" value={weekly.data.macros.fat_g} unit="g" />
+              <Stat label="Rata-rata lemak" value={weekly.data.macros.fat_g} unit="g/hari" />
             </Card>
           </div>
 
@@ -113,7 +117,7 @@ export default function InsightsPage() {
             <p className="text-sm text-[hsl(var(--muted-foreground))]">{weekly.data.message}</p>
 
             <div className="mt-6 space-y-3">
-              <p className="text-sm font-medium">Konsumsi harian vs target</p>
+              <p className="text-sm font-medium">Kalori masuk dibandingkan target</p>
               {weekly.data.daily.map((d) => (
                 <div key={d.date} className="grid grid-cols-[5.5rem_1fr_auto] items-center gap-2 text-xs">
                   <span className="text-[hsl(var(--muted-foreground))]">
@@ -128,17 +132,17 @@ export default function InsightsPage() {
                     <div
                       className="absolute inset-y-0 left-0 rounded-full bg-[hsl(var(--primary))]"
                       style={{ width: `${(d.consumed_calories / maxBar) * 100}%` }}
-                      title="Konsumsi"
+                      title="Kalori masuk"
                     />
                   </div>
                   <span className="tabular-nums text-[hsl(var(--muted-foreground))]">
-                    {d.consumed_calories}/{d.target}
+                    {d.consumed_calories.toLocaleString("id-ID")} dari {d.target.toLocaleString("id-ID")} kkal
                   </span>
                 </div>
               ))}
               <HelperText>
                 <span className="inline-flex items-center gap-1">
-                  Batang gelap = konsumsi · area pudar = target hari itu.
+                  Garis gelap menunjukkan kalori yang tercatat. Area terang menunjukkan target harian.
                   <InfoTip tip="insights_bars" />
                 </span>
               </HelperText>
@@ -148,8 +152,8 @@ export default function InsightsPage() {
       ) : (
         !weekly.isLoading && (
           <EmptyState
-            title="Belum ada data insight"
-            description="Catat minimal beberapa hari agar pola mulai terlihat."
+            title="Belum cukup data untuk membuat ringkasan mingguan."
+            description="Mulai dengan mencatat makanan atau aktivitas hari ini."
           />
         )
       )}
@@ -157,12 +161,12 @@ export default function InsightsPage() {
       {macros.data ? (
         <Card>
           <div className="flex items-center gap-1.5">
-            <SectionTitle>Target makronutrien (estimasi)</SectionTitle>
+            <SectionTitle>Target makronutrien harian</SectionTitle>
             <InfoTip tip="macro_targets" />
           </div>
           <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))]">
-            Berdasarkan target kalori {macros.data.calorie_target} kkal ·{" "}
-            {macros.data.split?.custom ? "target kustom" : "berdasarkan berat & tujuan"}
+            Perkiraan berdasarkan target {macros.data.calorie_target} kkal, berat badan, dan
+            tujuanmu.
           </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
             {[
@@ -182,7 +186,9 @@ export default function InsightsPage() {
             ))}
           </div>
           <div className="mt-2">
-            <HelperText>Label teks menyertai warna — bukan satu-satunya indikator.</HelperText>
+            <HelperText>
+              Label teks selalu disertakan, sehingga informasi tidak hanya dibedakan dengan warna.
+            </HelperText>
           </div>
         </Card>
       ) : null}

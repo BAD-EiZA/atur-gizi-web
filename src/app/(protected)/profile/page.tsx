@@ -45,7 +45,7 @@ function EnergySuggestionCard() {
   const accept = useMutation({
     mutationFn: () => api("/v1/me/energy-suggestion/accept", { method: "POST", body: "{}" }),
     onSuccess: async () => {
-      toast.success("Target adaptif diterapkan.");
+      toast.success("Perubahan berhasil disimpan.");
       await qc.invalidateQueries({ queryKey: ["dashboard"] });
       await qc.invalidateQueries({ queryKey: ["energy-suggestion"] });
     },
@@ -54,18 +54,21 @@ function EnergySuggestionCard() {
   return (
     <Card className="space-y-3">
       <div className="flex items-center gap-1.5">
-        <SectionTitle>Saran TDEE adaptif</SectionTitle>
+        <SectionTitle>Perkiraan kebutuhan kalori adaptif</SectionTitle>
         <InfoTip tip="adaptive_tdee" />
       </div>
       {!q.data.available ? (
-        <HelperText>{q.data.message}</HelperText>
+        <HelperText>
+          Catat berat badan selama minimal 14 hari dan makanan selama minimal 10 hari untuk
+          mendapatkan perkiraan yang lebih personal.
+        </HelperText>
       ) : (
         <>
           <p className="text-sm text-[hsl(var(--muted-foreground))]">{q.data.message}</p>
           <dl className="grid gap-1 text-sm sm:grid-cols-2">
             <div>
               <dt className="inline-flex items-center gap-1 text-[hsl(var(--muted-foreground))]">
-                TDEE adaptif <InfoTip tip="tdee" />
+                Perkiraan TDEE <InfoTip tip="tdee" />
               </dt>
               <dd className="font-semibold tabular-nums">{q.data.adaptive_tdee_kcal} kkal</dd>
             </div>
@@ -132,6 +135,7 @@ export default function ProfilePage() {
     onSuccess: async () => {
       setWeight("");
       setErr(null);
+      toast.success("Berat badan berhasil diperbarui.");
       await qc.invalidateQueries({ queryKey: ["weight-logs"] });
       await refetch();
     },
@@ -149,6 +153,7 @@ export default function ProfilePage() {
         }),
       }),
     onSuccess: async () => {
+      toast.success("Perubahan berhasil disimpan.");
       await qc.invalidateQueries({ queryKey: ["macros"] });
       await qc.invalidateQueries({ queryKey: ["dashboard"] });
     },
@@ -168,7 +173,7 @@ export default function ProfilePage() {
 
   return (
     <div className="mx-auto max-w-3xl animate-fade-up space-y-5">
-      <PageTitle title="Profil" subtitle="Data dasar, berat, dan target makro." />
+      <PageTitle title="Profil" subtitle="Kelola data tubuh, target, dan akunmu." />
 
       <Card className="flex flex-wrap items-center gap-4">
         <div
@@ -180,16 +185,16 @@ export default function ProfilePage() {
         <div className="min-w-0 flex-1">
           <p className="text-lg font-semibold">{data?.display_name || "Pengguna"}</p>
           <p className="text-sm text-[hsl(var(--muted-foreground))]">
-            {data?.email || "Email dikelola Kinde"}
+            {data?.email || "Email dikelola melalui Kinde"}
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
             <Badge variant="secondary">
-              {data?.onboarding_completed ? "Onboarding selesai" : "Onboarding belum selesai"}
+              {data?.onboarding_completed ? "Pengaturan awal selesai" : "Pengaturan awal belum selesai"}
             </Badge>
           </div>
         </div>
         <Button variant="secondary" onClick={() => router.push("/settings")}>
-          Buka setelan
+          Buka pengaturan akun
         </Button>
       </Card>
 
@@ -197,13 +202,13 @@ export default function ProfilePage() {
         <SectionTitle>Informasi dasar</SectionTitle>
         <dl className="grid gap-2 sm:grid-cols-2">
           <div>
-            <dt className="text-[hsl(var(--muted-foreground))]">Berat</dt>
+            <dt className="text-[hsl(var(--muted-foreground))]">Berat badan</dt>
             <dd className="font-medium tabular-nums">
               {data?.profile?.current_weight_kg ?? "—"} kg
             </dd>
           </div>
           <div>
-            <dt className="text-[hsl(var(--muted-foreground))]">Tinggi</dt>
+            <dt className="text-[hsl(var(--muted-foreground))]">Tinggi badan</dt>
             <dd className="font-medium tabular-nums">{data?.profile?.height_cm ?? "—"} cm</dd>
           </div>
           <div>
@@ -211,37 +216,39 @@ export default function ProfilePage() {
             <dd className="font-medium">{data?.settings?.timezone ?? "—"}</dd>
           </div>
           <div>
-            <dt className="text-[hsl(var(--muted-foreground))]">Mode kalori</dt>
+            <dt className="text-[hsl(var(--muted-foreground))]">Cara menghitung kalori</dt>
             <dd className="font-medium">
-              {data?.settings?.calorie_budget_mode === "eat_back" ? "Eat-back" : "Intake only"}
+              {data?.settings?.calorie_budget_mode === "eat_back"
+                ? "Makanan dan aktivitas"
+                : "Hanya makanan"}
             </dd>
           </div>
         </dl>
         <HelperText>
-          Ubah berat di bawah — target kalori & makro dihitung ulang otomatis.
+          Saat berat badan diperbarui, target kalori dan makronutrien akan dihitung ulang.
         </HelperText>
         <Link href="/onboarding">
           <Button variant="outline" type="button">
-            Perbarui target / onboarding
+            Perbarui profil dan target
           </Button>
         </Link>
       </Card>
 
       <Card className="space-y-3">
         <div className="flex items-center gap-1.5">
-          <SectionTitle>Catat berat</SectionTitle>
+          <SectionTitle>Catat berat badan</SectionTitle>
           <InfoTip tip="weight_log" />
         </div>
         <div className="flex flex-wrap gap-2">
           <div className="min-w-[8rem] flex-1">
-            <LabelWithTip tip="weight_log">Berat (kg)</LabelWithTip>
+            <LabelWithTip tip="weight_log">Berat badan</LabelWithTip>
             <Input
               type="number"
               step="0.1"
               min={20}
               value={weight}
               onChange={(e) => setWeight(e.target.value)}
-              placeholder={String(data?.profile?.current_weight_kg ?? "")}
+              placeholder="Contoh: 72"
             />
           </div>
           <div className="flex items-end">
@@ -250,7 +257,7 @@ export default function ProfilePage() {
               disabled={!weight || logWeight.isPending}
               loading={logWeight.isPending}
             >
-              Simpan berat
+              {logWeight.isPending ? "Menyimpan..." : "Simpan berat"}
             </Button>
           </div>
         </div>
@@ -284,39 +291,58 @@ export default function ProfilePage() {
 
       <Card className="space-y-3">
         <div className="flex items-center gap-1.5">
-          <SectionTitle>Target makro (g/hari)</SectionTitle>
+          <SectionTitle>Target makronutrien harian</SectionTitle>
           <InfoTip tip="macro_targets" />
         </div>
         <p className="text-sm text-[hsl(var(--muted-foreground))]">
-          Saat ini: P {macros.data?.protein_g ?? "—"} · K {macros.data?.carbs_g ?? "—"} · L{" "}
-          {macros.data?.fat_g ?? "—"} (target {macros.data?.calorie_target ?? "—"} kkal)
+          Target saat ini: Protein {macros.data?.protein_g ?? "—"} g · Karbohidrat{" "}
+          {macros.data?.carbs_g ?? "—"} g · Lemak {macros.data?.fat_g ?? "—"} g ·{" "}
+          {macros.data?.calorie_target != null
+            ? `${macros.data.calorie_target.toLocaleString("id-ID")} kkal`
+            : "—"}
         </p>
         <div className="grid grid-cols-3 gap-2">
           <div>
             <LabelWithTip tip="protein" className="text-xs">
               Protein
             </LabelWithTip>
-            <Input type="number" value={p} onChange={(e) => setP(e.target.value)} placeholder="g" />
+            <Input
+              type="number"
+              value={p}
+              onChange={(e) => setP(e.target.value)}
+              placeholder="Masukkan gram"
+            />
           </div>
           <div>
             <LabelWithTip tip="carbs" className="text-xs">
-              Karbo
+              Karbohidrat
             </LabelWithTip>
-            <Input type="number" value={c} onChange={(e) => setC(e.target.value)} placeholder="g" />
+            <Input
+              type="number"
+              value={c}
+              onChange={(e) => setC(e.target.value)}
+              placeholder="Masukkan gram"
+            />
           </div>
           <div>
             <LabelWithTip tip="fat" className="text-xs">
               Lemak
             </LabelWithTip>
-            <Input type="number" value={f} onChange={(e) => setF(e.target.value)} placeholder="g" />
+            <Input
+              type="number"
+              value={f}
+              onChange={(e) => setF(e.target.value)}
+              placeholder="Masukkan gram"
+            />
           </div>
         </div>
+        <HelperText>Kosongkan semua kolom untuk tetap menggunakan target otomatis.</HelperText>
         <Button
           variant="secondary"
           onClick={() => saveMacros.mutate()}
           disabled={saveMacros.isPending || (!p && !c && !f)}
         >
-          Simpan target makro
+          {saveMacros.isPending ? "Menyimpan..." : "Simpan target makro"}
         </Button>
       </Card>
 
@@ -341,8 +367,11 @@ export default function ProfilePage() {
       </Card>
 
       <Card className="space-y-2 border-red-200 bg-red-50/50">
-        <SectionTitle>Zona berbahaya</SectionTitle>
-        <p className="text-sm text-red-900/80">Hapus akun menghapus semua data domain.</p>
+        <SectionTitle>Hapus akun</SectionTitle>
+        <p className="text-sm text-red-900/80">
+          Tindakan ini akan menghapus akun beserta seluruh data makanan, aktivitas, berat badan, dan
+          pengaturan. Data yang sudah dihapus tidak dapat dipulihkan.
+        </p>
         <Link href="/account/delete">
           <Button variant="danger">Hapus akun</Button>
         </Link>

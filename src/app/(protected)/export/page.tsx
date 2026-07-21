@@ -42,7 +42,7 @@ export default function ExportPage() {
     <div className="animate-fade-up">
       <PageTitle
         title="Ekspor data"
-        subtitle="JSON/CSV profil, food logs, activity logs. Foto tidak disertakan."
+        subtitle="Unduh data akunmu dalam format JSON atau CSV. Foto biasanya tidak ikut diekspor."
         actions={<InfoTip tip="export_data" />}
       />
       <Card className="flex flex-wrap gap-2">

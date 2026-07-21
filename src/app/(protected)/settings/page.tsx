@@ -40,8 +40,8 @@ export default function SettingsPage() {
         }),
       }),
     onSuccess: async () => {
-      setMsg("Pengaturan disimpan.");
-      toast.success("Pengaturan disimpan.");
+      setMsg("Pengaturan berhasil disimpan.");
+      toast.success("Pengaturan berhasil disimpan.");
       await refetch();
     },
     onError: (e: Error) => setErr(e.message),
@@ -49,12 +49,12 @@ export default function SettingsPage() {
 
   return (
     <div className="animate-fade-up">
-      <PageTitle title="Setelan" subtitle="Umum, privasi media, dan tautan akun." />
+      <PageTitle title="Pengaturan" subtitle="Atur preferensi umum, privasi, dan penggunaan AI." />
       <Card className="space-y-3">
         <SectionTitle>Umum</SectionTitle>
         <div>
           <LabelWithTip tip="Zona waktu menentukan tanggal log harian (mis. Asia/Jakarta).">
-            Zona waktu (IANA)
+            Zona waktu
           </LabelWithTip>
           <Select value={timezone} onChange={(e) => setTimezone(e.target.value)}>
             <option value="Asia/Jakarta">Asia/Jakarta</option>
@@ -66,7 +66,7 @@ export default function SettingsPage() {
         </div>
         <div>
           <LabelWithTip tip="Metrik memakai kg dan cm. Imperial untuk lb/in (jika diaktifkan di alur terkait).">
-            Sistem unit
+            Satuan
           </LabelWithTip>
           <Select value={unitSystem} onChange={(e) => setUnitSystem(e.target.value)}>
             <option value="metric">Metrik (kg, cm)</option>
@@ -74,16 +74,18 @@ export default function SettingsPage() {
           </Select>
         </div>
         <div>
-          <LabelWithTip tip="budget_mode">Mode anggaran kalori</LabelWithTip>
+          <LabelWithTip tip="budget_mode">Cara menghitung sisa kalori</LabelWithTip>
           <Select value={budgetMode} onChange={(e) => setBudgetMode(e.target.value)}>
-            <option value="intake_only">Intake only (disarankan) — sisa = target − makan</option>
-            <option value="eat_back">Eat-back — sisa = target − (makan − aktivitas)</option>
+            <option value="intake_only">Hanya makanan (disarankan)</option>
+            <option value="eat_back">Makanan dan aktivitas</option>
           </Select>
           <HelperText>
-            Intake only menghindari double-count: target TDEE sudah memasukkan aktivitas harian.
+            {budgetMode === "eat_back"
+              ? "Sisa kalori dihitung dari target dikurangi makanan, lalu ditambah kalori aktivitas."
+              : "Sisa kalori dihitung dari target dikurangi kalori makanan. Kalori dari aktivitas tidak ditambahkan agar tidak terhitung dua kali."}
           </HelperText>
         </div>
-        <SectionTitle>Privasi & AI</SectionTitle>
+        <SectionTitle>Privasi dan AI</SectionTitle>
         <label className="flex items-start gap-2 text-sm text-[hsl(var(--foreground))]">
           <input
             type="checkbox"
@@ -93,23 +95,25 @@ export default function SettingsPage() {
           />
           <span>
             <span className="inline-flex items-center gap-1">
-              Simpan foto makanan setelah analisis AI
+              Simpan foto makanan setelah dianalisis
               <InfoTip tip="retain_photos" />
             </span>
-            <HelperText>Default nonaktif — foto dihapus setelah analisis atau konfirmasi.</HelperText>
+            <HelperText>
+              Secara default, foto dihapus setelah analisis atau setelah hasil dikonfirmasi.
+            </HelperText>
           </span>
         </label>
         {msg ? <p className="text-sm text-emerald-700">{msg}</p> : null}
         {err ? <ErrorBox message={err} /> : null}
-        <Button onClick={() => save.mutate()} disabled={save.isPending}>
-          Simpan
+        <Button onClick={() => save.mutate()} disabled={save.isPending} loading={save.isPending}>
+          {save.isPending ? "Menyimpan..." : "Simpan pengaturan"}
         </Button>
         <div className="flex flex-wrap gap-2 border-t pt-3 text-sm">
           <Link href="/billing" className="text-emerald-700">
-            Langganan
+            Kelola langganan
           </Link>
           <Link href="/wearables" className="text-emerald-700">
-            Wearable
+            Hubungkan perangkat
           </Link>
           <Link href="/export" className="text-emerald-700">
             Ekspor data

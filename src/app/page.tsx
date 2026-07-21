@@ -17,13 +17,13 @@ import { Logo } from "@/components/logo";
 import { LandingMotion } from "@/components/landing/landing-motion";
 
 export const metadata = {
-  title: "Atur Gizi — Catat Makan, Aktivitas, dan Insight Mingguan",
+  title: "Atur Gizi — Catat makan, aktivitas, dan ringkasan mingguan",
   description:
     "Catat makanan manual, dari barcode, atau melalui foto. Tinjau estimasi AI sebelum menyimpan dan pahami pola mingguan dengan bahasa yang netral.",
 };
 
 const marqueeItems = [
-  "AI draft · Anda konfirmasi",
+  "Draf AI · kamu konfirmasi",
   "Target transparan",
   "Foto default dihapus",
   "Ekspor data kapan saja",
@@ -95,7 +95,7 @@ export default function LandingPage() {
         <section id="cara-kerja" className="mx-auto max-w-6xl px-4 py-28 md:px-6 md:py-40">
           <h2 className="display-h2 text-center">Tiga langkah, kendali di tangan Anda</h2>
           <p className="mx-auto mt-4 max-w-2xl text-center text-[hsl(var(--muted-foreground))]">
-            AI membuat draft. Anda yang menentukan hasil akhirnya.
+            AI membuat draf. Kamu yang menentukan hasil akhirnya.
           </p>
 
           <ol className="mt-16 grid gap-6 md:grid-cols-3">
@@ -145,7 +145,7 @@ export default function LandingPage() {
         <section id="demo-ai" className="border-y border-[hsl(var(--border))] bg-[hsl(var(--muted)/0.4)]">
           <div className="mx-auto max-w-6xl px-4 py-28 md:px-6 md:py-40">
             <div className="max-w-2xl">
-              <h2 className="display-h2">AI membuat draft. Anda yang menentukan.</h2>
+              <h2 className="display-h2">AI membuat draf. Kamu yang menentukan.</h2>
               <p className="mt-4 text-[hsl(var(--muted-foreground))]">
                 Setiap item punya estimasi, keyakinan, dan asumsi — selalu bisa diedit.
               </p>
@@ -164,7 +164,7 @@ export default function LandingPage() {
               <div className="flex flex-col justify-between space-y-3 rounded-3xl border border-[hsl(var(--border))] bg-white p-6 shadow-[var(--shadow-sm)] md:p-8">
                 <div>
                   <p className="text-sm font-medium text-[hsl(var(--muted-foreground))]">
-                    Terdeteksi (draft)
+                    Terdeteksi (draf)
                   </p>
                   <div className="mt-4 space-y-3">
                     {[
@@ -304,7 +304,7 @@ export default function LandingPage() {
         <section className="border-y border-[hsl(var(--border))] bg-white">
           <div className="mx-auto grid max-w-6xl gap-12 px-4 py-28 md:grid-cols-2 md:items-center md:px-6 md:py-40">
             <div>
-              <h2 className="display-h2">Insight mingguan yang netral</h2>
+              <h2 className="display-h2">Ringkasan mingguan yang netral</h2>
               <p className="mt-4 text-[hsl(var(--muted-foreground))]">
                 Ringkasan menjelaskan pola, bukan menilai Anda. Selalu menyebut rentang data.
               </p>
@@ -343,7 +343,7 @@ export default function LandingPage() {
         <section id="privasi" className="mx-auto max-w-6xl px-4 py-28 md:px-6 md:py-40">
           <div className="grid gap-10 overflow-hidden rounded-[2rem] bg-slate-950 px-6 py-12 text-white md:grid-cols-2 md:px-12 md:py-16">
             <div>
-              <h2 className="display-h2 text-white">Anda tetap memegang kontrol</h2>
+              <h2 className="display-h2 text-white">Kamu tetap memegang kontrol</h2>
               <p className="mt-5 text-base leading-relaxed text-slate-300">
                 Tidak ada log AI tanpa konfirmasi. Foto default dihapus setelah analisis. Data
                 diekspor atau dihapus dari aplikasi.
@@ -373,12 +373,12 @@ export default function LandingPage() {
                 {
                   icon: PencilLine,
                   t: "Tinjau sebelum tersimpan",
-                  d: "Tidak ada log otomatis dari draft.",
+                  d: "Tidak ada catatan otomatis dari draf.",
                 },
                 {
                   icon: Trash2,
                   t: "Foto default dihapus",
-                  d: "Ubah preferensi di Setelan kapan saja.",
+                  d: "Ubah preferensi di Pengaturan kapan saja.",
                 },
                 {
                   icon: Download,

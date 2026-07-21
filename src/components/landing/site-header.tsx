@@ -191,7 +191,7 @@ export function SiteHeader() {
                       href="/settings"
                       className="flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-[hsl(var(--muted))]"
                     >
-                      <Settings className="size-4" aria-hidden /> Setelan
+                      <Settings className="size-4" aria-hidden /> Pengaturan
                     </Link>
                     <div className="my-1 border-t border-[hsl(var(--border))]" />
                     <LogoutLink

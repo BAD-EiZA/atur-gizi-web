@@ -143,7 +143,7 @@ export default function NewActivityPage() {
     },
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ["dashboard"] });
-      toast.success("Aktivitas tersimpan.");
+      toast.success("Aktivitas berhasil disimpan.");
       router.push("/dashboard");
     },
     onError: (e: Error) => setErr(e.message),
@@ -155,13 +155,13 @@ export default function NewActivityPage() {
     <div className="mx-auto max-w-3xl animate-fade-up">
       <PageTitle
         title="Catat aktivitas"
-        subtitle="Estimasi dari MET × berat × durasi. Intensitas, jarak, dan HR memperbaiki akurasi."
+        subtitle="Pilih aktivitas dan durasinya untuk menghitung perkiraan kalori yang terbakar."
         actions={
           <Link
             href="/activities/import-screenshot"
             className="text-sm font-medium text-[hsl(var(--primary))]"
           >
-            Impor screenshot
+            Impor dari screenshot
           </Link>
         }
       />
@@ -197,9 +197,9 @@ export default function NewActivityPage() {
           <div className="mt-1.5 flex flex-wrap gap-2">
             {(
               [
-                ["low", "Ringan (−15% MET)"],
+                ["low", "Ringan"],
                 ["moderate", "Sedang"],
-                ["high", "Berat (+15% MET)"],
+                ["high", "Berat"],
               ] as const
             ).map(([val, label]) => (
               <button
@@ -245,7 +245,7 @@ export default function NewActivityPage() {
         <div>
           <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
             <p className="inline-flex items-center gap-1 text-sm font-medium">
-              Jenis aktivitas
+              Pilih aktivitas
               <InfoTip tip="met" />
             </p>
             <div className="flex flex-wrap gap-1">
@@ -261,7 +261,19 @@ export default function NewActivityPage() {
                       : "bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))]",
                   )}
                 >
-                  {c === "all" ? "Semua" : c}
+                  {c === "all"
+                    ? "Semua"
+                    : c === "cardio"
+                      ? "Kardio"
+                      : c === "flexibility"
+                        ? "Fleksibilitas"
+                        : c === "strength"
+                          ? "Kekuatan"
+                          : c === "sport"
+                            ? "Olahraga"
+                            : c === "other"
+                              ? "Lainnya"
+                              : c}
                 </button>
               ))}
             </div>
@@ -292,7 +304,7 @@ export default function NewActivityPage() {
         </div>
 
         <div>
-          <Label htmlFor="custom">Atau nama kustom</Label>
+          <Label htmlFor="custom">Aktivitas lain</Label>
           <Input
             id="custom"
             value={customName}
@@ -300,13 +312,13 @@ export default function NewActivityPage() {
               setCustomName(e.target.value);
               if (e.target.value) setSelected(null);
             }}
-            placeholder="Mis. Main badminton kantor"
+            placeholder="Contoh: Badminton bersama rekan kantor"
           />
-          <HelperText>Isi MET manual di bawah jika pakai nama kustom.</HelperText>
+          <HelperText>Jika menggunakan nama sendiri, masukkan nilai MET secara manual.</HelperText>
         </div>
 
         <details className="rounded-xl border border-[hsl(var(--border))] p-3">
-          <summary className="cursor-pointer text-sm font-medium">Detail opsional (jarak, HR, RPE, beban)</summary>
+          <summary className="cursor-pointer text-sm font-medium">Tambahkan detail</summary>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <div>
               <LabelWithTip tip="distance" className="text-xs">
@@ -411,11 +423,11 @@ export default function NewActivityPage() {
 
         {err ? <ErrorBox message={err} /> : null}
         {!canSave ? (
-          <HelperText>Pilih jenis aktivitas atau isi nama kustom + MET.</HelperText>
+          <HelperText>Pilih aktivitas, atau isi nama aktivitas dan nilai MET.</HelperText>
         ) : null}
 
         <Button onClick={() => createMut.mutate()} loading={createMut.isPending} disabled={!canSave}>
-          Simpan aktivitas
+          {createMut.isPending ? "Menyimpan..." : "Simpan aktivitas"}
         </Button>
       </Card>
     </div>

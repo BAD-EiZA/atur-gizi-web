@@ -108,7 +108,7 @@ export default function MealPlansPage() {
           </div>
           <div>
             <LabelWithTip tip="carbs" className="text-xs">
-              Karbo (g)
+              Karbohidrat
             </LabelWithTip>
             <Input type="number" step="0.1" value={carbsG} onChange={(e) => setMacro("c", Number(e.target.value))} />
           </div>

@@ -37,8 +37,8 @@ export default function WearablesPage() {
   return (
     <div className="animate-fade-up space-y-4">
       <PageTitle
-        title="Wearable"
-        subtitle="OAuth penuh (Google Health / Apple) menyusul. Sementara: impor lewat screenshot AI — semua merek."
+        title="Hubungkan perangkat"
+        subtitle="Integrasi penuh menyusul. Sementara kamu bisa mengimpor aktivitas dari screenshot."
       />
 
       <Card className="space-y-3 border-[hsl(var(--primary)/0.2)] bg-gradient-to-br from-sky-50/80 to-white">
@@ -48,15 +48,15 @@ export default function WearablesPage() {
           </div>
           <div className="flex-1">
             <p className="inline-flex items-center gap-1.5 font-semibold">
-              Impor lewat screenshot
+              Impor aktivitas dari screenshot
               <InfoTip tip="screenshot_import" />
             </p>
             <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
-              Screenshot ringkasan workout di app jam/HP → AI membaca durasi, kalori, jarak → Anda
-              tinjau lalu simpan. Bekerja untuk Apple Fitness, Fitbit, Strava, Garmin, dll.
+              Screenshot ringkasan aktivitas di aplikasi kebugaran → AI membaca durasi, kalori, dan
+              jarak → kamu tinjau lalu simpan.
             </p>
             <Link href="/activities/import-screenshot" className="mt-3 inline-block">
-              <Button>Buka impor screenshot</Button>
+              <Button>Impor aktivitas</Button>
             </Link>
           </div>
         </div>

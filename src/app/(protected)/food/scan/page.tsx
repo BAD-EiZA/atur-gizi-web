@@ -86,18 +86,18 @@ export default function FoodScanPage() {
       if (!file) throw new Error("Pilih foto makanan terlebih dahulu.");
 
       setProgress(15);
-      setStatus("Meminta tanda tangan unggah...");
+      setStatus("Mengunggah foto...");
       const sig = await api<UploadSignature>("/v1/media/upload-signature", {
         method: "POST",
         body: "{}",
       });
 
       setProgress(40);
-      setStatus(sig.mock ? "Mode mock unggah..." : "Mengunggah ke Cloudinary...");
+      setStatus(sig.mock ? "Mode mock unggah..." : "Mengunggah foto...");
       const uploaded = await uploadToCloudinary(file, sig);
 
       setProgress(65);
-      setStatus("Mengenali makanan dan memperkirakan porsi...");
+      setStatus("AI sedang membaca makananmu...");
       const payload: Record<string, unknown> = {
         cloudinaryPublicId: uploaded.public_id,
         mediaDeliveryType: uploaded.type || sig.delivery_type,
@@ -111,7 +111,7 @@ export default function FoodScanPage() {
       }
 
       setProgress(85);
-      setStatus("Menghitung nutrisi (hasil belum disimpan)...");
+      setStatus("AI sedang membaca makananmu...");
       return api<AiAnalysis>("/v1/food-analyses", {
         method: "POST",
         body: JSON.stringify(payload),
@@ -147,12 +147,13 @@ export default function FoodScanPage() {
       setErr(null);
       setStatus(null);
       setProgress(100);
-      toast.message("Draft AI siap ditinjau", {
-        description: "Hasil belum disimpan sebelum kamu konfirmasi.",
-      });
+      toast.message("Analisis selesai. Periksa hasilnya sebelum menyimpan.");
     },
     onError: (e: Error) => {
-      setErr(e.message);
+      setErr(
+        e.message ||
+          "Foto belum dapat dianalisis. Coba gunakan foto yang lebih jelas atau isi makanan secara manual.",
+      );
       setStatus(null);
       setProgress(0);
     },
@@ -182,7 +183,7 @@ export default function FoodScanPage() {
       }),
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ["dashboard"] });
-      toast.success("Hasil AI yang sudah ditinjau tersimpan.");
+      toast.success("Makanan berhasil disimpan.");
       router.push("/dashboard");
     },
     onError: (e: Error) => setErr(e.message),
@@ -230,7 +231,7 @@ export default function FoodScanPage() {
   const onFile = (f: File | null) => {
     const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
     if (f && (!allowedTypes.includes(f.type) || f.size > 50 * 1024 * 1024)) {
-      setErr("Gunakan foto JPEG, PNG, atau WebP dengan ukuran maksimal 50 MB.");
+      setErr("Gunakan foto JPEG, PNG, atau WebP · maksimal 50 MB.");
       return;
     }
     setFile(f);
@@ -245,8 +246,8 @@ export default function FoodScanPage() {
   return (
     <div className="mx-auto max-w-3xl animate-fade-up">
       <PageTitle
-        title="Pindai makanan dengan AI"
-        subtitle="AI membuat draft. Kamu memegang keputusan. Foto dihapus setelah analisis (kecuali diaktifkan di setelan)."
+        title="Pindai makanan dari foto"
+        subtitle="Unggah foto makanan untuk membuat perkiraan awal. Periksa hasilnya sebelum menyimpan."
       />
 
       <Card className="space-y-5">
@@ -273,7 +274,10 @@ export default function FoodScanPage() {
           )}
           <p className="text-sm font-semibold">Seret foto ke sini atau pilih file</p>
           <p className="mt-1.5 max-w-sm text-xs leading-relaxed text-[hsl(var(--muted-foreground))]">
-            Tips: pencahayaan cukup, semua makanan terlihat, JPEG/PNG/WebP max 50 MB.
+            Pastikan semua makanan terlihat jelas dan pencahayaan cukup.
+          </p>
+          <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">
+            JPEG, PNG, atau WebP · Maksimal 50 MB
           </p>
           <Label htmlFor="photo" className="mt-4 !mb-0">
             <span className="sr-only">Pilih foto</span>
@@ -290,8 +294,9 @@ export default function FoodScanPage() {
 
         <ul className="list-inside list-disc text-xs text-[hsl(var(--muted-foreground))]">
           <li>Hasil AI adalah perkiraan awal, bukan data final.</li>
-          <li>Edit porsi, kalori, dan makro sebelum menyimpan.</li>
-          <li>Kuota AI 10 kali per hari per pengguna.</li>
+          <li>Kamu dapat mengubah nama, porsi, kalori, dan makronutrien.</li>
+          <li>Penggunaan AI dibatasi hingga 10 kali per hari.</li>
+          <li>Foto dihapus setelah analisis, kecuali penyimpanan foto diaktifkan di Pengaturan.</li>
         </ul>
 
         <Button
@@ -300,9 +305,9 @@ export default function FoodScanPage() {
           disabled={!file}
         >
           <Camera className="size-4" aria-hidden />
-          {analyze.isPending ? "Memproses..." : "Unggah & analisis"}
+          {analyze.isPending ? "Menganalisis..." : "Analisis foto"}
         </Button>
-        {!file ? <HelperText>Pilih foto untuk mengaktifkan tombol analisis.</HelperText> : null}
+        {!file ? <HelperText>Pilih foto untuk mulai menganalisis.</HelperText> : null}
 
         {analyze.isPending || progress > 0 ? (
           <div>
@@ -327,7 +332,7 @@ export default function FoodScanPage() {
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="secondary">
               <span className="inline-flex items-center gap-1">
-                Draft AI
+                Draf AI
                 <InfoTip tip="ai_draft" />
               </span>
             </Badge>
@@ -367,7 +372,7 @@ export default function FoodScanPage() {
           ))}
 
           <div>
-            <Label htmlFor="meal">Jenis makan</Label>
+            <Label htmlFor="meal">Waktu makan</Label>
             <Select id="meal" value={mealType} onChange={(e) => setMealType(e.target.value)}>
               <option value="breakfast">Sarapan</option>
               <option value="lunch">Makan siang</option>
@@ -532,7 +537,7 @@ export default function FoodScanPage() {
               loading={confirm.isPending}
               disabled={items.length === 0 || (lowConf && !reviewed)}
             >
-              Simpan hasil yang sudah ditinjau
+              Simpan makanan
             </Button>
             <Button
               variant="ghost"
@@ -545,7 +550,7 @@ export default function FoodScanPage() {
                 toast.message("Analisis dibatalkan");
               }}
             >
-              Batalkan
+              Batal
             </Button>
           </div>
         </Card>

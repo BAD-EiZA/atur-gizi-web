@@ -51,7 +51,7 @@ export default function DashboardPage() {
     <div className="animate-fade-up">
       <PageTitle
         title="Hari ini"
-        subtitle={d?.motivational_message ?? "Langkah kecil sudah cukup."}
+        subtitle={d?.motivational_message ?? "Pantau makanan dan aktivitasmu hari ini."}
         actions={
           <div className="flex flex-wrap gap-2">
             <Input
@@ -78,8 +78,8 @@ export default function DashboardPage() {
 
       {q.isError ? (
         <ErrorBox
-          message="Gagal memuat ringkasan hari ini."
-          action={<Button variant="outline" onClick={() => q.refetch()}>Coba lagi</Button>}
+          message="Data belum dapat dimuat."
+          action={<Button variant="outline" onClick={() => q.refetch()}>Muat ulang</Button>}
         />
       ) : null}
 
@@ -95,9 +95,7 @@ export default function DashboardPage() {
               <div className="min-w-0 flex-1">
                 <div className="mb-1 flex items-center gap-1.5">
                   <span className="text-xs font-medium text-[hsl(var(--muted-foreground))]">
-                    {d.budget_mode === "eat_back"
-                      ? "Sisa anggaran (net / eat-back)"
-                      : "Sisa anggaran makan"}
+                    Sisa kalori hari ini
                   </span>
                   <InfoTip
                     tip={d.budget_mode === "eat_back" ? "remaining_net" : "remaining_intake"}
@@ -107,7 +105,7 @@ export default function DashboardPage() {
                   label=""
                   value={formatKcal(d.remaining_calories)}
                   unit="kkal"
-                  hint={`Target ${formatKcal(d.intake_target)} kkal`}
+                  hint={`Target harian ${formatKcal(d.intake_target)} kkal`}
                 />
               </div>
               <Badge variant="secondary">{d.date}</Badge>
@@ -115,23 +113,23 @@ export default function DashboardPage() {
             <div className="relative mt-6">
               <div className="mb-1.5 flex items-center justify-between text-xs text-[hsl(var(--muted-foreground))]">
                 <span className="inline-flex items-center gap-1">
-                  Progres menuju target
+                  Progres menuju target harian
                   <InfoTip tip="progress" side="bottom" />
                 </span>
                 <span className="tabular-nums">{pct}%</span>
               </div>
-              <Progress value={pct} label="Progres kalori harian" className="h-3" />
+              <Progress value={pct} label="Progres menuju target harian" className="h-3" />
             </div>
             <div className="relative mt-6 grid grid-cols-2 gap-3 border-t border-[hsl(var(--border))] pt-5 text-center sm:grid-cols-4">
               <div className="rounded-2xl bg-white/70 p-3 ring-1 ring-[hsl(var(--border)/0.6)]">
                 <p className="text-xs text-[hsl(var(--muted-foreground))]">
-                  <TipLabel tip="consumed">Konsumsi</TipLabel>
+                  <TipLabel tip="consumed">Kalori masuk</TipLabel>
                 </p>
                 <p className="mt-0.5 text-lg font-semibold tabular-nums">{formatKcal(d.consumed_calories)}</p>
               </div>
               <div className="rounded-2xl bg-white/70 p-3 ring-1 ring-[hsl(var(--border)/0.6)]">
                 <p className="text-xs text-[hsl(var(--muted-foreground))]">
-                  <TipLabel tip="burned">Aktivitas</TipLabel>
+                  <TipLabel tip="burned">Kalori aktivitas</TipLabel>
                 </p>
                 <p className="mt-0.5 text-lg font-semibold tabular-nums text-[hsl(var(--activity))]">
                   {formatKcal(d.burned_calories)}
@@ -139,7 +137,7 @@ export default function DashboardPage() {
               </div>
               <div className="rounded-2xl bg-white/70 p-3 ring-1 ring-[hsl(var(--border)/0.6)]">
                 <p className="text-xs text-[hsl(var(--muted-foreground))]">
-                  <TipLabel tip="remaining_intake">Sisa makan</TipLabel>
+                  <TipLabel tip="remaining_intake">Sisa kalori</TipLabel>
                 </p>
                 <p className="mt-0.5 text-lg font-semibold tabular-nums">
                   {formatKcal(d.remaining_intake ?? d.intake_target - d.consumed_calories)}
@@ -147,7 +145,7 @@ export default function DashboardPage() {
               </div>
               <div className="rounded-2xl bg-white/70 p-3 ring-1 ring-[hsl(var(--border)/0.6)]">
                 <p className="text-xs text-[hsl(var(--muted-foreground))]">
-                  <TipLabel tip="remaining_net">Sisa net</TipLabel>
+                  <TipLabel tip="remaining_net">Sisa setelah aktivitas</TipLabel>
                 </p>
                 <p className="mt-0.5 text-lg font-semibold tabular-nums">
                   {formatKcal(d.remaining_net ?? d.remaining_calories)}
@@ -166,7 +164,7 @@ export default function DashboardPage() {
               </div>
               <div className="rounded-xl bg-[hsl(var(--muted)/0.5)] px-2 py-2">
                 <p className="text-[11px] text-[hsl(var(--muted-foreground))]">
-                  <TipLabel tip="carbs">Karbo</TipLabel>
+                  <TipLabel tip="carbs">Karbohidrat</TipLabel>
                 </p>
                 <p className="text-sm font-semibold tabular-nums">
                   {fmtMacro(d.consumed_carbs_g ?? 0)}
@@ -184,27 +182,34 @@ export default function DashboardPage() {
               </div>
             </div>
             <HelperText>
-              Mode {d.budget_mode === "eat_back" ? "eat-back (net)" : "intake-only (default)"}{" "}
-              <InfoTip tip="budget_mode" />. Ubah di Setelan. Angka estimasi.
+              {d.budget_mode === "eat_back"
+                ? "Sisa kalori dihitung dengan memasukkan aktivitas."
+                : "Sisa kalori dihitung dari target dikurangi kalori makanan. Aktivitas tidak menambah sisa kalori."}{" "}
+              <InfoTip tip="budget_mode" />{" "}
+              <Link href="/settings" className="font-medium text-[hsl(var(--primary))]">
+                Ubah cara perhitungan
+              </Link>
             </HelperText>
           </Card>
 
           {/* Side panel */}
           <Card className="lg:col-span-4" interactive>
-            <SectionTitle>Ringkasan cepat</SectionTitle>
+            <SectionTitle>Ringkasan hari ini</SectionTitle>
             <dl className="mt-4 space-y-3 text-sm">
               <div className="flex justify-between">
-                <dt className="text-[hsl(var(--muted-foreground))]">Catatan makanan</dt>
+                <dt className="text-[hsl(var(--muted-foreground))]">Makanan tercatat</dt>
                 <dd className="font-medium tabular-nums">{d.food_log_count}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-[hsl(var(--muted-foreground))]">Durasi aktivitas</dt>
+                <dt className="text-[hsl(var(--muted-foreground))]">Waktu aktif</dt>
                 <dd className="font-medium tabular-nums">{d.activity_duration_minutes} mnt</dd>
               </div>
               {d.target ? (
                 <div className="flex justify-between">
-                  <dt className="text-[hsl(var(--muted-foreground))]">Target aktif</dt>
-                  <dd className="font-medium tabular-nums">{d.target.calorie_target} kkal</dd>
+                  <dt className="text-[hsl(var(--muted-foreground))]">Target kalori</dt>
+                  <dd className="font-medium tabular-nums">
+                    {formatKcal(d.target.calorie_target)} kkal
+                  </dd>
                 </div>
               ) : null}
             </dl>
@@ -213,7 +218,7 @@ export default function DashboardPage() {
               className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-[hsl(var(--primary))]"
             >
               <Sparkles size={16} aria-hidden />
-              Lihat insight mingguan
+              Lihat ringkasan mingguan
             </Link>
           </Card>
 
@@ -224,8 +229,8 @@ export default function DashboardPage() {
               {[
                 { href: "/food/new", label: "Catat makanan", icon: Utensils },
                 { href: "/food/scan", label: "Pindai makanan", icon: Camera },
-                { href: "/activities/new", label: "Aktivitas", icon: Activity },
-                { href: "/insights", label: "Review minggu", icon: Sparkles },
+                { href: "/activities/new", label: "Catat aktivitas", icon: Activity },
+                { href: "/insights", label: "Lihat ringkasan", icon: Sparkles },
               ].map((a) => {
                 const Icon = a.icon;
                 return (
@@ -281,15 +286,15 @@ export default function DashboardPage() {
           {/* Timeline food */}
           <Card className="lg:col-span-6">
             <div className="mb-3 flex items-center justify-between">
-              <SectionTitle>Makanan</SectionTitle>
+              <SectionTitle>Makanan hari ini</SectionTitle>
               <Link href="/food/new" className="text-sm text-[hsl(var(--primary))]">
                 + Tambah
               </Link>
             </div>
             {d.recent_food.length === 0 ? (
               <EmptyState
-                title="Belum ada makanan tercatat"
-                description="Mulai dari catat manual, pilih favorit, atau pindai foto."
+                title="Belum ada makanan yang dicatat hari ini."
+                description="Catat manual, pilih favorit, atau pindai foto."
                 icon={<Utensils className="size-5" aria-hidden />}
                 action={
                   <>
@@ -300,7 +305,7 @@ export default function DashboardPage() {
                       </Button>
                     </Link>
                     <Link href="/food/scan">
-                      <Button variant="secondary">Pindai foto</Button>
+                      <Button variant="secondary">Pindai makanan</Button>
                     </Link>
                   </>
                 }
@@ -318,12 +323,12 @@ export default function DashboardPage() {
                         <p className="text-xs text-[hsl(var(--muted-foreground))]">
                           {f.meal_type}
                           {f.protein_g != null || f.carbs_g != null || f.fat_g != null
-                            ? ` · P ${fmtMacro(Number(f.protein_g) || 0)} · K ${fmtMacro(Number(f.carbs_g) || 0)} · L ${fmtMacro(Number(f.fat_g) || 0)}`
+                            ? ` · P ${fmtMacro(Number(f.protein_g) || 0)} g · K ${fmtMacro(Number(f.carbs_g) || 0)} g · L ${fmtMacro(Number(f.fat_g) || 0)} g`
                             : ""}
                         </p>
                       </div>
                       <span className="tabular-nums text-[hsl(var(--muted-foreground))]">
-                        {f.total_calories} kkal
+                        {formatKcal(f.total_calories)} kkal
                       </span>
                     </Link>
                   </li>
@@ -335,19 +340,19 @@ export default function DashboardPage() {
           {/* Timeline activity */}
           <Card className="lg:col-span-6">
             <div className="mb-3 flex items-center justify-between">
-              <SectionTitle>Aktivitas</SectionTitle>
+              <SectionTitle>Aktivitas hari ini</SectionTitle>
               <Link href="/activities/new" className="text-sm text-[hsl(var(--primary))]">
                 + Tambah
               </Link>
             </div>
             {d.recent_activity.length === 0 ? (
               <EmptyState
-                title="Belum ada aktivitas hari ini"
-                description="Catat jalan, latihan, atau olahraga lain dengan estimasi kalori."
+                title="Belum ada aktivitas yang dicatat hari ini."
+                description="Catat jalan, latihan, atau olahraga lain dengan perkiraan kalori."
                 icon={<Activity className="size-5" aria-hidden />}
                 action={
                   <Link href="/activities/new">
-                    <Button variant="secondary">Tambah aktivitas</Button>
+                    <Button variant="secondary">Catat aktivitas</Button>
                   </Link>
                 }
               />
@@ -377,7 +382,7 @@ export default function DashboardPage() {
 
           <p className="lg:col-span-12 text-xs text-[hsl(var(--muted-foreground))]">
             <Copy className="mr-1 inline size-3" aria-hidden />
-            Tip: buka histori untuk mengedit atau menghapus catatan. Semua estimasi dapat dikoreksi.
+            Buka Riwayat untuk melihat, mengubah, atau menghapus catatan. Semua angka dapat dikoreksi.
           </p>
         </div>
       ) : null}

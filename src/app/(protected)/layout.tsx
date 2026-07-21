@@ -37,7 +37,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
         <ErrorBox
           message={
             status === 401
-              ? "Sesi berakhir. Silakan masuk kembali."
+              ? "Sesi kamu telah berakhir. Masuk kembali untuk melanjutkan."
               : (error as Error).message || "Gagal memuat sesi."
           }
         />

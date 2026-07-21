@@ -165,13 +165,16 @@ export default function ImportActivityScreenshotPage() {
         setErr("Gambar sepertinya bukan layar aktivitas. Coba screenshot ringkasan workout.");
       } else {
         setErr(null);
-        toast.success("Screenshot terbaca. Periksa angka sebelum simpan.");
+        toast.success("Data berhasil dibaca. Periksa hasilnya sebelum menyimpan.");
       }
     },
     onError: (e: Error) => {
       setProgress(0);
       setStatus(null);
-      setErr(e.message);
+      setErr(
+        e.message ||
+          "Screenshot belum dapat dibaca. Coba unggah gambar yang lebih jelas atau catat aktivitas secara manual.",
+      );
     },
   });
 
@@ -191,8 +194,8 @@ export default function ImportActivityScreenshotPage() {
         logDate: logDate || undefined,
         source: "device",
         notes: draft
-          ? `Impor screenshot · ${APP_LABEL[draft.detected_app] ?? draft.detected_app} · conf ${Math.round((draft.confidence || 0) * 100)}%`
-          : "Impor screenshot",
+          ? `Impor aktivitas · ${APP_LABEL[draft.detected_app] ?? draft.detected_app} · keyakinan ${Math.round((draft.confidence || 0) * 100)}%`
+          : "Impor aktivitas",
       };
       if (activityTypeId && name) {
         body.notes = `${body.notes} · ${name}`;
@@ -205,7 +208,7 @@ export default function ImportActivityScreenshotPage() {
     },
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ["dashboard"] });
-      toast.success("Aktivitas dari screenshot tersimpan.");
+      toast.success("Aktivitas berhasil disimpan.");
       router.push("/dashboard");
     },
     onError: (e: Error) => setErr(e.message),
@@ -214,8 +217,8 @@ export default function ImportActivityScreenshotPage() {
   return (
     <div className="mx-auto max-w-3xl animate-fade-up space-y-4">
       <PageTitle
-        title="Impor lewat screenshot"
-        subtitle="Screenshot ringkasan workout dari Apple Fitness, Fitbit, Strava, Garmin, dll. AI membaca angka — Anda yang mengonfirmasi."
+        title="Impor aktivitas dari screenshot"
+        subtitle="Unggah ringkasan aktivitas dari aplikasi kebugaran. AI akan membaca datanya, lalu kamu yang mengonfirmasi."
         actions={
           <span className="inline-flex items-center gap-2">
             <InfoTip tip="screenshot_import" />
@@ -227,11 +230,13 @@ export default function ImportActivityScreenshotPage() {
       />
 
       <Card className="space-y-3 text-sm">
-        <p className="font-medium">Tips foto yang bagus</p>
+        <p className="font-medium">Agar hasil mudah dibaca</p>
         <ul className="list-inside list-disc text-xs text-[hsl(var(--muted-foreground))]">
-          <li>Buka layar ringkasan workout (bukan feed / beranda).</li>
-          <li>Pastikan durasi, kalori, dan jarak terbaca jelas — jangan crop angka penting.</li>
-          <li>JPEG / PNG / WebP, max 50 MB. Satu aktivitas per foto.</li>
+          <li>Gunakan screenshot halaman ringkasan aktivitas, bukan beranda atau feed.</li>
+          <li>Pastikan durasi, kalori, tanggal, dan jarak terlihat jelas.</li>
+          <li>Jangan memotong angka penting.</li>
+          <li>Gunakan file JPEG, PNG, atau WebP dengan ukuran maksimal 50 MB.</li>
+          <li>Satu screenshot sebaiknya berisi satu aktivitas.</li>
         </ul>
       </Card>
 
@@ -278,9 +283,9 @@ export default function ImportActivityScreenshotPage() {
           loading={analyze.isPending}
           disabled={!file}
         >
-          {analyze.isPending ? "Membaca..." : "Baca screenshot (AI)"}
+          {analyze.isPending ? "AI sedang membaca screenshot..." : "Baca screenshot"}
         </Button>
-        {!file ? <HelperText>Pilih gambar untuk mengaktifkan tombol.</HelperText> : null}
+        {!file ? <HelperText>Pilih screenshot untuk mulai membaca data.</HelperText> : null}
 
         {analyze.isPending || progress > 0 ? (
           <div>
@@ -402,7 +407,7 @@ export default function ImportActivityScreenshotPage() {
                   !reviewed)
               }
             >
-              Simpan ke aktivitas
+              Simpan aktivitas
             </Button>
             <Button
               variant="ghost"

@@ -44,46 +44,46 @@ const categories: { title: string; items: { id: Tab; label: string }[] }[] = [
   {
     title: "Catat lebih cepat",
     items: [
-      { id: "search", label: "Cari makanan cerdas" },
-      { id: "recover", label: "Pulihkan log" },
-      { id: "plate", label: "Cek item terlewat" },
-      { id: "memory", label: "Memori & alias" },
+      { id: "search", label: "Cari makanan" },
+      { id: "recover", label: "Pulihkan catatan" },
+      { id: "plate", label: "Periksa yang terlewat" },
+      { id: "memory", label: "Nama favorit & alias" },
     ],
   },
   {
     title: "Pahami pilihan",
     items: [
       { id: "compare", label: "Bandingkan makanan" },
-      { id: "target", label: "Penjelasan target" },
-      { id: "simulate", label: "Simulasi target" },
+      { id: "target", label: "Pahami target" },
+      { id: "simulate", label: "Coba skenario target" },
     ],
   },
   {
     title: "Lihat pola",
     items: [
       { id: "context", label: "Saran pencatatan" },
-      { id: "habits", label: "Pola kebiasaan" },
+      { id: "habits", label: "Lihat kebiasaan" },
       { id: "quality", label: "Periksa data" },
-      { id: "brief", label: "Rencana minggu" },
+      { id: "brief", label: "Rencana mingguan" },
     ],
   },
 ];
 
 const tabMeta: Record<Tab, { title: string; desc: string }> = {
   search: {
-    title: "Cari makanan cerdas",
-    desc: "Cari dari katalog dan memori. Hasil draft — belum disimpan.",
+    title: "Cari makanan",
+    desc: "Cari dari katalog dan makanan yang pernah kamu catat. Hasil akan dibuat sebagai draf.",
   },
   memory: {
-    title: "Memori makanan & alias",
+    title: "Nama favorit & alias",
     desc: "Simpan sebutan lokal (naspad, kopi pagi) agar pencatatan lebih cepat.",
   },
   compare: {
     title: "Bandingkan makanan",
-    desc: "Bandingkan estimasi kalori dan makro. Bukan label baik/buruk.",
+    desc: "Bandingkan perkiraan kalori dan makronutrien. Bukan label baik atau buruk.",
   },
   plate: {
-    title: "Cek item yang terlewat",
+    title: "Periksa yang terlewat",
     desc: "Bukan saran menambah makanan — hanya verifikasi komponen yang mungkin lupa dicatat.",
   },
   context: {
@@ -91,28 +91,28 @@ const tabMeta: Record<Tab, { title: string; desc: string }> = {
     desc: "Saran berdasarkan jam dan kebiasaan. Bukan perintah.",
   },
   recover: {
-    title: "Buat ulang draft dari ingatan",
-    desc: "Direkonstruksi dari apa yang masih diingat — confidence rendah.",
+    title: "Pulihkan catatan",
+    desc: "Buat ulang draf dari apa yang masih kamu ingat — keyakinan rendah.",
   },
   habits: {
-    title: "Pola kebiasaan",
-    desc: "Insight deskriptif. Korelasi ≠ sebab-akibat.",
+    title: "Lihat kebiasaan",
+    desc: "Ringkasan deskriptif. Korelasi bukan sebab-akibat.",
   },
   quality: {
-    title: "Pemeriksa kualitas data",
+    title: "Periksa data",
     desc: "Fokus pada kelengkapan data, bukan penilaian pribadi.",
   },
   target: {
-    title: "Penjelasan target",
-    desc: "Transparansi formula BMR/TDEE. Estimasi, bukan nasihat medis.",
+    title: "Pahami target",
+    desc: "Transparansi rumus BMR/TDEE. Perkiraan, bukan nasihat medis.",
   },
   simulate: {
-    title: "Simulasi target",
+    title: "Coba skenario target",
     desc: "Simulasi tidak mengubah target tersimpan.",
   },
   brief: {
-    title: "Rencana minggu",
-    desc: "Brief ringkas untuk fokus minggu — draft yang bisa ditinjau.",
+    title: "Rencana mingguan",
+    desc: "Brief ringkas untuk fokus minggu — draf yang bisa kamu periksa.",
   },
 };
 
@@ -233,12 +233,16 @@ export default function AiToolsPage() {
     <div className="animate-fade-up space-y-5">
       <PageTitle
         title="Asisten AI"
-        subtitle="Pilih alat untuk membuat draft yang dapat ditinjau sebelum disimpan."
+        subtitle="Gunakan alat bantu AI untuk membuat draf yang dapat kamu periksa sebelum disimpan."
         actions={
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="secondary">Draft, bukan keputusan</Badge>
-            <Badge variant="outline">Bukan alat medis</Badge>
-            <InfoTip tip="ai_tools" />
+            <Badge variant="secondary">Hasil berupa draf</Badge>
+            <Badge variant="outline">
+              <span className="inline-flex items-center gap-1">
+                Bukan saran medis
+                <InfoTip tip="ai_tools" />
+              </span>
+            </Badge>
           </div>
         }
       />
@@ -378,7 +382,7 @@ export default function AiToolsPage() {
                     Simpan sebagai alias
                   </Button>
                 </div>
-                <HelperText>Memori hanya mempercepat pencatatan akun Anda. Dapat dihapus kapan saja.</HelperText>
+                <HelperText>Nama favorit hanya mempercepat pencatatan akunmu. Dapat dihapus kapan saja.</HelperText>
                 {memory.isLoading ? <Skeleton className="h-16" /> : null}
                 {(memory.data?.data.length ?? 0) > 0 ? (
                   <div className="rounded-xl border border-[hsl(var(--border))]">
@@ -459,7 +463,7 @@ export default function AiToolsPage() {
             {tab === "context" ? (
               <>
                 <p className="text-sm text-[hsl(var(--muted-foreground))]">
-                  Berdasarkan jam lokal dan kebiasaan pencatatan Anda.
+                  Berdasarkan jam lokal dan kebiasaan pencatatanmu.
                 </p>
                 <Button onClick={() => run.mutate()} loading={run.isPending}>
                   Perbarui saran
@@ -469,7 +473,7 @@ export default function AiToolsPage() {
 
             {tab === "recover" ? (
               <>
-                <HelperText>Buat ulang draft dari hal yang masih diingat — bukan fakta pasti.</HelperText>
+                <HelperText>Buat ulang draf dari hal yang masih diingat — bukan fakta pasti.</HelperText>
                 {(["breakfast", "lunch", "dinner", "snacks", "drinks"] as const).map((k) => (
                   <div key={k}>
                     <Label>
@@ -491,7 +495,7 @@ export default function AiToolsPage() {
                   </div>
                 ))}
                 <Button onClick={() => run.mutate()} loading={run.isPending}>
-                  Buat draft
+                  Buat draf
                 </Button>
               </>
             ) : null}
@@ -568,14 +572,14 @@ export default function AiToolsPage() {
               <div className="space-y-2">
                 <Skeleton className="h-20" />
                 <Skeleton className="h-12" />
-                <p className="text-xs text-[hsl(var(--muted-foreground))]">Menyusun draft…</p>
+                <p className="text-xs text-[hsl(var(--muted-foreground))]">Menyusun draf…</p>
               </div>
             ) : null}
           </Card>
 
           {!result && !run.isPending && !err ? (
             <IdleHint>
-              Isi formulir di atas, lalu jalankan alat. Hasil muncul di sini sebagai draft yang bisa
+              Isi formulir di atas, lalu jalankan alat. Hasil muncul di sini sebagai draf yang bisa
               ditinjau — bukan data final.
             </IdleHint>
           ) : null}
@@ -671,7 +675,7 @@ export default function AiToolsPage() {
                           })
                         }
                       >
-                        Gunakan di catatan
+                        Gunakan draf
                       </Button>
                     </div>
                   ),
@@ -865,7 +869,7 @@ export default function AiToolsPage() {
                             key={o}
                             type="button"
                             className="rounded-full border border-[hsl(var(--border))] px-3 py-1 text-xs hover:bg-[hsl(var(--muted))]"
-                            onClick={() => toast.message(`Anda memilih: ${o} untuk ${c.name}`)}
+                            onClick={() => toast.message(`Kamu memilih: ${o} untuk ${c.name}`)}
                           >
                             {o}
                           </button>
@@ -939,7 +943,7 @@ export default function AiToolsPage() {
             >
               <SectionTitle>Draft rekonstruksi</SectionTitle>
               <p className="text-sm text-[hsl(var(--muted-foreground))]">
-                {result.label || "Berdasarkan ingatan Anda"}
+                {result.label || "Berdasarkan ingatanmu"}
               </p>
               <ul className="space-y-2">
                 {(result.draft_items ?? []).map(
@@ -958,7 +962,7 @@ export default function AiToolsPage() {
               </ul>
               {(result.draft_items ?? []).length === 0 ? (
                 <p className="text-sm text-[hsl(var(--muted-foreground))]">
-                  Isi setidaknya satu field ingatan untuk membuat draft.
+                  Isi setidaknya satu field ingatan untuk membuat draf.
                 </p>
               ) : (
                 <Button
@@ -1075,7 +1079,7 @@ export default function AiToolsPage() {
 
           {result && tab === "target" && (result.calorie_target != null || result.explanation) ? (
             <ResultShell technical={result}>
-              <SectionTitle>Target harian Anda</SectionTitle>
+              <SectionTitle>Target harianmu</SectionTitle>
               {result.calorie_target != null ? (
                 <p className="text-3xl font-bold tabular-nums">
                   {result.calorie_target}{" "}
@@ -1144,7 +1148,7 @@ export default function AiToolsPage() {
                 </div>
               </div>
               <p className="rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-900">
-                {result.message || "Ini hanya simulasi. Target Anda belum berubah."}
+                {result.message || "Ini hanya simulasi. Target kamu belum berubah."}
               </p>
               <AssumptionList
                 items={[
@@ -1217,7 +1221,7 @@ export default function AiToolsPage() {
       <ConfirmDialog
         open={confirmApply}
         title="Tinjau target di onboarding?"
-        description="Simulasi tidak mengubah target otomatis. Anda akan diarahkan ke onboarding untuk meninjau dan menyimpan perubahan secara sadar."
+        description="Simulasi tidak mengubah target otomatis. Kamu akan diarahkan ke pengaturan awal untuk meninjau dan menyimpan perubahan secara sadar."
         confirmLabel="Buka onboarding"
         onCancel={() => setConfirmApply(false)}
         onConfirm={() => {

@@ -193,7 +193,7 @@ export default function NewFoodPage() {
       }),
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ["dashboard"] });
-      toast.success("Catatan makanan tersimpan. Total hari ini diperbarui.");
+      toast.success("Makanan berhasil disimpan.");
       router.push("/dashboard");
     },
     onError: (e: Error) => setErr(e.message),
@@ -216,16 +216,16 @@ export default function NewFoodPage() {
     <div className="mx-auto max-w-3xl animate-fade-up">
       <PageTitle
         title="Catat makanan"
-        subtitle="Input manual. Semua angka divalidasi di server. Estimasi dapat dikoreksi kapan saja."
+        subtitle="Masukkan detail makanan. Kamu dapat mengubahnya kapan saja."
       />
 
       <Card className="mb-4 space-y-3 border-[hsl(var(--primary)/0.12)] bg-gradient-to-br from-emerald-50/40 to-white">
-        <p className="text-sm font-semibold">Pencarian cerdas</p>
+        <p className="text-sm font-semibold">Cari makanan</p>
         <div className="flex flex-wrap gap-2">
           <Input
             value={searchQ}
             onChange={(e) => setSearchQ(e.target.value)}
-            placeholder="Cari: naspad, ayam geprek, kopi pagi..."
+            placeholder="Cari nasi padang, ayam geprek, kopi susu..."
             className="min-w-[12rem] flex-1"
           />
           <Button
@@ -234,9 +234,13 @@ export default function NewFoodPage() {
             disabled={!searchQ.trim()}
             onClick={() => searchMut.mutate()}
           >
-            Cari AI
+            {searchMut.isPending ? "Mencari..." : "Cari dengan AI"}
           </Button>
         </div>
+        <HelperText>
+          Pilih hasil pencarian untuk mengisi formulir secara otomatis. Periksa kembali sebelum
+          menyimpan.
+        </HelperText>
         {searchHits.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {searchHits.slice(0, 10).map((h, i) => (
@@ -296,31 +300,31 @@ export default function NewFoodPage() {
         }}
       >
       <Card className="space-y-4">
-        <div>
-          <Label htmlFor="mealType">Jenis makan</Label>
-          <Select
-            id="mealType"
-            value={form.mealType}
-            onChange={(e) => setForm({ ...form, mealType: e.target.value })}
-          >
-            <option value="breakfast">Sarapan</option>
-            <option value="lunch">Makan siang</option>
-            <option value="dinner">Makan malam</option>
-            <option value="snack">Camilan</option>
-            <option value="other">Lainnya</option>
-          </Select>
-        </div>
-        <div>
-          <Label htmlFor="name">Nama makanan</Label>
-          <Input
-            id="name"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-            placeholder="Contoh: Nasi putih + ayam goreng"
-            required
-          />
-          <HelperText>Nama ini menjadi judul catatan.</HelperText>
-        </div>
+          <div>
+            <Label htmlFor="mealType">Waktu makan</Label>
+            <Select
+              id="mealType"
+              value={form.mealType}
+              onChange={(e) => setForm({ ...form, mealType: e.target.value })}
+            >
+              <option value="breakfast">Sarapan</option>
+              <option value="lunch">Makan siang</option>
+              <option value="dinner">Makan malam</option>
+              <option value="snack">Camilan</option>
+              <option value="other">Lainnya</option>
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="name">Nama makanan</Label>
+            <Input
+              id="name"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              placeholder="Contoh: Nasi putih dan ayam goreng"
+              required
+            />
+            <HelperText>Nama ini akan tampil di Beranda dan Riwayat.</HelperText>
+          </div>
         <div className="grid gap-3 sm:grid-cols-3">
           <div>
             <Label htmlFor="portion">Jumlah</Label>
@@ -350,7 +354,7 @@ export default function NewFoodPage() {
           </div>
           <div>
             <LabelWithTip tip="atwater" htmlFor="kcal">
-              Kalori (kkal)
+              Kalori
             </LabelWithTip>
             <Input
               id="kcal"
@@ -363,13 +367,13 @@ export default function NewFoodPage() {
         </div>
         <div>
           <p className="mb-2 inline-flex items-center gap-1 text-sm font-medium">
-            Makronutrien (opsional)
+            Makronutrien opsional
             <InfoTip tip="macros" />
           </p>
           <div className="grid gap-3 sm:grid-cols-3">
             <div>
               <LabelWithTip tip="protein" htmlFor="p">
-                Protein (g)
+                Protein
               </LabelWithTip>
               <Input
                 id="p"
@@ -382,7 +386,7 @@ export default function NewFoodPage() {
             </div>
             <div>
               <LabelWithTip tip="carbs" htmlFor="c">
-                Karbohidrat (g)
+                Karbohidrat
               </LabelWithTip>
               <Input
                 id="c"
@@ -395,7 +399,7 @@ export default function NewFoodPage() {
             </div>
             <div>
               <LabelWithTip tip="fat" htmlFor="f">
-                Lemak (g)
+                Lemak
               </LabelWithTip>
               <Input
                 id="f"
@@ -416,24 +420,24 @@ export default function NewFoodPage() {
           {atwWarn ? <p className="mt-2 text-xs text-amber-800">{atwWarn}</p> : null}
         </div>
         <div>
-          <Label htmlFor="notes">Catatan (opsional)</Label>
+          <Label htmlFor="notes">Catatan opsional</Label>
           <Input
             id="notes"
             value={form.notes}
             onChange={(e) => setForm({ ...form, notes: e.target.value })}
-            placeholder="Mis. porsi rumah, restoran, dll."
+            placeholder="Contoh: porsi rumahan, tanpa saus, dari restoran"
           />
         </div>
         {err ? <ErrorBox message={err} /> : null}
         {!canSave && form.name === "" ? (
-          <HelperText>Isi nama makanan untuk mengaktifkan tombol simpan.</HelperText>
+          <HelperText>Isi nama makanan untuk menyimpan.</HelperText>
         ) : null}
         <div className="sticky bottom-20 z-10 flex flex-wrap gap-2 border-t border-[hsl(var(--border))] bg-white/95 pt-3 md:static md:border-0 md:bg-transparent md:pt-0">
           <Button type="submit" loading={mut.isPending} disabled={!canSave}>
-            Simpan catatan
+            {mut.isPending ? "Menyimpan..." : "Simpan makanan"}
           </Button>
           <Button variant="ghost" type="button" onClick={() => router.push("/food/scan")}>
-            Pindai foto saja
+            Pindai foto makanan
           </Button>
         </div>
       </Card>

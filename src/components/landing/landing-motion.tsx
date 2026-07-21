@@ -10,7 +10,7 @@ export function LandingMotion() {
       <section className="mx-auto max-w-5xl px-4 py-28 md:px-6 md:py-40">
         <Reveal>
           <ScrubWords
-            text="Estimasi AI bukan kebenaran mutlak. Setiap angka menampilkan asumsi, keyakinan, dan ruang untuk Anda mengoreksi sebelum data tersimpan."
+            text="Perkiraan AI bukan kebenaran mutlak. Setiap angka menampilkan asumsi, keyakinan, dan ruang untuk kamu mengoreksi sebelum data tersimpan."
             className="text-center text-2xl font-medium leading-snug tracking-tight text-[hsl(var(--foreground))] md:text-4xl md:leading-snug"
           />
         </Reveal>
@@ -24,12 +24,12 @@ export function LandingMotion() {
               <p className="text-sm font-medium text-[hsl(var(--primary))]">Kenapa terasa berbeda</p>
               <h2 className="display-h2">Kendali manusia di atas otomatisasi</h2>
               <p className="text-[hsl(var(--muted-foreground))] leading-relaxed">
-                Scroll galeri. Setiap momen produk dibangun agar Anda tetap menjadi sumber
+                Scroll galeri. Setiap momen produk dibangun agar kamu tetap menjadi sumber
                 kebenaran — bukan model AI.
               </p>
               <ul className="space-y-3 pt-4 text-sm">
                 {[
-                  { icon: Camera, t: "Foto jadi draft, bukan log" },
+                  { icon: Camera, t: "Foto jadi draf, bukan catatan" },
                   { icon: PencilLine, t: "Edit porsi & makro dulu" },
                   { icon: ShieldCheck, t: "Privasi default aktif" },
                 ].map((x) => {
@@ -57,7 +57,7 @@ export function LandingMotion() {
                 {
                   src: "/brand/gallery-activity.jpg",
                   alt: "Sayur dan bahan segar",
-                  cap: "Aktivitas menambah ruang kalori net",
+                  cap: "Aktivitas dapat diperhitungkan sesuai cara hitung yang kamu pilih",
                 },
               ].map((img) => (
                 <figure

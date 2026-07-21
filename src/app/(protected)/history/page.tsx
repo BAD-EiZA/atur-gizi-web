@@ -71,8 +71,8 @@ export default function HistoryPage() {
   return (
     <div className="animate-fade-up">
       <PageTitle
-        title="Histori"
-        subtitle={`Timeline ${from} – ${to}`}
+        title="Riwayat"
+        subtitle="Lihat, cari, dan kelola catatan makanan serta aktivitasmu."
         actions={
           <Link href="/export">
             <Button variant="outline">Ekspor data</Button>
@@ -83,36 +83,36 @@ export default function HistoryPage() {
       <Card className="mb-4 grid gap-3 sm:grid-cols-3">
         <div>
           <label className="mb-1 block text-xs font-medium text-[hsl(var(--muted-foreground))]">
-            Rentang
+            Rentang waktu
           </label>
           <Select value={range} onChange={(e) => setRange(e.target.value)}>
-            <option value="7">7 hari</option>
-            <option value="14">14 hari</option>
-            <option value="30">30 hari</option>
+            <option value="7">7 hari terakhir</option>
+            <option value="14">14 hari terakhir</option>
+            <option value="30">30 hari terakhir</option>
           </Select>
         </div>
         <div>
           <label className="mb-1 block text-xs font-medium text-[hsl(var(--muted-foreground))]">
-            Jenis
+            Jenis catatan
           </label>
           <Select
             value={filter}
             onChange={(e) => setFilter(e.target.value as "all" | "food" | "activity")}
           >
-            <option value="all">Semua</option>
+            <option value="all">Semua catatan</option>
             <option value="food">Makanan</option>
             <option value="activity">Aktivitas</option>
           </Select>
         </div>
         <div>
           <label className="mb-1 block text-xs font-medium text-[hsl(var(--muted-foreground))]">
-            Cari
+            Cari catatan
           </label>
           <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Nama catatan..."
-            aria-label="Cari histori"
+            placeholder="Cari nama makanan atau aktivitas..."
+            aria-label="Cari catatan"
           />
         </div>
       </Card>
@@ -121,15 +121,15 @@ export default function HistoryPage() {
 
       {list.isError ? (
         <ErrorBox
-          message="Gagal memuat histori."
-          action={<Button variant="outline" onClick={() => list.refetch()}>Coba lagi</Button>}
+          message="Data belum dapat dimuat."
+          action={<Button variant="outline" onClick={() => list.refetch()}>Muat ulang</Button>}
         />
       ) : null}
 
       {!list.isLoading && !list.isError && filtered.length === 0 ? (
         <EmptyState
-          title="Belum ada catatan pada rentang ini"
-          description="Mulai catat makanan atau aktivitas — langkah kecil sudah cukup."
+          title="Belum ada catatan dalam rentang waktu ini."
+          description="Pilih catatan untuk melihat, mengubah, atau menghapus detail."
           icon={<HistoryIcon className="size-5" aria-hidden />}
           action={
             <>
@@ -137,7 +137,7 @@ export default function HistoryPage() {
                 <Button>Catat makanan</Button>
               </Link>
               <Link href="/activities/new">
-                <Button variant="secondary">Aktivitas</Button>
+                <Button variant="secondary">Catat aktivitas</Button>
               </Link>
             </>
           }
