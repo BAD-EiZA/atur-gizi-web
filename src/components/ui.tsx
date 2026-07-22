@@ -262,8 +262,23 @@ export function Skeleton({ className }: { className?: string }) {
   );
 }
 
-export function HelperText({ children }: { children: ReactNode }) {
-  return <p className="mt-1.5 text-xs leading-relaxed text-[hsl(var(--muted-foreground))]">{children}</p>;
+export function HelperText({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <p
+      className={cn(
+        "mt-1.5 text-xs leading-relaxed text-[hsl(var(--muted-foreground))]",
+        className,
+      )}
+    >
+      {children}
+    </p>
+  );
 }
 
 export function SectionTitle({ children }: { children: ReactNode }) {

@@ -140,7 +140,18 @@ body {
 }
 
 .animate-fade-up {
-  animation: fade-up 0.55s ease-out both;
+  animation: fade-up 0.55s cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+@keyframes nutrition-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

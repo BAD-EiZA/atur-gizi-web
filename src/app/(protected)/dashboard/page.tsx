@@ -64,6 +64,9 @@ export default function DashboardPage() {
             <Button variant="secondary" onClick={() => setDate("")}>
               Hari ini
             </Button>
+            <Link href="/nutrition">
+              <Button variant="outline">Target gizi</Button>
+            </Link>
           </div>
         }
       />

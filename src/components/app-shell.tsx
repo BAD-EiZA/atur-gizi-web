@@ -53,6 +53,7 @@ const groups: { title: string; items: NavItem[] }[] = [
   {
     title: "Pantau",
     items: [
+      { href: "/nutrition", label: "Target gizi", icon: Sparkles, tip: "BMI, REE, TDEE, target berat" },
       { href: "/history", label: "Riwayat", icon: History },
       { href: "/insights", label: "Ringkasan mingguan", icon: Sparkles },
     ],

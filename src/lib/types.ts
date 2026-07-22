@@ -3,6 +3,8 @@ export type Me = {
   email: string | null;
   display_name: string | null;
   onboarding_completed: boolean;
+  adult_automatic_allowed?: boolean;
+  nutrition_basics?: unknown;
   profile: {
     date_of_birth: string | null;
     height_cm: number | null;
