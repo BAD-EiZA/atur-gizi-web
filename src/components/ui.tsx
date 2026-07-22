@@ -228,10 +228,14 @@ export function Progress({
   value,
   className,
   label,
+  barClassName,
+  barStyle,
 }: {
   value: number;
   className?: string;
   label?: string;
+  barClassName?: string;
+  barStyle?: React.CSSProperties;
 }) {
   const v = Math.min(100, Math.max(0, value));
   return (
@@ -244,8 +248,11 @@ export function Progress({
       aria-label={label}
     >
       <div
-        className="h-full rounded-full bg-[hsl(var(--primary))] transition-all duration-500 ease-out"
-        style={{ width: `${v}%` }}
+        className={cn(
+          "h-full rounded-full bg-[hsl(var(--primary))] transition-all duration-500 ease-out",
+          barClassName,
+        )}
+        style={{ width: `${v}%`, ...barStyle }}
       />
     </div>
   );

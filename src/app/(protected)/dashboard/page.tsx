@@ -155,35 +155,44 @@ export default function DashboardPage() {
                 </p>
               </div>
             </div>
-            <div className="relative mt-3 grid grid-cols-3 gap-2 text-center">
-              <div className="rounded-xl bg-[hsl(var(--muted)/0.5)] px-2 py-2">
-                <p className="text-[11px] text-[hsl(var(--muted-foreground))]">
-                  <TipLabel tip="protein">Protein</TipLabel>
-                </p>
-                <p className="text-sm font-semibold tabular-nums">
-                  {fmtMacro(d.consumed_protein_g ?? 0)}
-                  {d.protein_target_g != null ? ` / ${fmtMacro(d.protein_target_g)}` : ""} g
-                </p>
-              </div>
-              <div className="rounded-xl bg-[hsl(var(--muted)/0.5)] px-2 py-2">
-                <p className="text-[11px] text-[hsl(var(--muted-foreground))]">
-                  <TipLabel tip="carbs">Karbohidrat</TipLabel>
-                </p>
-                <p className="text-sm font-semibold tabular-nums">
-                  {fmtMacro(d.consumed_carbs_g ?? 0)}
-                  {d.carbs_target_g != null ? ` / ${fmtMacro(d.carbs_target_g)}` : ""} g
-                </p>
-              </div>
-              <div className="rounded-xl bg-[hsl(var(--muted)/0.5)] px-2 py-2">
-                <p className="text-[11px] text-[hsl(var(--muted-foreground))]">
-                  <TipLabel tip="fat">Lemak</TipLabel>
-                </p>
-                <p className="text-sm font-semibold tabular-nums">
-                  {fmtMacro(d.consumed_fat_g ?? 0)}
-                  {d.fat_target_g != null ? ` / ${fmtMacro(d.fat_target_g)}` : ""} g
-                </p>
-              </div>
+            <div className="relative mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
+              <MacroDayStat
+                tip="protein"
+                label="Protein"
+                consumed={d.consumed_protein_g ?? 0}
+                target={d.protein_target_g}
+                color="hsl(var(--protein))"
+              />
+              <MacroDayStat
+                tip="carbs"
+                label="Karbohidrat"
+                consumed={d.consumed_carbs_g ?? 0}
+                target={d.carbs_target_g}
+                color="hsl(var(--carbs))"
+              />
+              <MacroDayStat
+                tip="fat"
+                label="Lemak"
+                consumed={d.consumed_fat_g ?? 0}
+                target={d.fat_target_g}
+                color="hsl(var(--fat))"
+              />
             </div>
+            {d.protein_target_g == null &&
+            d.carbs_target_g == null &&
+            d.fat_target_g == null ? (
+              <HelperText className="mt-2">
+                Target makro belum diset.{" "}
+                <Link href="/nutrition" className="font-medium text-[hsl(var(--primary))]">
+                  Atur target gizi
+                </Link>{" "}
+                atau{" "}
+                <Link href="/profile" className="font-medium text-[hsl(var(--primary))]">
+                  profil
+                </Link>
+                .
+              </HelperText>
+            ) : null}
             <HelperText>
               {d.budget_mode === "eat_back"
                 ? "Sisa kalori dihitung dengan memasukkan aktivitas."
@@ -389,6 +398,58 @@ export default function DashboardPage() {
           </p>
         </div>
       ) : null}
+    </div>
+  );
+}
+
+function MacroDayStat({
+  tip,
+  label,
+  consumed,
+  target,
+  color,
+}: {
+  tip: "protein" | "carbs" | "fat";
+  label: string;
+  consumed: number;
+  target: number | null | undefined;
+  color: string;
+}) {
+  const hasTarget = target != null && target > 0;
+  const pct = hasTarget ? Math.min(100, Math.round((consumed / target) * 100)) : 0;
+  const remaining = hasTarget ? target - consumed : null;
+  const over = remaining != null && remaining < 0;
+
+  return (
+    <div className="rounded-xl bg-[hsl(var(--muted)/0.5)] px-3 py-2.5 text-left">
+      <p className="text-[11px] text-[hsl(var(--muted-foreground))]">
+        <TipLabel tip={tip}>{label}</TipLabel>
+      </p>
+      <p className="mt-0.5 text-sm font-semibold tabular-nums">
+        {fmtMacro(consumed)}
+        {hasTarget ? ` / ${fmtMacro(target)}` : ""} g
+      </p>
+      {hasTarget ? (
+        <>
+          <Progress
+            value={pct}
+            label={`${label} ${pct}%`}
+            className="mt-2 h-1.5"
+            barStyle={{ backgroundColor: color }}
+          />
+          <p
+            className={`mt-1 text-[11px] tabular-nums ${
+              over ? "text-amber-700" : "text-[hsl(var(--muted-foreground))]"
+            }`}
+          >
+            {over
+              ? `Lebih ${fmtMacro(Math.abs(remaining ?? 0))} g`
+              : `Sisa ${fmtMacro(remaining ?? 0)} g`}
+          </p>
+        </>
+      ) : (
+        <p className="mt-1 text-[11px] text-[hsl(var(--muted-foreground))]">Target belum diset</p>
+      )}
     </div>
   );
 }
